@@ -1,0 +1,22 @@
+{
+    "dockerComposeFile": "docker-compose.yml",
+    "service": "app",
+	//"workspaceFolder": "/",
+  "workspaceFolder": "/work",
+  "runArgs": [
+    "--add-host=host.local:host-gateway"
+  ],
+//   "workspaceMount": "source=${localWorkspaceFolder}/sub-folder,target=/workspace,type=bind",
+// "workspaceFolder": "/workspace",
+    "customizations": {
+      "vscode": {
+        "extensions": ["golang.Go"]
+      }
+    },
+    "remoteEnv": {
+      // the original host directory which is needed for volume mount commands from inside the container (Docker in Docker)
+      "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}/.."
+  }
+  
+    //"forwardPorts": [3000]
+  }

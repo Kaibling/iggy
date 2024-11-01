@@ -1,0 +1,19 @@
+version: "3.4"
+services:
+  app:
+   container_name: iggyiggy
+   build: .
+   volumes:
+    - "../.:/iggy"
+   working_dir: "/iggy"
+   command: "tail -f /dev/null"
+   extra_hosts:
+      - "host.local:host-gateway"
+   ports:
+      - 8082:8082
+  db:
+   image: docker.io/library/postgres:16
+   volumes:
+    - ${PWD}/pgdata:/var/lib/postgresql/data
+   env_file:
+      - ../.env

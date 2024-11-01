@@ -1,0 +1,10 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "persistence/queries"
+    schema: "persistence/schema.sql"
+    gen:
+      go:
+        package: "sqlcrepo"
+        out: "persistence/sqlcrepo"
+        sql_package: "pgx/v5"
