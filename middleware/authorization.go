@@ -8,7 +8,7 @@ package middleware
 // 	"github.com/kaibling/apiforge/envelope"
 // 	apierror "github.com/kaibling/apiforge/error"
 // 	"github.com/kaibling/iggy/config"
-// 	"github.com/kaibling/iggy/initservice"
+// 	"github.com/kaibling/iggy/bootstrap"
 // )
 
 // func Authorization(next http.Handler) http.Handler {

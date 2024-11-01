@@ -3,18 +3,17 @@ package user
 import (
 	"net/http"
 
-	"github.com/kaibling/apiforge/apictx"
 	"github.com/kaibling/apiforge/envelope"
 	apierror "github.com/kaibling/apiforge/error"
 	"github.com/kaibling/apiforge/route"
 
-	"github.com/kaibling/iggy/initservice"
+	"github.com/kaibling/iggy/bootstrap"
 	"github.com/kaibling/iggy/model"
 )
 
 func usersGet(w http.ResponseWriter, r *http.Request) {
 	e := envelope.ReadEnvelope(r)
-	us := initservice.NewUserService(r.Context(), apictx.GetValue(r.Context(), "user_name").(string))
+	us := bootstrap.NewUserService(r.Context())
 	users, err := us.FetchAll()
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
@@ -27,7 +26,7 @@ func usersGet(w http.ResponseWriter, r *http.Request) {
 func userGet(w http.ResponseWriter, r *http.Request) {
 	userID := route.ReadUrlParam("id", r)
 	e := envelope.ReadEnvelope(r)
-	us := initservice.NewUserService(r.Context(), apictx.GetValue(r.Context(), "user_name").(string))
+	us := bootstrap.NewUserService(r.Context())
 	user, err := us.FetchUser(userID)
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
@@ -43,7 +42,7 @@ func userPost(w http.ResponseWriter, r *http.Request) {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
 	}
-	us := initservice.NewUserService(r.Context(), apictx.GetValue(r.Context(), "user_name").(string))
+	us := bootstrap.NewUserService(r.Context())
 	newUser, err := us.CreateUser(postUser)
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
@@ -55,7 +54,7 @@ func userPost(w http.ResponseWriter, r *http.Request) {
 func userDel(w http.ResponseWriter, r *http.Request) {
 	e := envelope.ReadEnvelope(r)
 	userID := route.ReadUrlParam("id", r)
-	us := initservice.NewUserService(r.Context(), apictx.GetValue(r.Context(), "user_name").(string))
+	us := bootstrap.NewUserService(r.Context())
 	if err := us.DeleteUser(userID); err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
@@ -66,7 +65,7 @@ func userDel(w http.ResponseWriter, r *http.Request) {
 func getUserToken(w http.ResponseWriter, r *http.Request) {
 	e := envelope.ReadEnvelope(r)
 	userID := route.ReadUrlParam("id", r)
-	ts := initservice.NewTokenService(r.Context(), apictx.GetValue(r.Context(), "user_name").(string))
+	ts := bootstrap.NewTokenService(r.Context())
 	// TODO check expiration
 	tokens, err := ts.ListUserToken(userID)
 	if err != nil {

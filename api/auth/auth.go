@@ -5,11 +5,11 @@ import (
 
 	apierror "github.com/kaibling/apiforge/error"
 
-	"github.com/kaibling/apiforge/apictx"
+	"github.com/kaibling/apiforge/ctxkeys"
 	"github.com/kaibling/apiforge/envelope"
 	"github.com/kaibling/apiforge/route"
+	"github.com/kaibling/iggy/bootstrap"
 	"github.com/kaibling/iggy/config"
-	"github.com/kaibling/iggy/initservice"
 	"github.com/kaibling/iggy/model"
 )
 
@@ -20,8 +20,8 @@ func authLogin(w http.ResponseWriter, r *http.Request) {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
 	}
-	us := initservice.NewUserService(r.Context(), config.SYSTEM_USER)
-	ts := initservice.NewTokenService(r.Context(), config.SYSTEM_USER)
+	us := bootstrap.NewUserServiceAnonym(r.Context(), config.SYSTEM_USER)
+	ts := bootstrap.NewTokenServiceAnonym(r.Context(), config.SYSTEM_USER)
 	token, err := us.Login(postLogin, ts)
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
@@ -33,8 +33,8 @@ func authLogin(w http.ResponseWriter, r *http.Request) {
 func authLogout(w http.ResponseWriter, r *http.Request) {
 	e := envelope.ReadEnvelope(r)
 
-	ts := initservice.NewTokenService(r.Context(), config.SYSTEM_USER)
-	err := ts.DeleteTokenByValue(apictx.GetValue(r.Context(), "user_token").(string))
+	ts := bootstrap.NewTokenServiceAnonym(r.Context(), config.SYSTEM_USER)
+	err := ts.DeleteTokenByValue(ctxkeys.GetValue(r.Context(), ctxkeys.TokenKey).(string))
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
@@ -45,9 +45,9 @@ func authLogout(w http.ResponseWriter, r *http.Request) {
 func authCheck(w http.ResponseWriter, r *http.Request) {
 	e := envelope.ReadEnvelope(r)
 
-	ts := initservice.NewTokenService(r.Context(), config.SYSTEM_USER)
-	// TODO check exporation
-	t, err := ts.ReadTokenByValue(apictx.GetValue(r.Context(), "user_token").(string))
+	ts := bootstrap.NewTokenServiceAnonym(r.Context(), config.SYSTEM_USER)
+	// TODO check expiration
+	t, err := ts.ReadTokenByValue(ctxkeys.GetValue(r.Context(), ctxkeys.TokenKey).(string))
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return

@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/kaibling/apiforge/apictx"
+	"github.com/kaibling/apiforge/ctxkeys"
 	"github.com/kaibling/apiforge/lib/utils"
 	"github.com/kaibling/iggy/model"
 	"github.com/kaibling/iggy/persistence/sqlcrepo"
@@ -24,7 +24,7 @@ type TokenRepo struct {
 func NewTokenRepo(ctx context.Context, username string) *TokenRepo {
 	return &TokenRepo{
 		ctx: ctx,
-		q:   sqlcrepo.New(ctx.Value(apictx.String("db")).(*pgxpool.Pool)),
+		q:   sqlcrepo.New(ctx.Value(ctxkeys.DBConnKey).(*pgxpool.Pool)),
 		//username: ctx.Value(apictx.String("user_name")).(string),
 		Username: username,
 	}

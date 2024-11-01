@@ -5,13 +5,13 @@ import (
 	"fmt"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/kaibling/apiforge/apictx"
+	"github.com/kaibling/apiforge/ctxkeys"
 	"github.com/kaibling/apiforge/handler"
 	"github.com/kaibling/apiforge/middleware"
 	apiservice "github.com/kaibling/apiforge/service"
 	"github.com/kaibling/iggy/api"
+	"github.com/kaibling/iggy/bootstrap"
 	"github.com/kaibling/iggy/config"
-	"github.com/kaibling/iggy/initservice"
 	"github.com/kaibling/iggy/migration"
 	"github.com/kaibling/iggy/persistence/psql"
 )
@@ -24,20 +24,20 @@ func Start() error {
 	l := apiservice.BuildLogger(cfg.Logger)
 	ctx := context.Background()
 
-	ctx = context.WithValue(ctx, apictx.String("logger"), l)
+	ctx = context.WithValue(ctx, ctxkeys.LoggerKey, l)
 	conn, err := psql.New(cfg)
 	if err != nil {
 		return err
 	}
-	ctx = context.WithValue(ctx, apictx.String("db"), conn)
-	ctx = context.WithValue(ctx, apictx.String("cfg"), cfg)
+	ctx = context.WithValue(ctx, ctxkeys.DBConnKey, conn)
+	ctx = context.WithValue(ctx, ctxkeys.String("cfg"), cfg)
 	if err = migration.SelfMigrate(cfg); err != nil {
 		return err
 	} else {
 		l.LogLine("rh migration successful")
 	}
 
-	userService := initservice.NewUserService(ctx, config.SYSTEM_USER)
+	userService := bootstrap.NewUserServiceAnonym(ctx, config.SYSTEM_USER)
 
 	pwd, err := userService.EnsureAdmin(cfg.AdminPassword)
 	if err != nil {
@@ -50,8 +50,8 @@ func Start() error {
 	root := chi.NewRouter()
 	// context
 	root.Use(middleware.AddContext("logger", l))
-	root.Use(middleware.AddContext("db", apictx.GetValue(ctx, "db")))
-	root.Use(middleware.AddContext("cfg", apictx.GetValue(ctx, "cfg")))
+	root.Use(middleware.AddContext("db", conn))
+	root.Use(middleware.AddContext("cfg", cfg))
 
 	// middleware
 	root.Use(middleware.InitEnvelope)

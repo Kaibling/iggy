@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/kaibling/apiforge/apictx"
+	"github.com/kaibling/apiforge/ctxkeys"
 	"github.com/kaibling/apiforge/envelope"
 	apierror "github.com/kaibling/apiforge/error"
+	"github.com/kaibling/iggy/bootstrap"
 	"github.com/kaibling/iggy/config"
-	"github.com/kaibling/iggy/initservice"
 )
 
 func Authentication(next http.Handler) http.Handler {
@@ -35,8 +35,8 @@ func Authentication(next http.Handler) http.Handler {
 		token := authSlice[1]
 
 		// validate token and get username
-		ts := initservice.NewTokenService(r.Context(), config.SYSTEM_USER)
-		us := initservice.NewUserService(r.Context(), config.SYSTEM_USER)
+		ts := bootstrap.NewTokenServiceAnonym(r.Context(), config.SYSTEM_USER)
+		us := bootstrap.NewUserServiceAnonym(r.Context(), config.SYSTEM_USER)
 		// todo set token last used
 		// TODO use not found sql error
 		user, err := us.ValidateToken(token, ts)
@@ -44,9 +44,9 @@ func Authentication(next http.Handler) http.Handler {
 			e.SetError(apierror.New(fmt.Errorf("invalid token"), http.StatusUnauthorized)).Finish(w, r)
 			return
 		}
-		ctx := context.WithValue(r.Context(), apictx.String("user_name"), user.Username)
-		ctx = context.WithValue(ctx, apictx.String("user_id"), user.ID)
-		ctx = context.WithValue(ctx, apictx.String("user_token"), token)
+		ctx := context.WithValue(r.Context(), ctxkeys.UserNameKey, user.Username)
+		ctx = context.WithValue(ctx, ctxkeys.UserIDKey, user.ID)
+		ctx = context.WithValue(ctx, ctxkeys.TokenKey, token)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
