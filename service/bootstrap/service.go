@@ -20,6 +20,7 @@ func NewUserService(ctx context.Context) *service.UserService {
 func NewTokenService(ctx context.Context) *service.TokenService {
 	username := ctxkeys.GetValue(ctx, ctxkeys.UserNameKey).(string)
 	cfg := ctxkeys.GetValue(ctx, "cfg").(config.Configuration)
+
 	tokenRepo := repo.NewTokenRepo(ctx, username)
 	return service.NewTokenService(ctx, tokenRepo, cfg)
 }
@@ -34,4 +35,28 @@ func NewTokenServiceAnonym(ctx context.Context, username string) *service.TokenS
 	cfg := ctxkeys.GetValue(ctx, "cfg").(config.Configuration)
 	tokenRepo := repo.NewTokenRepo(ctx, username)
 	return service.NewTokenService(ctx, tokenRepo, cfg)
+}
+
+func NewWorkflowService(ctx context.Context) *service.WorkflowService {
+	username := ctxkeys.GetValue(ctx, ctxkeys.UserNameKey).(string)
+	cfg := ctxkeys.GetValue(ctx, "cfg").(config.Configuration)
+
+	workflowRepo := repo.NewWorkflowRepo(ctx, username)
+	return service.NewWorkflowService(ctx, workflowRepo, cfg)
+}
+
+func NewRunService(ctx context.Context) *service.RunService {
+	username := ctxkeys.GetValue(ctx, ctxkeys.UserNameKey).(string)
+	cfg := ctxkeys.GetValue(ctx, "cfg").(config.Configuration)
+
+	runRepo := repo.NewRunRepo(ctx, username)
+	return service.NewRunService(ctx, runRepo, cfg)
+}
+
+func NewRunLogService(ctx context.Context) *service.RunLogService {
+	username := ctxkeys.GetValue(ctx, ctxkeys.UserNameKey).(string)
+	cfg := ctxkeys.GetValue(ctx, "cfg").(config.Configuration)
+
+	runLogRepo := repo.NewRunLogRepo(ctx, username)
+	return service.NewRunLogService(ctx, runLogRepo, cfg)
 }
