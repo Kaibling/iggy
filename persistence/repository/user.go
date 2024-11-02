@@ -38,13 +38,13 @@ func (r *UserRepo) SaveUser(t model.NewUser) (*model.User, error) {
 			Valid: true,
 		},
 		CreatedBy: r.Username,
-		UpdatedAt: pgtype.Timestamp{
+		ModifiedAt: pgtype.Timestamp{
 			Time:  time.Now(),
 			Valid: true,
 		},
-		UpdatedBy: r.Username,
-		Active:    bool2Int(t.Active),
-		Password:  pgtype.Text{String: t.Password, Valid: true},
+		ModifiedBy: r.Username,
+		Active:     bool2Int(t.Active),
+		Password:   pgtype.Text{String: t.Password, Valid: true},
 	})
 	if err != nil {
 		return nil, err
@@ -97,11 +97,11 @@ func (r *UserRepo) UpdatePassword(passwordHash string, userID string) (*model.Us
 			String: passwordHash,
 			Valid:  true,
 		},
-		UpdatedAt: pgtype.Timestamp{
+		ModifiedAt: pgtype.Timestamp{
 			Time:  time.Now(),
 			Valid: true,
 		},
-		UpdatedBy: r.Username,
+		ModifiedBy: r.Username,
 	})
 	if err != nil {
 		if err == pgx.ErrNoRows {
@@ -119,10 +119,10 @@ func marshalUser(t sqlcrepo.User) *model.User {
 		Active:   int2Bool(t.Active),
 		Password: t.Password.String,
 		Meta: model.MetaData{
-			CreatedAt: t.CreatedAt.Time,
-			CreatedBy: t.CreatedBy,
-			UpdatedAt: t.UpdatedAt.Time,
-			UpdatedBy: t.UpdatedBy,
+			CreatedAt:  t.CreatedAt.Time,
+			CreatedBy:  t.CreatedBy,
+			ModifiedAt: t.ModifiedAt.Time,
+			ModifiedBy: t.ModifiedBy,
 		},
 	}
 	return u
@@ -136,10 +136,10 @@ func marshalUsers(repoUsers []sqlcrepo.User) []*model.User {
 			Username: t.Username,
 			Active:   int2Bool(t.Active),
 			Meta: model.MetaData{
-				CreatedAt: t.CreatedAt.Time,
-				CreatedBy: t.CreatedBy,
-				UpdatedAt: t.UpdatedAt.Time,
-				UpdatedBy: t.UpdatedBy,
+				CreatedAt:  t.CreatedAt.Time,
+				CreatedBy:  t.CreatedBy,
+				ModifiedAt: t.ModifiedAt.Time,
+				ModifiedBy: t.ModifiedBy,
 			},
 		})
 	}

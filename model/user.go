@@ -42,10 +42,10 @@ func CreateNewToken(userID string, expiration time.Time) NewToken {
 }
 
 type MetaData struct {
-	CreatedAt time.Time `json:"created_at"`
-	CreatedBy string    `json:"created_by"`
-	UpdatedAt time.Time `json:"updated_at"`
-	UpdatedBy string    `json:"updated_by"`
+	CreatedAt  time.Time `json:"created_at"`
+	CreatedBy  string    `json:"created_by"`
+	ModifiedAt time.Time `json:"modified_at"`
+	ModifiedBy string    `json:"modified_by"`
 }
 
 type Identifier struct {

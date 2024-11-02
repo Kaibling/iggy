@@ -14,7 +14,7 @@ import (
 var migrations embed.FS
 
 func SelfMigrate(cfg config.Configuration) error {
-	databaseURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&x-migrations-table=\"public\".\"reinhardt_schema_migrations\"&x-migrations-table-quoted=1",
+	databaseURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&x-migrations-table=\"public\".\"iggy_schema_migrations\"&x-migrations-table-quoted=1",
 		cfg.DBUser,
 		cfg.DBPassword,
 		cfg.DBHost,
@@ -47,36 +47,36 @@ func SelfMigrate(cfg config.Configuration) error {
 
 }
 
-func MigrateDB(prefix string, path string, cfg config.Configuration) error {
+// func MigrateDB(prefix string, path string, cfg config.Configuration) error {
 
-	databaseURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&x-migrations-table=\"public\".\"%s_schema_migrations\"&x-migrations-table-quoted=1",
-		cfg.DBUser,
-		cfg.DBPassword,
-		cfg.DBHost,
-		cfg.DBPort,
-		cfg.DBDatabase,
-		prefix,
-	)
+// 	databaseURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&x-migrations-table=\"public\".\"%s_schema_migrations\"&x-migrations-table-quoted=1",
+// 		cfg.DBUser,
+// 		cfg.DBPassword,
+// 		cfg.DBHost,
+// 		cfg.DBPort,
+// 		cfg.DBDatabase,
+// 		prefix,
+// 	)
 
-	p := &postgres.Postgres{}
-	driver, err := p.Open(databaseURL)
-	if err != nil {
-		return err
-	}
-	defer driver.Close()
-	// Create a new migration instance
-	m, err := migrate.NewWithDatabaseInstance(
-		"file://"+path,
-		"postgres",
-		driver,
-	)
-	if err != nil {
-		return fmt.Errorf("could not create migration instance: %v", err)
-	}
+// 	p := &postgres.Postgres{}
+// 	driver, err := p.Open(databaseURL)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	defer driver.Close()
+// 	// Create a new migration instance
+// 	m, err := migrate.NewWithDatabaseInstance(
+// 		"file://"+path,
+// 		"postgres",
+// 		driver,
+// 	)
+// 	if err != nil {
+// 		return fmt.Errorf("could not create migration instance: %v", err)
+// 	}
 
-	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		return fmt.Errorf("could not apply migrations: %v", err)
-	}
+// 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+// 		return fmt.Errorf("could not apply migrations: %v", err)
+// 	}
 
-	return nil
-}
+// 	return nil
+// }

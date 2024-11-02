@@ -13,7 +13,7 @@ import (
 
 const createToken = `-- name: CreateToken :one
 INSERT INTO tokens (
-  id, user_id,active,value,expires, created_at, created_by,updated_at,updated_by
+  id, user_id,active,value,expires, created_at, created_by,modified_at,modified_by
 ) VALUES (
   $1, $2, $3, $4, $5, $6, $7, $8,$9
 )
@@ -21,15 +21,15 @@ RETURNING id
 `
 
 type CreateTokenParams struct {
-	ID        string
-	UserID    string
-	Active    int32
-	Value     string
-	Expires   pgtype.Timestamp
-	CreatedAt pgtype.Timestamp
-	CreatedBy string
-	UpdatedAt pgtype.Timestamp
-	UpdatedBy string
+	ID         string
+	UserID     string
+	Active     int32
+	Value      string
+	Expires    pgtype.Timestamp
+	CreatedAt  pgtype.Timestamp
+	CreatedBy  string
+	ModifiedAt pgtype.Timestamp
+	ModifiedBy string
 }
 
 func (q *Queries) CreateToken(ctx context.Context, arg CreateTokenParams) (string, error) {
@@ -41,8 +41,8 @@ func (q *Queries) CreateToken(ctx context.Context, arg CreateTokenParams) (strin
 		arg.Expires,
 		arg.CreatedAt,
 		arg.CreatedBy,
-		arg.UpdatedAt,
-		arg.UpdatedBy,
+		arg.ModifiedAt,
+		arg.ModifiedBy,
 	)
 	var id string
 	err := row.Scan(&id)
@@ -60,22 +60,22 @@ func (q *Queries) DeleteTokenByValue(ctx context.Context, value string) error {
 }
 
 const getToken = `-- name: GetToken :one
-SELECT tokens.id, tokens.value, tokens.active, tokens.expires, tokens.created_at, tokens.created_by, tokens.updated_at, tokens.updated_by, tokens.user_id, users.username FROM tokens
+SELECT tokens.id, tokens.value, tokens.active, tokens.expires, tokens.created_at, tokens.created_by, tokens.modified_at, tokens.modified_by, tokens.user_id, users.username FROM tokens
 JOIN users on tokens.user_id = users.id
 WHERE tokens.id = $1 LIMIT 1
 `
 
 type GetTokenRow struct {
-	ID        string
-	Value     string
-	Active    int32
-	Expires   pgtype.Timestamp
-	CreatedAt pgtype.Timestamp
-	CreatedBy string
-	UpdatedAt pgtype.Timestamp
-	UpdatedBy string
-	UserID    string
-	Username  string
+	ID         string
+	Value      string
+	Active     int32
+	Expires    pgtype.Timestamp
+	CreatedAt  pgtype.Timestamp
+	CreatedBy  string
+	ModifiedAt pgtype.Timestamp
+	ModifiedBy string
+	UserID     string
+	Username   string
 }
 
 func (q *Queries) GetToken(ctx context.Context, id string) (GetTokenRow, error) {
@@ -88,8 +88,8 @@ func (q *Queries) GetToken(ctx context.Context, id string) (GetTokenRow, error) 
 		&i.Expires,
 		&i.CreatedAt,
 		&i.CreatedBy,
-		&i.UpdatedAt,
-		&i.UpdatedBy,
+		&i.ModifiedAt,
+		&i.ModifiedBy,
 		&i.UserID,
 		&i.Username,
 	)
@@ -97,22 +97,22 @@ func (q *Queries) GetToken(ctx context.Context, id string) (GetTokenRow, error) 
 }
 
 const getTokenByValue = `-- name: GetTokenByValue :one
-SELECT tokens.id, tokens.value, tokens.active, tokens.expires, tokens.created_at, tokens.created_by, tokens.updated_at, tokens.updated_by, tokens.user_id,users.username FROM tokens
+SELECT tokens.id, tokens.value, tokens.active, tokens.expires, tokens.created_at, tokens.created_by, tokens.modified_at, tokens.modified_by, tokens.user_id,users.username FROM tokens
 JOIN users on tokens.user_id = users.id
 WHERE value = $1 LIMIT 1
 `
 
 type GetTokenByValueRow struct {
-	ID        string
-	Value     string
-	Active    int32
-	Expires   pgtype.Timestamp
-	CreatedAt pgtype.Timestamp
-	CreatedBy string
-	UpdatedAt pgtype.Timestamp
-	UpdatedBy string
-	UserID    string
-	Username  string
+	ID         string
+	Value      string
+	Active     int32
+	Expires    pgtype.Timestamp
+	CreatedAt  pgtype.Timestamp
+	CreatedBy  string
+	ModifiedAt pgtype.Timestamp
+	ModifiedBy string
+	UserID     string
+	Username   string
 }
 
 func (q *Queries) GetTokenByValue(ctx context.Context, value string) (GetTokenByValueRow, error) {
@@ -125,8 +125,8 @@ func (q *Queries) GetTokenByValue(ctx context.Context, value string) (GetTokenBy
 		&i.Expires,
 		&i.CreatedAt,
 		&i.CreatedBy,
-		&i.UpdatedAt,
-		&i.UpdatedBy,
+		&i.ModifiedAt,
+		&i.ModifiedBy,
 		&i.UserID,
 		&i.Username,
 	)
@@ -134,22 +134,22 @@ func (q *Queries) GetTokenByValue(ctx context.Context, value string) (GetTokenBy
 }
 
 const listTokens = `-- name: ListTokens :many
-SELECT tokens.id, tokens.value, tokens.active, tokens.expires, tokens.created_at, tokens.created_by, tokens.updated_at, tokens.updated_by, tokens.user_id,users.username FROM tokens
+SELECT tokens.id, tokens.value, tokens.active, tokens.expires, tokens.created_at, tokens.created_by, tokens.modified_at, tokens.modified_by, tokens.user_id,users.username FROM tokens
 JOIN users on tokens.user_id = users.id
 ORDER BY tokens.id
 `
 
 type ListTokensRow struct {
-	ID        string
-	Value     string
-	Active    int32
-	Expires   pgtype.Timestamp
-	CreatedAt pgtype.Timestamp
-	CreatedBy string
-	UpdatedAt pgtype.Timestamp
-	UpdatedBy string
-	UserID    string
-	Username  string
+	ID         string
+	Value      string
+	Active     int32
+	Expires    pgtype.Timestamp
+	CreatedAt  pgtype.Timestamp
+	CreatedBy  string
+	ModifiedAt pgtype.Timestamp
+	ModifiedBy string
+	UserID     string
+	Username   string
 }
 
 func (q *Queries) ListTokens(ctx context.Context) ([]ListTokensRow, error) {
@@ -168,8 +168,8 @@ func (q *Queries) ListTokens(ctx context.Context) ([]ListTokensRow, error) {
 			&i.Expires,
 			&i.CreatedAt,
 			&i.CreatedBy,
-			&i.UpdatedAt,
-			&i.UpdatedBy,
+			&i.ModifiedAt,
+			&i.ModifiedBy,
 			&i.UserID,
 			&i.Username,
 		); err != nil {
@@ -184,23 +184,23 @@ func (q *Queries) ListTokens(ctx context.Context) ([]ListTokensRow, error) {
 }
 
 const listUserTokens = `-- name: ListUserTokens :many
-SELECT tokens.id, tokens.value, tokens.active, tokens.expires, tokens.created_at, tokens.created_by, tokens.updated_at, tokens.updated_by, tokens.user_id,users.username FROM tokens
+SELECT tokens.id, tokens.value, tokens.active, tokens.expires, tokens.created_at, tokens.created_by, tokens.modified_at, tokens.modified_by, tokens.user_id,users.username FROM tokens
 JOIN users on tokens.user_id = users.id
 WHERE user_id = $1
 ORDER BY tokens.id
 `
 
 type ListUserTokensRow struct {
-	ID        string
-	Value     string
-	Active    int32
-	Expires   pgtype.Timestamp
-	CreatedAt pgtype.Timestamp
-	CreatedBy string
-	UpdatedAt pgtype.Timestamp
-	UpdatedBy string
-	UserID    string
-	Username  string
+	ID         string
+	Value      string
+	Active     int32
+	Expires    pgtype.Timestamp
+	CreatedAt  pgtype.Timestamp
+	CreatedBy  string
+	ModifiedAt pgtype.Timestamp
+	ModifiedBy string
+	UserID     string
+	Username   string
 }
 
 func (q *Queries) ListUserTokens(ctx context.Context, userID string) ([]ListUserTokensRow, error) {
@@ -219,8 +219,8 @@ func (q *Queries) ListUserTokens(ctx context.Context, userID string) ([]ListUser
 			&i.Expires,
 			&i.CreatedAt,
 			&i.CreatedBy,
-			&i.UpdatedAt,
-			&i.UpdatedBy,
+			&i.ModifiedAt,
+			&i.ModifiedBy,
 			&i.UserID,
 			&i.Username,
 		); err != nil {
@@ -235,23 +235,23 @@ func (q *Queries) ListUserTokens(ctx context.Context, userID string) ([]ListUser
 }
 
 const listUserTokensByName = `-- name: ListUserTokensByName :many
-SELECT tokens.id, tokens.value, tokens.active, tokens.expires, tokens.created_at, tokens.created_by, tokens.updated_at, tokens.updated_by, tokens.user_id,users.username FROM tokens
+SELECT tokens.id, tokens.value, tokens.active, tokens.expires, tokens.created_at, tokens.created_by, tokens.modified_at, tokens.modified_by, tokens.user_id,users.username FROM tokens
 JOIN users on tokens.user_id = users.id
 WHERE users.username = $1
 ORDER BY tokens.id
 `
 
 type ListUserTokensByNameRow struct {
-	ID        string
-	Value     string
-	Active    int32
-	Expires   pgtype.Timestamp
-	CreatedAt pgtype.Timestamp
-	CreatedBy string
-	UpdatedAt pgtype.Timestamp
-	UpdatedBy string
-	UserID    string
-	Username  string
+	ID         string
+	Value      string
+	Active     int32
+	Expires    pgtype.Timestamp
+	CreatedAt  pgtype.Timestamp
+	CreatedBy  string
+	ModifiedAt pgtype.Timestamp
+	ModifiedBy string
+	UserID     string
+	Username   string
 }
 
 func (q *Queries) ListUserTokensByName(ctx context.Context, username string) ([]ListUserTokensByNameRow, error) {
@@ -270,8 +270,8 @@ func (q *Queries) ListUserTokensByName(ctx context.Context, username string) ([]
 			&i.Expires,
 			&i.CreatedAt,
 			&i.CreatedBy,
-			&i.UpdatedAt,
-			&i.UpdatedBy,
+			&i.ModifiedAt,
+			&i.ModifiedBy,
 			&i.UserID,
 			&i.Username,
 		); err != nil {
@@ -288,25 +288,25 @@ func (q *Queries) ListUserTokensByName(ctx context.Context, username string) ([]
 const updateTokenValidity = `-- name: UpdateTokenValidity :one
 UPDATE tokens
   set active = $2,
-  updated_at = $3,
-  updated_by = $4
+  modified_at = $3,
+  modified_by = $4
 WHERE id = $1
-RETURNING id, value, active, expires, created_at, created_by, updated_at, updated_by, user_id
+RETURNING id, value, active, expires, created_at, created_by, modified_at, modified_by, user_id
 `
 
 type UpdateTokenValidityParams struct {
-	ID        string
-	Active    int32
-	UpdatedAt pgtype.Timestamp
-	UpdatedBy string
+	ID         string
+	Active     int32
+	ModifiedAt pgtype.Timestamp
+	ModifiedBy string
 }
 
 func (q *Queries) UpdateTokenValidity(ctx context.Context, arg UpdateTokenValidityParams) (Token, error) {
 	row := q.db.QueryRow(ctx, updateTokenValidity,
 		arg.ID,
 		arg.Active,
-		arg.UpdatedAt,
-		arg.UpdatedBy,
+		arg.ModifiedAt,
+		arg.ModifiedBy,
 	)
 	var i Token
 	err := row.Scan(
@@ -316,8 +316,8 @@ func (q *Queries) UpdateTokenValidity(ctx context.Context, arg UpdateTokenValidi
 		&i.Expires,
 		&i.CreatedAt,
 		&i.CreatedBy,
-		&i.UpdatedAt,
-		&i.UpdatedBy,
+		&i.ModifiedAt,
+		&i.ModifiedBy,
 		&i.UserID,
 	)
 	return i, err

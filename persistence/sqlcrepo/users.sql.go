@@ -22,7 +22,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id string) error {
 }
 
 const fetchAll = `-- name: FetchAll :many
-SELECT id, username, password, active, created_at, created_by, updated_at, updated_by FROM users 
+SELECT id, username, password, active, created_at, created_by, modified_at, modified_by FROM users 
 ORDER BY id
 `
 
@@ -42,8 +42,8 @@ func (q *Queries) FetchAll(ctx context.Context) ([]User, error) {
 			&i.Active,
 			&i.CreatedAt,
 			&i.CreatedBy,
-			&i.UpdatedAt,
-			&i.UpdatedBy,
+			&i.ModifiedAt,
+			&i.ModifiedBy,
 		); err != nil {
 			return nil, err
 		}
@@ -56,7 +56,7 @@ func (q *Queries) FetchAll(ctx context.Context) ([]User, error) {
 }
 
 const fetchUser = `-- name: FetchUser :one
-SELECT id, username, password, active, created_at, created_by, updated_at, updated_by FROM users
+SELECT id, username, password, active, created_at, created_by, modified_at, modified_by FROM users
 WHERE id = $1 LIMIT 1
 `
 
@@ -70,14 +70,14 @@ func (q *Queries) FetchUser(ctx context.Context, id string) (User, error) {
 		&i.Active,
 		&i.CreatedAt,
 		&i.CreatedBy,
-		&i.UpdatedAt,
-		&i.UpdatedBy,
+		&i.ModifiedAt,
+		&i.ModifiedBy,
 	)
 	return i, err
 }
 
 const fetchUserByName = `-- name: FetchUserByName :one
-SELECT id, username, password, active, created_at, created_by, updated_at, updated_by FROM users
+SELECT id, username, password, active, created_at, created_by, modified_at, modified_by FROM users
 WHERE username = $1 LIMIT 1
 `
 
@@ -91,30 +91,30 @@ func (q *Queries) FetchUserByName(ctx context.Context, username string) (User, e
 		&i.Active,
 		&i.CreatedAt,
 		&i.CreatedBy,
-		&i.UpdatedAt,
-		&i.UpdatedBy,
+		&i.ModifiedAt,
+		&i.ModifiedBy,
 	)
 	return i, err
 }
 
 const saveUser = `-- name: SaveUser :one
 INSERT INTO users (
-  id, username,password,active, created_at, created_by,updated_at,updated_by
+  id, username,password,active, created_at, created_by,modified_at,modified_by
 ) VALUES (
   $1, $2, $3, $4, $5, $6, $7,$8
 )
-RETURNING id, username, password, active, created_at, created_by, updated_at, updated_by
+RETURNING id, username, password, active, created_at, created_by, modified_at, modified_by
 `
 
 type SaveUserParams struct {
-	ID        string
-	Username  string
-	Password  pgtype.Text
-	Active    int32
-	CreatedAt pgtype.Timestamp
-	CreatedBy string
-	UpdatedAt pgtype.Timestamp
-	UpdatedBy string
+	ID         string
+	Username   string
+	Password   pgtype.Text
+	Active     int32
+	CreatedAt  pgtype.Timestamp
+	CreatedBy  string
+	ModifiedAt pgtype.Timestamp
+	ModifiedBy string
 }
 
 func (q *Queries) SaveUser(ctx context.Context, arg SaveUserParams) (User, error) {
@@ -125,8 +125,8 @@ func (q *Queries) SaveUser(ctx context.Context, arg SaveUserParams) (User, error
 		arg.Active,
 		arg.CreatedAt,
 		arg.CreatedBy,
-		arg.UpdatedAt,
-		arg.UpdatedBy,
+		arg.ModifiedAt,
+		arg.ModifiedBy,
 	)
 	var i User
 	err := row.Scan(
@@ -136,8 +136,8 @@ func (q *Queries) SaveUser(ctx context.Context, arg SaveUserParams) (User, error
 		&i.Active,
 		&i.CreatedAt,
 		&i.CreatedBy,
-		&i.UpdatedAt,
-		&i.UpdatedBy,
+		&i.ModifiedAt,
+		&i.ModifiedBy,
 	)
 	return i, err
 }
@@ -145,25 +145,25 @@ func (q *Queries) SaveUser(ctx context.Context, arg SaveUserParams) (User, error
 const updatePassword = `-- name: UpdatePassword :one
 UPDATE users
   set password = $2,
-  updated_at = $3,
-  updated_by = $4
+  modified_at = $3,
+  modified_by = $4
 WHERE id = $1
-RETURNING id, username, password, active, created_at, created_by, updated_at, updated_by
+RETURNING id, username, password, active, created_at, created_by, modified_at, modified_by
 `
 
 type UpdatePasswordParams struct {
-	ID        string
-	Password  pgtype.Text
-	UpdatedAt pgtype.Timestamp
-	UpdatedBy string
+	ID         string
+	Password   pgtype.Text
+	ModifiedAt pgtype.Timestamp
+	ModifiedBy string
 }
 
 func (q *Queries) UpdatePassword(ctx context.Context, arg UpdatePasswordParams) (User, error) {
 	row := q.db.QueryRow(ctx, updatePassword,
 		arg.ID,
 		arg.Password,
-		arg.UpdatedAt,
-		arg.UpdatedBy,
+		arg.ModifiedAt,
+		arg.ModifiedBy,
 	)
 	var i User
 	err := row.Scan(
@@ -173,8 +173,8 @@ func (q *Queries) UpdatePassword(ctx context.Context, arg UpdatePasswordParams) 
 		&i.Active,
 		&i.CreatedAt,
 		&i.CreatedBy,
-		&i.UpdatedAt,
-		&i.UpdatedBy,
+		&i.ModifiedAt,
+		&i.ModifiedBy,
 	)
 	return i, err
 }

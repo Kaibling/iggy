@@ -28,7 +28,7 @@ ORDER BY tokens.id;
 
 -- name: CreateToken :one
 INSERT INTO tokens (
-  id, user_id,active,value,expires, created_at, created_by,updated_at,updated_by
+  id, user_id,active,value,expires, created_at, created_by,modified_at,modified_by
 ) VALUES (
   $1, $2, $3, $4, $5, $6, $7, $8,$9
 )
@@ -37,8 +37,8 @@ RETURNING id;
 -- name: UpdateTokenValidity :one
 UPDATE tokens
   set active = $2,
-  updated_at = $3,
-  updated_by = $4
+  modified_at = $3,
+  modified_by = $4
 WHERE id = $1
 RETURNING *;
 

@@ -40,12 +40,12 @@ func (r *TokenRepo) CreateToken(t model.NewToken) (*model.Token, error) {
 			Valid: true,
 		},
 		CreatedBy: r.Username,
-		UpdatedAt: pgtype.Timestamp{
+		ModifiedAt: pgtype.Timestamp{
 			Time:  time.Now(),
 			Valid: true,
 		},
-		UpdatedBy: r.Username,
-		Active:    bool2Int(t.Active),
+		ModifiedBy: r.Username,
+		Active:     bool2Int(t.Active),
 		Expires: pgtype.Timestamp{
 			Time:  t.Expires,
 			Valid: true,
@@ -69,10 +69,10 @@ func (r *TokenRepo) ReadToken(id string) (*model.Token, error) {
 		Expires: rt.Expires.Time,
 		User:    model.Identifier{ID: rt.UserID, Name: rt.Username},
 		Meta: model.MetaData{
-			CreatedAt: rt.CreatedAt.Time,
-			CreatedBy: rt.CreatedBy,
-			UpdatedAt: rt.UpdatedAt.Time,
-			UpdatedBy: rt.UpdatedBy,
+			CreatedAt:  rt.CreatedAt.Time,
+			CreatedBy:  rt.CreatedBy,
+			ModifiedAt: rt.ModifiedAt.Time,
+			ModifiedBy: rt.ModifiedBy,
 		},
 	}, nil
 }
@@ -92,10 +92,10 @@ func (r *TokenRepo) ReadTokenByValue(t string) (*model.Token, error) {
 		Expires: rt.Expires.Time,
 		User:    model.Identifier{ID: rt.UserID, Name: rt.Username},
 		Meta: model.MetaData{
-			CreatedAt: rt.CreatedAt.Time,
-			CreatedBy: rt.CreatedBy,
-			UpdatedAt: rt.UpdatedAt.Time,
-			UpdatedBy: rt.UpdatedBy,
+			CreatedAt:  rt.CreatedAt.Time,
+			CreatedBy:  rt.CreatedBy,
+			ModifiedAt: rt.ModifiedAt.Time,
+			ModifiedBy: rt.ModifiedBy,
 		},
 	}, nil
 }
@@ -114,10 +114,10 @@ func (r *TokenRepo) ListTokens() ([]*model.Token, error) {
 			Expires: t.Expires.Time,
 			User:    model.Identifier{ID: t.UserID, Name: t.Username},
 			Meta: model.MetaData{
-				CreatedAt: t.CreatedAt.Time,
-				CreatedBy: t.CreatedBy,
-				UpdatedAt: t.UpdatedAt.Time,
-				UpdatedBy: t.UpdatedBy,
+				CreatedAt:  t.CreatedAt.Time,
+				CreatedBy:  t.CreatedBy,
+				ModifiedAt: t.ModifiedAt.Time,
+				ModifiedBy: t.ModifiedBy,
 			},
 		})
 	}
@@ -138,10 +138,10 @@ func (r *TokenRepo) ListUserToken(username string) ([]*model.Token, error) {
 			Expires: t.Expires.Time,
 			User:    model.Identifier{ID: t.UserID, Name: t.Username},
 			Meta: model.MetaData{
-				CreatedAt: t.CreatedAt.Time,
-				CreatedBy: t.CreatedBy,
-				UpdatedAt: t.UpdatedAt.Time,
-				UpdatedBy: t.UpdatedBy,
+				CreatedAt:  t.CreatedAt.Time,
+				CreatedBy:  t.CreatedBy,
+				ModifiedAt: t.ModifiedAt.Time,
+				ModifiedBy: t.ModifiedBy,
 			},
 		})
 	}

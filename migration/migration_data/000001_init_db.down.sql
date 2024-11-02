@@ -1,5 +1,6 @@
 DROP TABLE tokens;
 DROP TABLE users;
-DROP TABLE permissions
-DROP TABLE roles;
-DROP TABLE user_roles;
+DROP TABLE workflows_children;
+DROP TABLE run_logs;
+DROP TABLE runs;
+DROP TABLE workflows;

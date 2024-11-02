@@ -8,25 +8,63 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type Token struct {
+type Run struct {
+	ID         string
+	WorkflowID string
+	Error      pgtype.Text
+	StartTime  pgtype.Timestamp
+	FinishTime pgtype.Timestamp
+	CreatedAt  pgtype.Timestamp
+	ModifiedAt pgtype.Timestamp
+	CreatedBy  string
+	ModifiedBy string
+}
+
+type RunLog struct {
 	ID        string
-	Value     string
-	Active    int32
-	Expires   pgtype.Timestamp
-	CreatedAt pgtype.Timestamp
-	CreatedBy string
-	UpdatedAt pgtype.Timestamp
-	UpdatedBy string
-	UserID    string
+	Message   string
+	Timestamp pgtype.Timestamp
+	RunID     string
+}
+
+type Token struct {
+	ID         string
+	Value      string
+	Active     int32
+	Expires    pgtype.Timestamp
+	CreatedAt  pgtype.Timestamp
+	CreatedBy  string
+	ModifiedAt pgtype.Timestamp
+	ModifiedBy string
+	UserID     string
 }
 
 type User struct {
-	ID        string
-	Username  string
-	Password  pgtype.Text
-	Active    int32
-	CreatedAt pgtype.Timestamp
-	CreatedBy string
-	UpdatedAt pgtype.Timestamp
-	UpdatedBy string
+	ID         string
+	Username   string
+	Password   pgtype.Text
+	Active     int32
+	CreatedAt  pgtype.Timestamp
+	CreatedBy  string
+	ModifiedAt pgtype.Timestamp
+	ModifiedBy string
+}
+
+type Workflow struct {
+	ID          string
+	Name        string
+	Code        pgtype.Text
+	ObjectType  string
+	FailOnError bool
+	BuildIn     bool
+	CreatedAt   pgtype.Timestamp
+	ModifiedAt  pgtype.Timestamp
+	CreatedBy   string
+	ModifiedBy  string
+	DeletedAt   pgtype.Timestamp
+}
+
+type WorkflowsChild struct {
+	WorkflowID string
+	ChildrenID string
 }

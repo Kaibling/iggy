@@ -12,7 +12,7 @@ ORDER BY id;
 
 -- name: SaveUser :one
 INSERT INTO users (
-  id, username,password,active, created_at, created_by,updated_at,updated_by
+  id, username,password,active, created_at, created_by,modified_at,modified_by
 ) VALUES (
   $1, $2, $3, $4, $5, $6, $7,$8
 )
@@ -21,8 +21,8 @@ RETURNING *;
 -- name: UpdatePassword :one
 UPDATE users
   set password = $2,
-  updated_at = $3,
-  updated_by = $4
+  modified_at = $3,
+  modified_by = $4
 WHERE id = $1
 RETURNING *;
 
