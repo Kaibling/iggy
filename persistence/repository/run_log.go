@@ -43,8 +43,8 @@ func (r *RunLogRepo) SaveRunLog(newModel model.NewRunLog) (*model.RunLog, error)
 	return r.FetchRunLog(newRunLogID)
 }
 
-func (r *RunLogRepo) FetchRunLogsByRun(id string) ([]model.RunLog, error) {
-	rt, err := r.q.FetchRunLogsByRun(r.ctx, id)
+func (r *RunLogRepo) FetchRunLogsByRun(runID string) ([]model.RunLog, error) {
+	rt, err := r.q.FetchRunLogsByRun(r.ctx, runID)
 	if err != nil {
 		return nil, err
 	}
