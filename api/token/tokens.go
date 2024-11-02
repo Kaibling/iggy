@@ -6,7 +6,7 @@ import (
 	"github.com/kaibling/apiforge/envelope"
 	apierror "github.com/kaibling/apiforge/error"
 
-	"github.com/kaibling/iggy/bootstrap"
+	"github.com/kaibling/iggy/service/bootstrap"
 )
 
 func getTokens(w http.ResponseWriter, r *http.Request) {

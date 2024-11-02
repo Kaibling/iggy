@@ -1,26 +1,30 @@
 -- name: GetToken :one
-SELECT * FROM tokens
-WHERE id = $1 LIMIT 1;
+SELECT tokens.*, users.username FROM tokens
+JOIN users on tokens.user_id = users.id
+WHERE tokens.id = $1 LIMIT 1;
 
 -- name: GetTokenByValue :one
-SELECT * FROM tokens
+SELECT tokens.*,users.username FROM tokens
+JOIN users on tokens.user_id = users.id
 WHERE value = $1 LIMIT 1;
 
 
 -- name: ListUserTokens :many
-SELECT * FROM tokens 
+SELECT tokens.*,users.username FROM tokens
+JOIN users on tokens.user_id = users.id
 WHERE user_id = $1
-ORDER BY id;
+ORDER BY tokens.id;
 
 -- name: ListUserTokensByName :many
-SELECT tokens.* FROM tokens 
-join users on tokens.user_id = users.id
+SELECT tokens.*,users.username FROM tokens
+JOIN users on tokens.user_id = users.id
 WHERE users.username = $1
 ORDER BY tokens.id;
 
 -- name: ListTokens :many
-SELECT * FROM tokens 
-ORDER BY id;
+SELECT tokens.*,users.username FROM tokens
+JOIN users on tokens.user_id = users.id
+ORDER BY tokens.id;
 
 -- name: CreateToken :one
 INSERT INTO tokens (
@@ -28,7 +32,7 @@ INSERT INTO tokens (
 ) VALUES (
   $1, $2, $3, $4, $5, $6, $7, $8,$9
 )
-RETURNING *;
+RETURNING id;
 
 -- name: UpdateTokenValidity :one
 UPDATE tokens

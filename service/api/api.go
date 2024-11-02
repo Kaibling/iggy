@@ -10,10 +10,10 @@ import (
 	"github.com/kaibling/apiforge/middleware"
 	apiservice "github.com/kaibling/apiforge/service"
 	"github.com/kaibling/iggy/api"
-	"github.com/kaibling/iggy/bootstrap"
-	"github.com/kaibling/iggy/config"
 	"github.com/kaibling/iggy/migration"
 	"github.com/kaibling/iggy/persistence/psql"
+	"github.com/kaibling/iggy/pkg/config"
+	"github.com/kaibling/iggy/service/bootstrap"
 )
 
 func Start() error {

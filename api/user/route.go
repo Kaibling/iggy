@@ -2,7 +2,7 @@ package user
 
 import (
 	"github.com/go-chi/chi/v5"
-	"github.com/kaibling/iggy/middleware"
+	"github.com/kaibling/iggy/api/middleware"
 )
 
 func Route() chi.Router {

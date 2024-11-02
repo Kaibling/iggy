@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/kaibling/apiforge/lib/utils"
-	"github.com/kaibling/iggy/config"
-	"github.com/kaibling/iggy/crypto"
 	"github.com/kaibling/iggy/model"
+	"github.com/kaibling/iggy/pkg/config"
+	"github.com/kaibling/iggy/pkg/crypto"
 )
 
 type userRepo interface {
@@ -57,7 +57,7 @@ func (us *UserService) DeleteUser(id string) error {
 }
 
 func (us *UserService) EnsureAdmin(password string) (string, error) {
-	if _, err := us.repo.FetchUserByName("admin"); err != nil {
+	if _, err := us.repo.FetchUserByName(us.cfg.AdminUser); err != nil {
 		if err == sql.ErrNoRows {
 			// create Admin user
 			if password == "" {
@@ -66,7 +66,7 @@ func (us *UserService) EnsureAdmin(password string) (string, error) {
 			pwdhash, _ := crypto.HashPassword(password, us.cfg.PasswordCost)
 			if _, err = us.repo.SaveUser(model.NewUser{
 				ID:       utils.NewULID().String(),
-				Username: "admin",
+				Username: us.cfg.AdminUser,
 				Password: pwdhash,
 			}); err != nil {
 				return "", err
@@ -90,16 +90,8 @@ func (us *UserService) Login(login model.Login, ts *TokenService) (*model.Token,
 	if !ok {
 		return nil, fmt.Errorf("no")
 	}
-	return ts.CreateToken(model.Token{
-		Value:     "string",
-		Active:    true,
-		CreatedAt: time.Now(),
-		CreatedBy: "",
-		UpdatedAt: time.Now(),
-		UpdatedBy: "string",
-		UserID:    user.ID,
-		Expires:   time.Now().Add(time.Hour * time.Duration(us.cfg.TokenExpiration)),
-	})
+	expirationTime := time.Now().Add(time.Hour * time.Duration(us.cfg.TokenExpiration))
+	return ts.CreateToken(model.CreateNewToken(user.ID, expirationTime))
 }
 
 func (us *UserService) ValidateToken(token string, ts *TokenService) (*model.User, error) {
@@ -110,5 +102,5 @@ func (us *UserService) ValidateToken(token string, ts *TokenService) (*model.Use
 	}
 
 	// TODO validate expiration
-	return us.FetchUser(t.UserID)
+	return us.FetchUser(t.User.ID)
 }

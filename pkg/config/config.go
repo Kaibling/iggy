@@ -11,6 +11,7 @@ var (
 )
 
 type Configuration struct {
+	AdminUser       string
 	AdminPassword   string
 	BindingPort     string
 	BindingIP       string
@@ -33,6 +34,7 @@ func Load() (Configuration, error) {
 	}
 
 	return Configuration{
+		AdminUser:       getEnv("ADMIN_User", "admin"),
 		AdminPassword:   getEnv("ADMIN_PASSWORD", ""),
 		BindingIP:       getEnv("BINDING_IP", "0.0.0.0"),
 		BindingPort:     getEnv("BINDING_PORT", "7800"),

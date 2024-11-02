@@ -4,8 +4,8 @@ import (
 	"context"
 
 	"github.com/kaibling/apiforge/ctxkeys"
-	"github.com/kaibling/iggy/config"
 	repo "github.com/kaibling/iggy/persistence/repository"
+	"github.com/kaibling/iggy/pkg/config"
 	"github.com/kaibling/iggy/service"
 )
 

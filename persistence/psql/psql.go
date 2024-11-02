@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/kaibling/iggy/config"
+	"github.com/kaibling/iggy/pkg/config"
 )
 
 func New(cfg config.Configuration) (*pgxpool.Pool, error) {

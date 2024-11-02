@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/kaibling/apiforge/ctxkeys"
-	"github.com/kaibling/apiforge/lib/utils"
 	"github.com/kaibling/iggy/model"
 	"github.com/kaibling/iggy/persistence/sqlcrepo"
 
@@ -30,11 +29,11 @@ func NewTokenRepo(ctx context.Context, username string) *TokenRepo {
 	}
 }
 
-func (r *TokenRepo) CreateToken(t model.Token) (*model.Token, error) {
+func (r *TokenRepo) CreateToken(t model.NewToken) (*model.Token, error) {
 
-	ret, err := r.q.CreateToken(r.ctx, sqlcrepo.CreateTokenParams{
+	newTokenID, err := r.q.CreateToken(r.ctx, sqlcrepo.CreateTokenParams{
 		Value:  t.Value,
-		ID:     utils.NewULID().String(),
+		ID:     t.ID,
 		UserID: t.UserID,
 		CreatedAt: pgtype.Timestamp{
 			Time:  time.Now(),
@@ -55,7 +54,7 @@ func (r *TokenRepo) CreateToken(t model.Token) (*model.Token, error) {
 	if err != nil {
 		return nil, err
 	}
-	return marshalToken(ret), nil
+	return r.ReadToken(newTokenID)
 }
 
 func (r *TokenRepo) ReadToken(id string) (*model.Token, error) {
@@ -63,7 +62,19 @@ func (r *TokenRepo) ReadToken(id string) (*model.Token, error) {
 	if err != nil {
 		return nil, err
 	}
-	return marshalToken(rt), nil
+	return &model.Token{
+		ID:      rt.ID,
+		Value:   rt.Value,
+		Active:  int2Bool(rt.Active),
+		Expires: rt.Expires.Time,
+		User:    model.Identifier{ID: rt.UserID, Name: rt.Username},
+		Meta: model.MetaData{
+			CreatedAt: rt.CreatedAt.Time,
+			CreatedBy: rt.CreatedBy,
+			UpdatedAt: rt.UpdatedAt.Time,
+			UpdatedBy: rt.UpdatedBy,
+		},
+	}, nil
 }
 
 func (r *TokenRepo) ReadTokenByValue(t string) (*model.Token, error) {
@@ -74,7 +85,19 @@ func (r *TokenRepo) ReadTokenByValue(t string) (*model.Token, error) {
 		}
 		return nil, err
 	}
-	return marshalToken(rt), nil
+	return &model.Token{
+		ID:      rt.ID,
+		Value:   rt.Value,
+		Active:  int2Bool(rt.Active),
+		Expires: rt.Expires.Time,
+		User:    model.Identifier{ID: rt.UserID, Name: rt.Username},
+		Meta: model.MetaData{
+			CreatedAt: rt.CreatedAt.Time,
+			CreatedBy: rt.CreatedBy,
+			UpdatedAt: rt.UpdatedAt.Time,
+			UpdatedBy: rt.UpdatedBy,
+		},
+	}, nil
 }
 
 func (r *TokenRepo) ListTokens() ([]*model.Token, error) {
@@ -82,7 +105,23 @@ func (r *TokenRepo) ListTokens() ([]*model.Token, error) {
 	if err != nil {
 		return nil, err
 	}
-	return marshalTokens(rt), nil
+	users := []*model.Token{}
+	for _, t := range rt {
+		users = append(users, &model.Token{
+			ID:      t.ID,
+			Value:   t.Value,
+			Active:  int2Bool(t.Active),
+			Expires: t.Expires.Time,
+			User:    model.Identifier{ID: t.UserID, Name: t.Username},
+			Meta: model.MetaData{
+				CreatedAt: t.CreatedAt.Time,
+				CreatedBy: t.CreatedBy,
+				UpdatedAt: t.UpdatedAt.Time,
+				UpdatedBy: t.UpdatedBy,
+			},
+		})
+	}
+	return users, nil
 }
 
 func (r *TokenRepo) ListUserToken(username string) ([]*model.Token, error) {
@@ -90,7 +129,23 @@ func (r *TokenRepo) ListUserToken(username string) ([]*model.Token, error) {
 	if err != nil {
 		return nil, err
 	}
-	return marshalTokens(rt), nil
+	users := []*model.Token{}
+	for _, t := range rt {
+		users = append(users, &model.Token{
+			ID:      t.ID,
+			Value:   t.Value,
+			Active:  int2Bool(t.Active),
+			Expires: t.Expires.Time,
+			User:    model.Identifier{ID: t.UserID, Name: t.Username},
+			Meta: model.MetaData{
+				CreatedAt: t.CreatedAt.Time,
+				CreatedBy: t.CreatedBy,
+				UpdatedAt: t.UpdatedAt.Time,
+				UpdatedBy: t.UpdatedBy,
+			},
+		})
+	}
+	return users, nil
 }
 
 func (r *TokenRepo) DeleteTokenByValue(t string) error {
@@ -102,37 +157,4 @@ func (r *TokenRepo) DeleteTokenByValue(t string) error {
 		return err
 	}
 	return nil
-}
-
-func marshalToken(t sqlcrepo.Token) *model.Token {
-	u := &model.Token{
-		ID:        t.ID,
-		Value:     t.Value,
-		CreatedAt: t.CreatedAt.Time,
-		CreatedBy: t.CreatedBy,
-		UpdatedAt: t.UpdatedAt.Time,
-		UpdatedBy: t.UpdatedBy,
-		Active:    int2Bool(t.Active),
-		Expires:   t.Expires.Time,
-		UserID:    t.UserID,
-	}
-	return u
-}
-
-func marshalTokens(repoTokens []sqlcrepo.Token) []*model.Token {
-	users := []*model.Token{}
-	for _, t := range repoTokens {
-		users = append(users, &model.Token{
-			ID:        t.ID,
-			Value:     t.Value,
-			CreatedAt: t.CreatedAt.Time,
-			CreatedBy: t.CreatedBy,
-			UpdatedAt: t.UpdatedAt.Time,
-			UpdatedBy: t.UpdatedBy,
-			Active:    int2Bool(t.Active),
-			Expires:   t.Expires.Time,
-			UserID:    t.UserID,
-		})
-	}
-	return users
 }

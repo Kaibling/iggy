@@ -114,14 +114,16 @@ func (r *UserRepo) UpdatePassword(passwordHash string, userID string) (*model.Us
 
 func marshalUser(t sqlcrepo.User) *model.User {
 	u := &model.User{
-		ID:        t.ID,
-		Username:  t.Username,
-		CreatedAt: t.CreatedAt.Time,
-		CreatedBy: t.CreatedBy,
-		UpdatedAt: t.UpdatedAt.Time,
-		UpdatedBy: t.UpdatedBy,
-		Active:    int2Bool(t.Active),
-		Password:  t.Password.String,
+		ID:       t.ID,
+		Username: t.Username,
+		Active:   int2Bool(t.Active),
+		Password: t.Password.String,
+		Meta: model.MetaData{
+			CreatedAt: t.CreatedAt.Time,
+			CreatedBy: t.CreatedBy,
+			UpdatedAt: t.UpdatedAt.Time,
+			UpdatedBy: t.UpdatedBy,
+		},
 	}
 	return u
 }
@@ -130,13 +132,15 @@ func marshalUsers(repoUsers []sqlcrepo.User) []*model.User {
 	users := []*model.User{}
 	for _, t := range repoUsers {
 		users = append(users, &model.User{
-			ID:        t.ID,
-			Username:  t.Username,
-			CreatedAt: t.CreatedAt.Time,
-			CreatedBy: t.CreatedBy,
-			UpdatedAt: t.UpdatedAt.Time,
-			UpdatedBy: t.UpdatedBy,
-			Active:    int2Bool(t.Active),
+			ID:       t.ID,
+			Username: t.Username,
+			Active:   int2Bool(t.Active),
+			Meta: model.MetaData{
+				CreatedAt: t.CreatedAt.Time,
+				CreatedBy: t.CreatedBy,
+				UpdatedAt: t.UpdatedAt.Time,
+				UpdatedBy: t.UpdatedBy,
+			},
 		})
 	}
 	return users

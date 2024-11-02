@@ -7,7 +7,7 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
-	"github.com/kaibling/iggy/config"
+	"github.com/kaibling/iggy/pkg/config"
 )
 
 //go:embed migration_data/*.sql

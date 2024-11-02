@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 
-	"github.com/kaibling/iggy/config"
-	"github.com/kaibling/iggy/crypto"
 	"github.com/kaibling/iggy/model"
+	"github.com/kaibling/iggy/pkg/config"
+	"github.com/kaibling/iggy/pkg/crypto"
 )
 
 type tokenRepo interface {
@@ -14,7 +14,7 @@ type tokenRepo interface {
 	DeleteTokenByValue(t string) error
 	ListTokens() ([]*model.Token, error)
 	ListUserToken(username string) ([]*model.Token, error)
-	CreateToken(t model.Token) (*model.Token, error)
+	CreateToken(t model.NewToken) (*model.Token, error)
 }
 
 type TokenService struct {
@@ -35,7 +35,7 @@ func (ts *TokenService) ReadTokenByValue(v string) (*model.Token, error) {
 	return ts.repo.ReadTokenByValue(v)
 }
 
-func (ts *TokenService) CreateToken(u model.Token) (*model.Token, error) {
+func (ts *TokenService) CreateToken(u model.NewToken) (*model.Token, error) {
 	tokenVal, err := crypto.GenerateAPIKey(ts.cfg.TokenKeyLength)
 	if err != nil {
 		return nil, err
