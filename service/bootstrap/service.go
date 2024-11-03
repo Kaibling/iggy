@@ -48,8 +48,9 @@ func NewWorkflowService(ctx context.Context) *service.WorkflowService {
 func NewRunService(ctx context.Context) *service.RunService {
 	username := ctxkeys.GetValue(ctx, ctxkeys.UserNameKey).(string)
 	cfg := ctxkeys.GetValue(ctx, "cfg").(config.Configuration)
+	request_id := ctxkeys.GetValue(ctx, ctxkeys.RequestIDKey).(string)
 
-	runRepo := repo.NewRunRepo(ctx, username)
+	runRepo := repo.NewRunRepo(ctx, username, request_id)
 	return service.NewRunService(ctx, runRepo, cfg)
 }
 
@@ -63,5 +64,6 @@ func NewRunLogService(ctx context.Context) *service.RunLogService {
 
 func NewWorkflowEngineService(ctx context.Context) *service.WorkflowEngineService {
 	cfg := ctxkeys.GetValue(ctx, "cfg").(config.Configuration)
+	//runLogService := NewRunLogService(ctx)
 	return service.NewWorkflowEngineService(ctx, cfg)
 }

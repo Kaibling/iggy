@@ -10,6 +10,7 @@ import (
 
 type Run struct {
 	ID         string
+	RequestID  pgtype.Text
 	WorkflowID string
 	Error      pgtype.Text
 	StartTime  pgtype.Timestamp

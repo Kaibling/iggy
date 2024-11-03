@@ -44,6 +44,7 @@ type Run struct {
 	SharedData map[string]any
 	StartTime  time.Time
 	FinishTime time.Time
+	Logs       []entity.NewRunLog
 }
 
 func (r Run) ToNewEntity() entity.NewRun {
@@ -51,6 +52,7 @@ func (r Run) ToNewEntity() entity.NewRun {
 		WorkflowID: r.WorkflowID,
 		StartTime:  r.StartTime,
 		FinishTime: r.FinishTime,
+		Logs:       r.Logs,
 	}
 	if r.Error != nil {
 		e := r.Error.Error()

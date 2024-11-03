@@ -46,6 +46,7 @@ create table
 create table
   "runs" (
     id text,
+    request_id text,
     workflow_id text not null,
     error text,
     start_time TIMESTAMP not null,

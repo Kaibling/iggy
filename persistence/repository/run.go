@@ -13,17 +13,19 @@ import (
 )
 
 type RunRepo struct {
-	ctx      context.Context
-	q        *sqlcrepo.Queries
-	username string
+	ctx        context.Context
+	q          *sqlcrepo.Queries
+	username   string
+	request_id string
 }
 
-func NewRunRepo(ctx context.Context, username string) *RunRepo {
+func NewRunRepo(ctx context.Context, username, request_id string) *RunRepo {
 	return &RunRepo{
 		ctx: ctx,
 		q:   sqlcrepo.New(ctx.Value(ctxkeys.DBConnKey).(*pgxpool.Pool)),
 		// username: ctx.Value(apictx.String("user_name")).(string),
-		username: username,
+		username:   username,
+		request_id: request_id,
 	}
 }
 
@@ -37,6 +39,10 @@ func (r *RunRepo) SaveRun(newModel entity.NewRun) (*entity.Run, error) {
 	}
 
 	newRunID, err := r.q.SaveRun(r.ctx, sqlcrepo.SaveRunParams{
+		RequestID: pgtype.Text{
+			String: r.request_id,
+			Valid:  true,
+		},
 		ID:         newModel.ID,
 		WorkflowID: newModel.WorkflowID,
 		Error:      pgError,

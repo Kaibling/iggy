@@ -17,4 +17,4 @@ services:
    volumes:
     - ${PWD}/pgdata:/var/lib/postgresql/data
    env_file:
-      - .env
+      - ../.env

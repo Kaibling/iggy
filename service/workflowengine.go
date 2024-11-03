@@ -15,7 +15,7 @@ type WorkflowEngineService struct {
 }
 
 func NewWorkflowEngineService(ctx context.Context, cfg config.Configuration) *WorkflowEngineService {
-	return &WorkflowEngineService{ctx: ctx, repo: workflow.Engine{}, cfg: cfg}
+	return &WorkflowEngineService{ctx: ctx, repo: workflow.NewEngine(), cfg: cfg}
 }
 
 func (ts *WorkflowEngineService) Execute(w entity.Workflow) ([]entity.NewRun, error) {

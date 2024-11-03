@@ -31,12 +31,13 @@ func createRun(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	us := bootstrap.NewRunService(r.Context())
-	newRun, err := us.CreateRun(postRun)
+	rs := bootstrap.NewRunLogService(r.Context())
+	err := us.CreateRun(postRun, rs)
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
 	}
-	e.SetResponse(newRun).Finish(w, r)
+	e.SetSuccess().Finish(w, r)
 }
 
 func fetchRunLogsByRun(w http.ResponseWriter, r *http.Request) {

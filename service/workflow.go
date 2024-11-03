@@ -2,10 +2,12 @@ package service
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/kaibling/apiforge/lib/utils"
 	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/pkg/config"
+	"github.com/kaibling/iggy/pkg/utility"
 )
 
 type workflowRepo interface {
@@ -52,29 +54,26 @@ func (ws *WorkflowService) DeleteWorkflow(id string) error {
 	return ws.repo.DeleteWorkflow(id)
 }
 
-func (ws *WorkflowService) Execute(workflowID string, workflowExecutionService *WorkflowEngineService, runService *RunService) ([]entity.Run, error) {
+func (ws *WorkflowService) Execute(workflowID string, workflowExecutionService *WorkflowEngineService, runService *RunService, runLogService *RunLogService) error {
 	// get workflow
 	wf, err := ws.FetchWorkflows([]string{workflowID})
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// execute
 	executedRuns, err := workflowExecutionService.Execute(*wf)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	// TODO REPO should support bulkinsert
-	savedRuns := []entity.Run{}
+	fmt.Println(utility.Pretty(executedRuns))
 	// save runs
 	for _, newRun := range executedRuns {
-		saveRun, err := runService.CreateRun(newRun)
-		if err != nil {
-			return nil, err
+		if err := runService.CreateRun(newRun, runLogService); err != nil {
+			return err
 		}
-		savedRuns = append(savedRuns, *saveRun)
+
 	}
 
-	// return save
-	return savedRuns, nil
+	return nil
 }

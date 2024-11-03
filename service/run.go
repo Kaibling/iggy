@@ -28,11 +28,25 @@ func (ts *RunService) FetchRun(id string) (*entity.Run, error) {
 	return ts.repo.FetchRun(id)
 }
 
-func (ts *RunService) CreateRun(u entity.NewRun) (*entity.Run, error) {
-	if u.ID == "" {
-		u.ID = utils.NewULID().String()
+func (ts *RunService) CreateRun(newEntity entity.NewRun, runLogService *RunLogService) error {
+	if newEntity.ID == "" {
+		newEntity.ID = utils.NewULID().String()
 	}
-	return ts.repo.SaveRun(u)
+
+	_, err := ts.repo.SaveRun(newEntity)
+	if err != nil {
+		return err
+	}
+	runLogs := []entity.NewRunLog{}
+	for _, runLog := range newEntity.Logs {
+		runLog.RunID = newEntity.ID
+		runLogs = append(runLogs, runLog)
+	}
+	if err := runLogService.CreateRunLogs(runLogs); err != nil {
+		return err
+	}
+	return nil
+
 }
 
 func (ts *RunService) FetchRunByWorkflow(id string) ([]*entity.Run, error) {

@@ -18,13 +18,16 @@ type WorkflowResult struct {
 	SharedData map[string]any
 }
 
-type Engine struct {
+type Engine struct{}
+
+func NewEngine() Engine {
+	return Engine{}
 }
 
 func (e Engine) Execute(workflow entity.Workflow) ([]entity.NewRun, error) {
 	wf := FromWorkflowEntity(workflow)
 	sharedData := map[string]any{}
-	result := execute_workflow(wf, sharedData)
+	result := e.execute_workflow(wf, sharedData)
 	runs := []entity.NewRun{}
 	for _, r := range result.Runs {
 		runs = append(runs, r.ToNewEntity())
@@ -33,17 +36,17 @@ func (e Engine) Execute(workflow entity.Workflow) ([]entity.NewRun, error) {
 
 }
 
-func execute_workflow(w Workflow, sharedData map[string]any) WorkflowResult {
+func (e Engine) execute_workflow(w Workflow, sharedData map[string]any) WorkflowResult {
 	if w.ObjectType == Folder {
-		return execute_folder(w, sharedData)
+		return e.execute_folder(w, sharedData)
 	}
-	return execute_adapter(w, sharedData)
+	return e.execute_adapter(w, sharedData)
 }
 
-func execute_folder(w Workflow, sharedData map[string]any) WorkflowResult {
+func (e Engine) execute_folder(w Workflow, sharedData map[string]any) WorkflowResult {
 	runs := []Run{}
 	for _, child := range w.Children {
-		result := execute_workflow(child, sharedData)
+		result := e.execute_workflow(child, sharedData)
 		runs = append(runs, result.Runs...)
 		sharedData = result.SharedData
 
@@ -62,8 +65,8 @@ func execute_folder(w Workflow, sharedData map[string]any) WorkflowResult {
 	}
 }
 
-func execute_adapter(w Workflow, sharedData map[string]any) WorkflowResult {
-	execAdapter, err := getAdapter(w.ObjectType)
+func (e Engine) execute_adapter(w Workflow, sharedData map[string]any) WorkflowResult {
+	execAdapter, err := e.getAdapter(w.ObjectType)
 	if err != nil {
 		return WorkflowResult{
 			Error:      err,
@@ -81,6 +84,7 @@ func execute_adapter(w Workflow, sharedData map[string]any) WorkflowResult {
 		SharedData: result.SharedData,
 		StartTime:  startTime,
 		FinishTime: finishTime,
+		Logs:       result.Logs,
 	}
 	return WorkflowResult{
 		Error:      result.Error,
@@ -89,7 +93,7 @@ func execute_adapter(w Workflow, sharedData map[string]any) WorkflowResult {
 	}
 }
 
-func getAdapter(wft WorkflowType) (WorkflowAdapter, error) {
+func (e Engine) getAdapter(wft WorkflowType) (WorkflowAdapter, error) {
 	switch wft {
 	case Javascript:
 		return adapter.NewJavascriptAdapter(), nil

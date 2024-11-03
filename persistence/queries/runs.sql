@@ -14,8 +14,8 @@ WHERE runs.workflow_id = $1;
 
 -- name: SaveRun :one
 INSERT INTO runs (
-  id, workflow_id, error, start_time, finish_time, created_at, modified_at, created_by, modified_by
+  id,request_id, workflow_id, error, start_time, finish_time, created_at, modified_at, created_by, modified_by
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7, $8, $9
+  $1, $2, $3, $4, $5, $6, $7, $8, $9,$10
 )
 RETURNING id;

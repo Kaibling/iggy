@@ -15,7 +15,7 @@ func Route() chi.Router {
 		r.Patch("/{id}", patchWorkflow)
 		r.Get("/{id}", fetchWorkflow)
 		r.Delete("/{id}", deleteWorkflow)
-		r.Get("/{id}/runs", fetchRunsbyWorkflow)
+		r.Get("/{id}/runs", fetchRunsByWorkflow)
 		r.Post("/{id}/execute", executeWorkflow)
 	})
 	return r

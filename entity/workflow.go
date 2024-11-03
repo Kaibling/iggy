@@ -59,6 +59,7 @@ type NewRun struct {
 	Error      *string
 	StartTime  time.Time
 	FinishTime time.Time
+	Logs       []NewRunLog
 }
 
 type Run struct {
