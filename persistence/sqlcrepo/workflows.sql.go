@@ -130,3 +130,38 @@ func (q *Queries) SaveWorkflow(ctx context.Context, arg SaveWorkflowParams) (str
 	err := row.Scan(&id)
 	return id, err
 }
+
+const updateWorkflow = `-- name: UpdateWorkflow :exec
+UPDATE workflows
+SET
+    name = COALESCE($4, name),
+    code = COALESCE($5, code),
+    object_type = COALESCE($6, object_type),
+    fail_on_error = COALESCE($7, fail_on_error),
+    modified_at = $2,
+    modified_by = $3
+WHERE id = $1
+`
+
+type UpdateWorkflowParams struct {
+	ID          string
+	ModifiedAt  pgtype.Timestamp
+	ModifiedBy  string
+	Name        pgtype.Text
+	Code        pgtype.Text
+	ObjectType  pgtype.Text
+	FailOnError pgtype.Bool
+}
+
+func (q *Queries) UpdateWorkflow(ctx context.Context, arg UpdateWorkflowParams) error {
+	_, err := q.db.Exec(ctx, updateWorkflow,
+		arg.ID,
+		arg.ModifiedAt,
+		arg.ModifiedBy,
+		arg.Name,
+		arg.Code,
+		arg.ObjectType,
+		arg.FailOnError,
+	)
+	return err
+}

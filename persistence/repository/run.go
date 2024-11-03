@@ -28,13 +28,18 @@ func NewRunRepo(ctx context.Context, username string) *RunRepo {
 }
 
 func (r *RunRepo) SaveRun(newModel entity.NewRun) (*entity.Run, error) {
+	var pgError pgtype.Text
+	if newModel.Error != nil {
+		pgError.String = *newModel.Error
+		pgError.Valid = true
+	} else {
+		pgError.Valid = false
+	}
+
 	newRunID, err := r.q.SaveRun(r.ctx, sqlcrepo.SaveRunParams{
 		ID:         newModel.ID,
 		WorkflowID: newModel.WorkflowID,
-		Error: pgtype.Text{
-			String: *newModel.Error,
-			Valid:  true,
-		},
+		Error:      pgError,
 		StartTime: pgtype.Timestamp{
 			Time:  newModel.StartTime,
 			Valid: true,
@@ -57,6 +62,7 @@ func (r *RunRepo) SaveRun(newModel entity.NewRun) (*entity.Run, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return r.FetchRun(newRunID)
 }
 

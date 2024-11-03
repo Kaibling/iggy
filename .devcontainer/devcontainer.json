@@ -10,7 +10,10 @@
 // "workspaceFolder": "/workspace",
     "customizations": {
       "vscode": {
-        "extensions": ["golang.Go"]
+        "extensions": [
+            "golang.Go",
+            "streetsidesoftware.code-spell-checker"
+        ]
       }
     },
     "remoteEnv": {

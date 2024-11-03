@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/kaibling/iggy/apperror"
+	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/pkg/workflow/adapter"
 )
 
@@ -20,9 +21,16 @@ type WorkflowResult struct {
 type Engine struct {
 }
 
-func (e Engine) Execute(w Workflow) WorkflowResult {
+func (e Engine) Execute(workflow entity.Workflow) ([]entity.NewRun, error) {
+	wf := FromWorkflowEntity(workflow)
 	sharedData := map[string]any{}
-	return execute_workflow(w, sharedData)
+	result := execute_workflow(wf, sharedData)
+	runs := []entity.NewRun{}
+	for _, r := range result.Runs {
+		runs = append(runs, r.ToNewEntity())
+	}
+	return runs, result.Error
+
 }
 
 func execute_workflow(w Workflow, sharedData map[string]any) WorkflowResult {

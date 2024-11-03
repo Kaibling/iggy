@@ -11,10 +11,12 @@ func Route() chi.Router {
 		r.Use(middleware.Authentication)
 		//r.Use(middleware.Authorization)
 		r.Post("/", createWorkflow)
-		r.Get("/", fetchAll)
+		// r.Get("/", fetchAll)
+		r.Patch("/{id}", patchWorkflow)
 		r.Get("/{id}", fetchWorkflow)
 		r.Delete("/{id}", deleteWorkflow)
 		r.Get("/{id}/runs", fetchRunsbyWorkflow)
+		r.Post("/{id}/execute", executeWorkflow)
 	})
 	return r
 }

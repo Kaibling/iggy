@@ -1,7 +1,7 @@
 -- name: FetchRun :one
 SELECT runs.*,workflows.name FROM runs
 JOIN workflows
-ON workflows.id = runs.id
+ON workflows.id = runs.workflow_id
 WHERE runs.id = $1
 LIMIT 1;
 

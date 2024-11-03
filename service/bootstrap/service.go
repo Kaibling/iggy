@@ -60,3 +60,8 @@ func NewRunLogService(ctx context.Context) *service.RunLogService {
 	runLogRepo := repo.NewRunLogRepo(ctx, username)
 	return service.NewRunLogService(ctx, runLogRepo, cfg)
 }
+
+func NewWorkflowEngineService(ctx context.Context) *service.WorkflowEngineService {
+	cfg := ctxkeys.GetValue(ctx, "cfg").(config.Configuration)
+	return service.NewWorkflowEngineService(ctx, cfg)
+}

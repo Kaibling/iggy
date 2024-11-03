@@ -14,7 +14,7 @@ import (
 const fetchRun = `-- name: FetchRun :one
 SELECT runs.id, runs.workflow_id, runs.error, runs.start_time, runs.finish_time, runs.created_at, runs.modified_at, runs.created_by, runs.modified_by,workflows.name FROM runs
 JOIN workflows
-ON workflows.id = runs.id
+ON workflows.id = runs.workflow_id
 WHERE runs.id = $1
 LIMIT 1
 `

@@ -24,15 +24,25 @@ type NewWorkflow struct {
 	BuildIn     bool         `json:"build_in"`
 	FailOnError bool         `json:"fail_on_error"`
 	ObjectType  WorkflowType `json:"object_type"`
-	Children    []Workflow   `json:"children"`
+	Children    []Identifier `json:"children"`
 }
 
-// TODO add more data, waht is wrong
+// TODO add more data, what is wrong
 func (w NewWorkflow) Validate() *apperror.AppError {
 	if w.ObjectType == "" {
 		return &apperror.MalformedRequest
 	}
 	return nil
+}
+
+type UpdateWorkflow struct {
+	// ID          *string       `json:"id"`
+	Name        *string       `json:"name"`
+	Code        *string       `json:"code"`
+	BuildIn     *bool         `json:"build_in"`
+	FailOnError *bool         `json:"fail_on_error"`
+	ObjectType  *WorkflowType `json:"object_type"`
+	Children    []Identifier  `json:"children"`
 }
 
 type WorkflowType string

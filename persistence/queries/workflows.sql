@@ -19,3 +19,15 @@ RETURNING id;
 UPDATE workflows
 SET deleted_at = $1
 WHERE id = $2;
+
+
+-- name: UpdateWorkflow :exec
+UPDATE workflows
+SET
+    name = COALESCE(sqlc.narg(name), name),
+    code = COALESCE(sqlc.narg(code), code),
+    object_type = COALESCE(sqlc.narg(object_type), object_type),
+    fail_on_error = COALESCE(sqlc.narg(fail_on_error), fail_on_error),
+    modified_at = $2,
+    modified_by = $3
+WHERE id = $1;

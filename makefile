@@ -28,6 +28,5 @@ migrate:
 
 rollback:
 	migrate -source file://migration/migration_data -database "postgres://${IGGY_DB_USER}:${IGGY_DB_PASSWORD}@${IGGY_DB_HOST}:${IGGY_DB_PORT}/${IGGY_DB_DATABASE}?sslmode=disable&x-migrations-table=\"public\".\"iggy_schema_migrations\"&x-migrations-table-quoted=1" down
-db-conn:
+psql:
 	PGPASSWORD=${IGGY_DB_PASSWORD} psql -h ${IGGY_DB_HOST} -U ${IGGY_DB_USER} ${IGGY_DB_DATABASE}
-

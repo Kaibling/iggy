@@ -11,23 +11,23 @@ import (
 	"github.com/kaibling/iggy/service/bootstrap"
 )
 
-func fetchAll(w http.ResponseWriter, r *http.Request) {
-	e := envelope.ReadEnvelope(r)
-	us := bootstrap.NewWorkflowService(r.Context())
-	workflows, err := us.FetchAll()
-	if err != nil {
-		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
-		return
-	}
-	e.SetResponse(workflows)
-	e.Finish(w, r)
-}
+// func fetchAll(w http.ResponseWriter, r *http.Request) {
+// 	e := envelope.ReadEnvelope(r)
+// 	us := bootstrap.NewWorkflowService(r.Context())
+// 	workflows, err := us.FetchAll()
+// 	if err != nil {
+// 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+// 		return
+// 	}
+// 	e.SetResponse(workflows)
+// 	e.Finish(w, r)
+// }
 
 func fetchWorkflow(w http.ResponseWriter, r *http.Request) {
 	workflowID := route.ReadUrlParam("id", r)
 	e := envelope.ReadEnvelope(r)
 	us := bootstrap.NewWorkflowService(r.Context())
-	workflow, err := us.FetchWorkflow(workflowID)
+	workflow, err := us.FetchWorkflows([]string{workflowID})
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
@@ -78,4 +78,35 @@ func fetchRunsbyWorkflow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	e.SetResponse(runs).Finish(w, r)
+}
+
+func executeWorkflow(w http.ResponseWriter, r *http.Request) {
+	workflowID := route.ReadUrlParam("id", r)
+	e := envelope.ReadEnvelope(r)
+	wfs := bootstrap.NewWorkflowService(r.Context())
+	rs := bootstrap.NewRunService(r.Context())
+	wfes := bootstrap.NewWorkflowEngineService(r.Context())
+	_, err := wfs.Execute(workflowID, wfes, rs)
+	if err != nil {
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+		return
+	}
+	e.SetSuccess().Finish(w, r)
+}
+
+func patchWorkflow(w http.ResponseWriter, r *http.Request) {
+	workflowID := route.ReadUrlParam("id", r)
+	e := envelope.ReadEnvelope(r)
+	var updateWorkflow entity.UpdateWorkflow
+	if err := route.ReadPostData(r, &updateWorkflow); err != nil {
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+		return
+	}
+	ws := bootstrap.NewWorkflowService(r.Context())
+	updatedWorkflow, err := ws.Update(workflowID, updateWorkflow)
+	if err != nil {
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+		return
+	}
+	e.SetResponse(updatedWorkflow).Finish(w, r)
 }
