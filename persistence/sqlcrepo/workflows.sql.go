@@ -91,9 +91,9 @@ func (q *Queries) FetchWorkflow(ctx context.Context, id string) (Workflow, error
 
 const saveWorkflow = `-- name: SaveWorkflow :one
 INSERT INTO workflows (
-  id,  name, code, object_type,fail_on_error, created_at, modified_at, created_by, modified_by, deleted_at 
+  id,  name, code, object_type,fail_on_error,build_in, created_at, modified_at, created_by, modified_by, deleted_at 
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10
+  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
 )
 RETURNING id
 `
@@ -104,6 +104,7 @@ type SaveWorkflowParams struct {
 	Code        pgtype.Text
 	ObjectType  string
 	FailOnError bool
+	BuildIn     bool
 	CreatedAt   pgtype.Timestamp
 	ModifiedAt  pgtype.Timestamp
 	CreatedBy   string
@@ -118,6 +119,7 @@ func (q *Queries) SaveWorkflow(ctx context.Context, arg SaveWorkflowParams) (str
 		arg.Code,
 		arg.ObjectType,
 		arg.FailOnError,
+		arg.BuildIn,
 		arg.CreatedAt,
 		arg.ModifiedAt,
 		arg.CreatedBy,

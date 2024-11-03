@@ -3,7 +3,7 @@ package workflow
 import (
 	"time"
 
-	apperror "github.com/kaibling/iggy/error"
+	"github.com/kaibling/iggy/apperror"
 	"github.com/kaibling/iggy/pkg/workflow/adapter"
 )
 

@@ -8,14 +8,14 @@ import (
 	"github.com/kaibling/apiforge/ctxkeys"
 	"github.com/kaibling/apiforge/envelope"
 	"github.com/kaibling/apiforge/route"
-	"github.com/kaibling/iggy/model"
+	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/pkg/config"
 	"github.com/kaibling/iggy/service/bootstrap"
 )
 
 func authLogin(w http.ResponseWriter, r *http.Request) {
 	e := envelope.ReadEnvelope(r)
-	var postLogin model.Login
+	var postLogin entity.Login
 	if err := route.ReadPostData(r, &postLogin); err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return

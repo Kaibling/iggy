@@ -7,16 +7,16 @@ import (
 	"time"
 
 	"github.com/kaibling/apiforge/lib/utils"
-	"github.com/kaibling/iggy/model"
+	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/pkg/config"
 	"github.com/kaibling/iggy/pkg/crypto"
 )
 
 type userRepo interface {
-	SaveUser(u model.NewUser) (*model.User, error)
-	FetchUser(id string) (*model.User, error)
-	FetchUserByName(name string) (*model.User, error)
-	FetchAll() ([]*model.User, error)
+	SaveUser(u entity.NewUser) (*entity.User, error)
+	FetchUser(id string) (*entity.User, error)
+	FetchUserByName(name string) (*entity.User, error)
+	FetchAll() ([]*entity.User, error)
 	DeleteUser(id string) error
 }
 
@@ -30,7 +30,7 @@ func NewUserService(ctx context.Context, u userRepo, cfg config.Configuration) *
 	return &UserService{ctx: ctx, repo: u, cfg: cfg}
 }
 
-func (us *UserService) FetchUser(id string) (*model.User, error) {
+func (us *UserService) FetchUser(id string) (*entity.User, error) {
 	u, err := us.repo.FetchUser(id)
 	if err != nil {
 		return nil, err
@@ -39,17 +39,19 @@ func (us *UserService) FetchUser(id string) (*model.User, error) {
 	return u, nil
 }
 
-func (us *UserService) CreateUser(u model.NewUser) (*model.User, error) {
+func (us *UserService) CreateUser(u entity.NewUser) (*entity.User, error) {
 	pwd, err := crypto.HashPassword(u.Password, us.cfg.PasswordCost)
 	if err != nil {
 		return nil, err
 	}
 	u.Password = pwd
-	u.ID = utils.NewULID().String()
+	if u.ID == "" {
+		u.ID = utils.NewULID().String()
+	}
 	return us.repo.SaveUser(u)
 }
 
-func (us *UserService) FetchAll() ([]*model.User, error) {
+func (us *UserService) FetchAll() ([]*entity.User, error) {
 	return us.repo.FetchAll()
 }
 func (us *UserService) DeleteUser(id string) error {
@@ -64,7 +66,7 @@ func (us *UserService) EnsureAdmin(password string) (string, error) {
 				password = utils.NewULID().String()
 			}
 			pwdhash, _ := crypto.HashPassword(password, us.cfg.PasswordCost)
-			if _, err = us.repo.SaveUser(model.NewUser{
+			if _, err = us.repo.SaveUser(entity.NewUser{
 				ID:       utils.NewULID().String(),
 				Username: us.cfg.AdminUser,
 				Password: pwdhash,
@@ -78,7 +80,7 @@ func (us *UserService) EnsureAdmin(password string) (string, error) {
 	return "", nil
 }
 
-func (us *UserService) Login(login model.Login, ts *TokenService) (*model.Token, error) {
+func (us *UserService) Login(login entity.Login, ts *TokenService) (*entity.Token, error) {
 	user, err := us.repo.FetchUserByName(login.Username)
 	if err != nil {
 		return nil, err
@@ -91,10 +93,10 @@ func (us *UserService) Login(login model.Login, ts *TokenService) (*model.Token,
 		return nil, fmt.Errorf("no")
 	}
 	expirationTime := time.Now().Add(time.Hour * time.Duration(us.cfg.TokenExpiration))
-	return ts.CreateToken(model.CreateNewToken(user.ID, expirationTime))
+	return ts.CreateToken(entity.CreateNewToken(user.ID, expirationTime))
 }
 
-func (us *UserService) ValidateToken(token string, ts *TokenService) (*model.User, error) {
+func (us *UserService) ValidateToken(token string, ts *TokenService) (*entity.User, error) {
 	t, err := ts.ReadTokenByValue(token)
 	if err != nil {
 		fmt.Printf("_> %v\n", err.Error())

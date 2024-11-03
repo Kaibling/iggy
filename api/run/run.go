@@ -7,7 +7,7 @@ import (
 	apierror "github.com/kaibling/apiforge/error"
 	"github.com/kaibling/apiforge/route"
 
-	"github.com/kaibling/iggy/model"
+	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/service/bootstrap"
 )
 
@@ -25,7 +25,7 @@ func fetchRun(w http.ResponseWriter, r *http.Request) {
 
 func createRun(w http.ResponseWriter, r *http.Request) {
 	e := envelope.ReadEnvelope(r)
-	var postRun model.NewRun
+	var postRun entity.NewRun
 	if err := route.ReadPostData(r, &postRun); err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return

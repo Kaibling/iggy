@@ -7,7 +7,7 @@ import (
 	apierror "github.com/kaibling/apiforge/error"
 	"github.com/kaibling/apiforge/route"
 
-	"github.com/kaibling/iggy/model"
+	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/service/bootstrap"
 )
 
@@ -37,11 +37,17 @@ func fetchWorkflow(w http.ResponseWriter, r *http.Request) {
 
 func createWorkflow(w http.ResponseWriter, r *http.Request) {
 	e := envelope.ReadEnvelope(r)
-	var postWorkflow model.NewWorkflow
+	var postWorkflow entity.NewWorkflow
 	if err := route.ReadPostData(r, &postWorkflow); err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
 	}
+	if err := postWorkflow.Validate(); err != nil {
+		e.SetError(err).Finish(w, r)
+		return
+	}
+	postWorkflow.ID = ""
+	postWorkflow.BuildIn = false
 	us := bootstrap.NewWorkflowService(r.Context())
 	newWorkflow, err := us.CreateWorkflow(postWorkflow)
 	if err != nil {

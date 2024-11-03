@@ -1,4 +1,4 @@
-package model
+package entity
 
 type Login struct {
 	Username string `json:"username"`

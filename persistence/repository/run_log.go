@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/kaibling/apiforge/ctxkeys"
-	"github.com/kaibling/iggy/model"
+	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/persistence/sqlcrepo"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -27,7 +27,7 @@ func NewRunLogRepo(ctx context.Context, username string) *RunLogRepo {
 	}
 }
 
-func (r *RunLogRepo) SaveRunLog(newModel model.NewRunLog) (*model.RunLog, error) {
+func (r *RunLogRepo) SaveRunLog(newModel entity.NewRunLog) (*entity.RunLog, error) {
 	newRunLogID, err := r.q.SaveRunLog(r.ctx, sqlcrepo.SaveRunLogParams{
 		ID:      newModel.ID,
 		RunID:   newModel.RunID,
@@ -43,15 +43,15 @@ func (r *RunLogRepo) SaveRunLog(newModel model.NewRunLog) (*model.RunLog, error)
 	return r.FetchRunLog(newRunLogID)
 }
 
-func (r *RunLogRepo) FetchRunLogsByRun(runID string) ([]model.RunLog, error) {
+func (r *RunLogRepo) FetchRunLogsByRun(runID string) ([]entity.RunLog, error) {
 	rt, err := r.q.FetchRunLogsByRun(r.ctx, runID)
 	if err != nil {
 		return nil, err
 	}
-	runLogs := []model.RunLog{}
+	runLogs := []entity.RunLog{}
 	for _, run := range rt {
 		runLogs = append(runLogs,
-			model.RunLog{
+			entity.RunLog{
 				ID:        run.ID,
 				RunID:     run.RunID,
 				Message:   run.Message,
@@ -62,12 +62,12 @@ func (r *RunLogRepo) FetchRunLogsByRun(runID string) ([]model.RunLog, error) {
 	return runLogs, nil
 }
 
-func (r *RunLogRepo) FetchRunLog(id string) (*model.RunLog, error) {
+func (r *RunLogRepo) FetchRunLog(id string) (*entity.RunLog, error) {
 	rt, err := r.q.FetchRunLog(r.ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	return &model.RunLog{
+	return &entity.RunLog{
 		ID:        rt.ID,
 		RunID:     rt.RunID,
 		Message:   rt.Message,

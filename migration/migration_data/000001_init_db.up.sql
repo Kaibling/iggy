@@ -76,3 +76,7 @@ CREATE TABLE
     PRIMARY KEY (id),
     FOREIGN KEY (run_id) REFERENCES runs (id) ON DELETE CASCADE
   );
+
+CREATE UNIQUE INDEX workflows_name_deleted_at_unique ON workflows (name)
+WHERE
+  deleted_at IS NULL;

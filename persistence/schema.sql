@@ -14,7 +14,7 @@ CREATE TABLE
 CREATE TABLE
   "tokens" (
     id text NOT NULL,
-    value text NOT NULL UNIQUE,
+    value text NOT NULL,
     active int NOT NULL,
     expires TIMESTAMP,
     created_at TIMESTAMP NOT NULL,

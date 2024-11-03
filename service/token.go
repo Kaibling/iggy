@@ -3,18 +3,19 @@ package service
 import (
 	"context"
 
-	"github.com/kaibling/iggy/model"
+	"github.com/kaibling/apiforge/lib/utils"
+	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/pkg/config"
 	"github.com/kaibling/iggy/pkg/crypto"
 )
 
 type tokenRepo interface {
-	ReadToken(id string) (*model.Token, error)
-	ReadTokenByValue(t string) (*model.Token, error)
+	ReadToken(id string) (*entity.Token, error)
+	ReadTokenByValue(t string) (*entity.Token, error)
 	DeleteTokenByValue(t string) error
-	ListTokens() ([]*model.Token, error)
-	ListUserToken(username string) ([]*model.Token, error)
-	CreateToken(t model.NewToken) (*model.Token, error)
+	ListTokens() ([]*entity.Token, error)
+	ListUserToken(username string) ([]*entity.Token, error)
+	CreateToken(t entity.NewToken) (*entity.Token, error)
 }
 
 type TokenService struct {
@@ -27,27 +28,30 @@ func NewTokenService(ctx context.Context, u tokenRepo, cfg config.Configuration)
 	return &TokenService{ctx: ctx, repo: u, cfg: cfg}
 }
 
-func (ts *TokenService) ReadToken(id string) (*model.Token, error) {
+func (ts *TokenService) ReadToken(id string) (*entity.Token, error) {
 	return ts.repo.ReadToken(id)
 }
 
-func (ts *TokenService) ReadTokenByValue(v string) (*model.Token, error) {
+func (ts *TokenService) ReadTokenByValue(v string) (*entity.Token, error) {
 	return ts.repo.ReadTokenByValue(v)
 }
 
-func (ts *TokenService) CreateToken(u model.NewToken) (*model.Token, error) {
+func (ts *TokenService) CreateToken(u entity.NewToken) (*entity.Token, error) {
 	tokenVal, err := crypto.GenerateAPIKey(ts.cfg.TokenKeyLength)
 	if err != nil {
 		return nil, err
 	}
 	u.Value = tokenVal
+	if u.ID == "" {
+		u.ID = utils.NewULID().String()
+	}
 	return ts.repo.CreateToken(u)
 }
 
-func (ts *TokenService) ListTokens() ([]*model.Token, error) {
+func (ts *TokenService) ListTokens() ([]*entity.Token, error) {
 	return ts.repo.ListTokens()
 }
-func (ts *TokenService) ListUserToken(username string) ([]*model.Token, error) {
+func (ts *TokenService) ListUserToken(username string) ([]*entity.Token, error) {
 	return ts.repo.ListUserToken(username)
 }
 func (ts *TokenService) DeleteTokenByValue(v string) error {

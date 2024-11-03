@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/kaibling/apiforge/ctxkeys"
-	"github.com/kaibling/iggy/model"
+	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/persistence/sqlcrepo"
 
 	"github.com/jackc/pgx/v5"
@@ -29,7 +29,7 @@ func NewTokenRepo(ctx context.Context, username string) *TokenRepo {
 	}
 }
 
-func (r *TokenRepo) CreateToken(t model.NewToken) (*model.Token, error) {
+func (r *TokenRepo) CreateToken(t entity.NewToken) (*entity.Token, error) {
 
 	newTokenID, err := r.q.CreateToken(r.ctx, sqlcrepo.CreateTokenParams{
 		Value:  t.Value,
@@ -57,18 +57,18 @@ func (r *TokenRepo) CreateToken(t model.NewToken) (*model.Token, error) {
 	return r.ReadToken(newTokenID)
 }
 
-func (r *TokenRepo) ReadToken(id string) (*model.Token, error) {
+func (r *TokenRepo) ReadToken(id string) (*entity.Token, error) {
 	rt, err := r.q.GetToken(r.ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	return &model.Token{
+	return &entity.Token{
 		ID:      rt.ID,
 		Value:   rt.Value,
 		Active:  int2Bool(rt.Active),
 		Expires: rt.Expires.Time,
-		User:    model.Identifier{ID: rt.UserID, Name: rt.Username},
-		Meta: model.MetaData{
+		User:    entity.Identifier{ID: rt.UserID, Name: rt.Username},
+		Meta: entity.MetaData{
 			CreatedAt:  rt.CreatedAt.Time,
 			CreatedBy:  rt.CreatedBy,
 			ModifiedAt: rt.ModifiedAt.Time,
@@ -77,7 +77,7 @@ func (r *TokenRepo) ReadToken(id string) (*model.Token, error) {
 	}, nil
 }
 
-func (r *TokenRepo) ReadTokenByValue(t string) (*model.Token, error) {
+func (r *TokenRepo) ReadTokenByValue(t string) (*entity.Token, error) {
 	rt, err := r.q.GetTokenByValue(r.ctx, t)
 	if err != nil {
 		if err == pgx.ErrNoRows {
@@ -85,13 +85,13 @@ func (r *TokenRepo) ReadTokenByValue(t string) (*model.Token, error) {
 		}
 		return nil, err
 	}
-	return &model.Token{
+	return &entity.Token{
 		ID:      rt.ID,
 		Value:   rt.Value,
 		Active:  int2Bool(rt.Active),
 		Expires: rt.Expires.Time,
-		User:    model.Identifier{ID: rt.UserID, Name: rt.Username},
-		Meta: model.MetaData{
+		User:    entity.Identifier{ID: rt.UserID, Name: rt.Username},
+		Meta: entity.MetaData{
 			CreatedAt:  rt.CreatedAt.Time,
 			CreatedBy:  rt.CreatedBy,
 			ModifiedAt: rt.ModifiedAt.Time,
@@ -100,20 +100,20 @@ func (r *TokenRepo) ReadTokenByValue(t string) (*model.Token, error) {
 	}, nil
 }
 
-func (r *TokenRepo) ListTokens() ([]*model.Token, error) {
+func (r *TokenRepo) ListTokens() ([]*entity.Token, error) {
 	rt, err := r.q.ListTokens(r.ctx)
 	if err != nil {
 		return nil, err
 	}
-	users := []*model.Token{}
+	users := []*entity.Token{}
 	for _, t := range rt {
-		users = append(users, &model.Token{
+		users = append(users, &entity.Token{
 			ID:      t.ID,
 			Value:   t.Value,
 			Active:  int2Bool(t.Active),
 			Expires: t.Expires.Time,
-			User:    model.Identifier{ID: t.UserID, Name: t.Username},
-			Meta: model.MetaData{
+			User:    entity.Identifier{ID: t.UserID, Name: t.Username},
+			Meta: entity.MetaData{
 				CreatedAt:  t.CreatedAt.Time,
 				CreatedBy:  t.CreatedBy,
 				ModifiedAt: t.ModifiedAt.Time,
@@ -124,20 +124,20 @@ func (r *TokenRepo) ListTokens() ([]*model.Token, error) {
 	return users, nil
 }
 
-func (r *TokenRepo) ListUserToken(username string) ([]*model.Token, error) {
+func (r *TokenRepo) ListUserToken(username string) ([]*entity.Token, error) {
 	rt, err := r.q.ListUserTokensByName(r.ctx, username)
 	if err != nil {
 		return nil, err
 	}
-	users := []*model.Token{}
+	users := []*entity.Token{}
 	for _, t := range rt {
-		users = append(users, &model.Token{
+		users = append(users, &entity.Token{
 			ID:      t.ID,
 			Value:   t.Value,
 			Active:  int2Bool(t.Active),
 			Expires: t.Expires.Time,
-			User:    model.Identifier{ID: t.UserID, Name: t.Username},
-			Meta: model.MetaData{
+			User:    entity.Identifier{ID: t.UserID, Name: t.Username},
+			Meta: entity.MetaData{
 				CreatedAt:  t.CreatedAt.Time,
 				CreatedBy:  t.CreatedBy,
 				ModifiedAt: t.ModifiedAt.Time,

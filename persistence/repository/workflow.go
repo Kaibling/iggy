@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/kaibling/apiforge/ctxkeys"
-	"github.com/kaibling/iggy/model"
+	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/persistence/sqlcrepo"
 
 	"github.com/jackc/pgx/v5"
@@ -29,7 +29,7 @@ func NewWorkflowRepo(ctx context.Context, username string) *WorkflowRepo {
 	}
 }
 
-func (r *WorkflowRepo) SaveWorkflow(newModel model.NewWorkflow) (*model.Workflow, error) {
+func (r *WorkflowRepo) SaveWorkflow(newModel entity.NewWorkflow) (*entity.Workflow, error) {
 	newWorkflowID, err := r.q.SaveWorkflow(r.ctx, sqlcrepo.SaveWorkflowParams{
 		ID:   newModel.ID,
 		Name: newModel.Name,
@@ -38,6 +38,7 @@ func (r *WorkflowRepo) SaveWorkflow(newModel model.NewWorkflow) (*model.Workflow
 			Valid:  true,
 		},
 		ObjectType:  string(newModel.ObjectType),
+		BuildIn:     newModel.BuildIn,
 		FailOnError: newModel.FailOnError,
 		//DeletedAt:   nil,
 		CreatedAt: pgtype.Timestamp{
@@ -57,17 +58,17 @@ func (r *WorkflowRepo) SaveWorkflow(newModel model.NewWorkflow) (*model.Workflow
 	return r.FetchWorkflow(newWorkflowID)
 }
 
-func (r *WorkflowRepo) FetchWorkflow(id string) (*model.Workflow, error) {
+func (r *WorkflowRepo) FetchWorkflow(id string) (*entity.Workflow, error) {
 	rt, err := r.q.FetchWorkflow(r.ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	return &model.Workflow{
+	return &entity.Workflow{
 		ID:          rt.ID,
 		Name:        rt.Name,
 		Code:        rt.Code.String,
 		FailOnError: rt.FailOnError,
-		Meta: model.MetaData{
+		Meta: entity.MetaData{
 			CreatedAt:  rt.CreatedAt.Time,
 			CreatedBy:  rt.CreatedBy,
 			ModifiedAt: rt.ModifiedAt.Time,
@@ -76,19 +77,19 @@ func (r *WorkflowRepo) FetchWorkflow(id string) (*model.Workflow, error) {
 	}, nil
 }
 
-func (r *WorkflowRepo) FetchAll() ([]*model.Workflow, error) {
+func (r *WorkflowRepo) FetchAll() ([]*entity.Workflow, error) {
 	t, err := r.q.FetchAllWorkflows(r.ctx)
 	if err != nil {
 		return nil, err
 	}
-	workflows := []*model.Workflow{}
+	workflows := []*entity.Workflow{}
 	for _, rt := range t {
-		workflows = append(workflows, &model.Workflow{
+		workflows = append(workflows, &entity.Workflow{
 			ID:          rt.ID,
 			Name:        rt.Name,
 			Code:        rt.Code.String,
 			FailOnError: rt.FailOnError,
-			Meta: model.MetaData{
+			Meta: entity.MetaData{
 				CreatedAt:  rt.CreatedAt.Time,
 				CreatedBy:  rt.CreatedBy,
 				ModifiedAt: rt.ModifiedAt.Time,

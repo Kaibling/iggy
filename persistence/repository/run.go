@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/kaibling/apiforge/ctxkeys"
-	"github.com/kaibling/iggy/model"
+	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/persistence/sqlcrepo"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -27,7 +27,7 @@ func NewRunRepo(ctx context.Context, username string) *RunRepo {
 	}
 }
 
-func (r *RunRepo) SaveRun(newModel model.NewRun) (*model.Run, error) {
+func (r *RunRepo) SaveRun(newModel entity.NewRun) (*entity.Run, error) {
 	newRunID, err := r.q.SaveRun(r.ctx, sqlcrepo.SaveRunParams{
 		ID:         newModel.ID,
 		WorkflowID: newModel.WorkflowID,
@@ -60,18 +60,18 @@ func (r *RunRepo) SaveRun(newModel model.NewRun) (*model.Run, error) {
 	return r.FetchRun(newRunID)
 }
 
-func (r *RunRepo) FetchRun(id string) (*model.Run, error) {
+func (r *RunRepo) FetchRun(id string) (*entity.Run, error) {
 	rt, err := r.q.FetchRun(r.ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	return &model.Run{
+	return &entity.Run{
 		ID:         rt.ID,
 		WorkflowID: rt.WorkflowID,
 		Error:      &rt.Error.String,
 		StartTime:  rt.StartTime.Time,
 		FinishTime: rt.FinishTime.Time,
-		Meta: model.MetaData{
+		Meta: entity.MetaData{
 			CreatedAt:  rt.CreatedAt.Time,
 			CreatedBy:  rt.CreatedBy,
 			ModifiedAt: rt.ModifiedAt.Time,
@@ -80,20 +80,20 @@ func (r *RunRepo) FetchRun(id string) (*model.Run, error) {
 	}, nil
 }
 
-func (r *RunRepo) FetchRunByWorkflow(workflowID string) ([]*model.Run, error) {
+func (r *RunRepo) FetchRunByWorkflow(workflowID string) ([]*entity.Run, error) {
 	t, err := r.q.FetchRunByWorkflow(r.ctx, workflowID)
 	if err != nil {
 		return nil, err
 	}
-	runs := []*model.Run{}
+	runs := []*entity.Run{}
 	for _, rt := range t {
-		runs = append(runs, &model.Run{
+		runs = append(runs, &entity.Run{
 			ID:         rt.ID,
 			WorkflowID: rt.WorkflowID,
 			Error:      &rt.Error.String,
 			StartTime:  rt.StartTime.Time,
 			FinishTime: rt.FinishTime.Time,
-			Meta: model.MetaData{
+			Meta: entity.MetaData{
 				CreatedAt:  rt.CreatedAt.Time,
 				CreatedBy:  rt.CreatedBy,
 				ModifiedAt: rt.ModifiedAt.Time,

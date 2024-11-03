@@ -1,11 +1,6 @@
-package error
+package apperror
 
 import "net/http"
-
-// type HTTPError interface {
-// 	Error() string
-// 	HTTPStatus() int
-// }
 
 type AppError struct {
 	msg        string
@@ -35,6 +30,11 @@ var Forbidden = AppError{
 var MissingJSAdapter = AppError{
 	msg:        "Adapter missing",
 	StatusCode: http.StatusInternalServerError,
+}
+
+var MalformedRequest = AppError{
+	msg:        "client request malformed",
+	StatusCode: http.StatusUnprocessableEntity,
 }
 
 // var ServerError = AppError{

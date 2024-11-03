@@ -7,7 +7,7 @@ import (
 	apierror "github.com/kaibling/apiforge/error"
 	"github.com/kaibling/apiforge/route"
 
-	"github.com/kaibling/iggy/model"
+	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/service/bootstrap"
 )
 
@@ -37,11 +37,12 @@ func userGet(w http.ResponseWriter, r *http.Request) {
 
 func userPost(w http.ResponseWriter, r *http.Request) {
 	e := envelope.ReadEnvelope(r)
-	var postUser model.NewUser
+	var postUser entity.NewUser
 	if err := route.ReadPostData(r, &postUser); err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
 	}
+	postUser.ID = ""
 	us := bootstrap.NewUserService(r.Context())
 	newUser, err := us.CreateUser(postUser)
 	if err != nil {

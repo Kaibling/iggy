@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/kaibling/apiforge/ctxkeys"
-	"github.com/kaibling/iggy/model"
+	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/persistence/sqlcrepo"
 
 	"github.com/jackc/pgx/v5"
@@ -29,7 +29,7 @@ func NewUserRepo(ctx context.Context, username string) *UserRepo {
 	}
 }
 
-func (r *UserRepo) SaveUser(t model.NewUser) (*model.User, error) {
+func (r *UserRepo) SaveUser(t entity.NewUser) (*entity.User, error) {
 	ret, err := r.q.SaveUser(r.ctx, sqlcrepo.SaveUserParams{
 		ID:       t.ID,
 		Username: t.Username,
@@ -52,7 +52,7 @@ func (r *UserRepo) SaveUser(t model.NewUser) (*model.User, error) {
 	return marshalUser(ret), nil
 }
 
-func (r *UserRepo) FetchUser(id string) (*model.User, error) {
+func (r *UserRepo) FetchUser(id string) (*entity.User, error) {
 	rt, err := r.q.FetchUser(r.ctx, id)
 	if err != nil {
 		return nil, err
@@ -60,7 +60,7 @@ func (r *UserRepo) FetchUser(id string) (*model.User, error) {
 	return marshalUser(rt), nil
 }
 
-func (r *UserRepo) FetchAll() ([]*model.User, error) {
+func (r *UserRepo) FetchAll() ([]*entity.User, error) {
 	rt, err := r.q.FetchAll(r.ctx)
 	if err != nil {
 		return nil, err
@@ -68,7 +68,7 @@ func (r *UserRepo) FetchAll() ([]*model.User, error) {
 	return marshalUsers(rt), nil
 }
 
-func (r *UserRepo) FetchUserByName(name string) (*model.User, error) {
+func (r *UserRepo) FetchUserByName(name string) (*entity.User, error) {
 	rt, err := r.q.FetchUserByName(r.ctx, name)
 	if err != nil {
 		if err == pgx.ErrNoRows {
@@ -90,7 +90,7 @@ func (r *UserRepo) DeleteUser(id string) error {
 	return nil
 }
 
-func (r *UserRepo) UpdatePassword(passwordHash string, userID string) (*model.User, error) {
+func (r *UserRepo) UpdatePassword(passwordHash string, userID string) (*entity.User, error) {
 	user, err := r.q.UpdatePassword(r.ctx, sqlcrepo.UpdatePasswordParams{
 		ID: userID,
 		Password: pgtype.Text{
@@ -112,13 +112,13 @@ func (r *UserRepo) UpdatePassword(passwordHash string, userID string) (*model.Us
 	return marshalUser(user), nil
 }
 
-func marshalUser(t sqlcrepo.User) *model.User {
-	u := &model.User{
+func marshalUser(t sqlcrepo.User) *entity.User {
+	u := &entity.User{
 		ID:       t.ID,
 		Username: t.Username,
 		Active:   int2Bool(t.Active),
 		Password: t.Password.String,
-		Meta: model.MetaData{
+		Meta: entity.MetaData{
 			CreatedAt:  t.CreatedAt.Time,
 			CreatedBy:  t.CreatedBy,
 			ModifiedAt: t.ModifiedAt.Time,
@@ -128,14 +128,14 @@ func marshalUser(t sqlcrepo.User) *model.User {
 	return u
 }
 
-func marshalUsers(repoUsers []sqlcrepo.User) []*model.User {
-	users := []*model.User{}
+func marshalUsers(repoUsers []sqlcrepo.User) []*entity.User {
+	users := []*entity.User{}
 	for _, t := range repoUsers {
-		users = append(users, &model.User{
+		users = append(users, &entity.User{
 			ID:       t.ID,
 			Username: t.Username,
 			Active:   int2Bool(t.Active),
-			Meta: model.MetaData{
+			Meta: entity.MetaData{
 				CreatedAt:  t.CreatedAt.Time,
 				CreatedBy:  t.CreatedBy,
 				ModifiedAt: t.ModifiedAt.Time,

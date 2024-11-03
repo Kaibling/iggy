@@ -1,23 +1,38 @@
-package model
+package entity
 
-import "time"
+import (
+	"time"
+
+	"github.com/kaibling/iggy/apperror"
+)
 
 type Workflow struct {
 	ID          string       `json:"id"`
 	Name        string       `json:"name"`
 	Code        string       `json:"code"`
+	BuildIn     bool         `json:"build_in"`
 	FailOnError bool         `json:"fail_on_error"`
 	ObjectType  WorkflowType `json:"object_type"`
 	Children    []Workflow   `json:"children"`
 	Meta        MetaData     `json:"meta"`
 }
+
 type NewWorkflow struct {
 	ID          string       `json:"id"`
 	Name        string       `json:"name"`
 	Code        string       `json:"code"`
+	BuildIn     bool         `json:"build_in"`
 	FailOnError bool         `json:"fail_on_error"`
 	ObjectType  WorkflowType `json:"object_type"`
 	Children    []Workflow   `json:"children"`
+}
+
+// TODO add more data, waht is wrong
+func (w NewWorkflow) Validate() *apperror.AppError {
+	if w.ObjectType == "" {
+		return &apperror.MalformedRequest
+	}
+	return nil
 }
 
 type WorkflowType string

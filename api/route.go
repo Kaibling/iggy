@@ -5,6 +5,7 @@ import (
 	"github.com/kaibling/iggy/api/auth"
 	"github.com/kaibling/iggy/api/token"
 	"github.com/kaibling/iggy/api/user"
+	"github.com/kaibling/iggy/api/workflow"
 )
 
 func ApiRoute() chi.Router {
@@ -12,5 +13,6 @@ func ApiRoute() chi.Router {
 	r.Mount("/auth", auth.Route())
 	r.Mount("/users", user.Route())
 	r.Mount("/tokens", token.Route())
+	r.Mount("/workflows", workflow.Route())
 	return r
 }
