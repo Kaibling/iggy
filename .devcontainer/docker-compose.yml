@@ -5,6 +5,7 @@ services:
    build: .
    volumes:
     - "../.:/iggy"
+    - "../../apiForge:/apiforge"
    working_dir: "/iggy"
    command: "tail -f /dev/null"
    extra_hosts:
@@ -16,4 +17,4 @@ services:
    volumes:
     - ${PWD}/pgdata:/var/lib/postgresql/data
    env_file:
-      - ../.env
+      - .env

@@ -9,6 +9,7 @@ import (
 	"github.com/kaibling/apiforge/handler"
 	"github.com/kaibling/apiforge/middleware"
 	apiservice "github.com/kaibling/apiforge/service"
+	"github.com/kaibling/apiforge/status"
 	"github.com/kaibling/iggy/api"
 	"github.com/kaibling/iggy/migration"
 	"github.com/kaibling/iggy/persistence/psql"
@@ -66,6 +67,8 @@ func Start() error {
 
 	a := apiservice.New(ctx, apiservice.ServerConfig{BindingIP: cfg.BindingIP, BindingPort: cfg.BindingPort})
 	a.AddCustomLogger(l)
+
+	status.IsReady.Store(true)
 	a.StartBlocking(root)
 	return nil
 }

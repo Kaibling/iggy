@@ -2,7 +2,7 @@
     "dockerComposeFile": "docker-compose.yml",
     "service": "app",
 	//"workspaceFolder": "/",
-  "workspaceFolder": "/work",
+  "workspaceFolder": "/iggy",
   "runArgs": [
     "--add-host=host.local:host-gateway"
   ],
