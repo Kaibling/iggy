@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"database/sql"
+	"log"
 	"time"
 
 	"github.com/kaibling/apiforge/ctxkeys"
@@ -17,6 +18,7 @@ import (
 type UserRepo struct {
 	ctx      context.Context
 	q        *sqlcrepo.Queries
+	db       *pgxpool.Pool
 	Username string
 }
 
@@ -24,6 +26,7 @@ func NewUserRepo(ctx context.Context, username string) *UserRepo {
 	return &UserRepo{
 		ctx: ctx,
 		q:   sqlcrepo.New(ctx.Value(ctxkeys.DBConnKey).(*pgxpool.Pool)),
+		db:  ctx.Value(ctxkeys.DBConnKey).(*pgxpool.Pool),
 		// username: ctx.Value(apictx.String("user_name")).(string),
 		Username: username,
 	}
@@ -60,8 +63,8 @@ func (r *UserRepo) FetchUser(id string) (*entity.User, error) {
 	return marshalUser(rt), nil
 }
 
-func (r *UserRepo) FetchAll() ([]*entity.User, error) {
-	rt, err := r.q.FetchAll(r.ctx)
+func (r *UserRepo) FetchByIDs(ids []string) ([]*entity.User, error) {
+	rt, err := r.q.FetchByIDs(r.ctx, ids)
 	if err != nil {
 		return nil, err
 	}
@@ -112,6 +115,30 @@ func (r *UserRepo) UpdatePassword(passwordHash string, userID string) (*entity.U
 	return marshalUser(user), nil
 }
 
+func (r *UserRepo) IDQuery(idQuery string) ([]string, error) {
+	rows, err := r.db.Query(context.Background(), idQuery)
+	if err != nil {
+		log.Fatalf("failed to execute query: %v", err)
+	}
+	var ids []string
+	// Process the results
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(
+			&id,
+		); err != nil {
+			log.Fatalf("failed to scan row: %v", err)
+		}
+		ids = append(ids, id)
+	}
+	if err := rows.Err(); err != nil {
+		log.Fatalf("row iteration error: %v", err)
+	}
+
+	defer rows.Close()
+	return ids, nil
+}
+
 func marshalUser(t sqlcrepo.User) *entity.User {
 	u := &entity.User{
 		ID:       t.ID,
@@ -135,6 +162,7 @@ func marshalUsers(repoUsers []sqlcrepo.User) []*entity.User {
 			ID:       t.ID,
 			Username: t.Username,
 			Active:   int2Bool(t.Active),
+			Password: t.Password.String,
 			Meta: entity.MetaData{
 				CreatedAt:  t.CreatedAt.Time,
 				CreatedBy:  t.CreatedBy,

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/kaibling/apiforge/lib/utils"
+	"github.com/kaibling/apiforge/params"
 	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/pkg/config"
 	"github.com/kaibling/iggy/pkg/crypto"
@@ -14,10 +15,11 @@ import (
 
 type userRepo interface {
 	SaveUser(u entity.NewUser) (*entity.User, error)
-	FetchUser(id string) (*entity.User, error)
 	FetchUserByName(name string) (*entity.User, error)
-	FetchAll() ([]*entity.User, error)
+	FetchByIDs(ids []string) ([]*entity.User, error)
+	//FetchAll() ([]*entity.User, error)
 	DeleteUser(id string) error
+	IDQuery(query string) ([]string, error)
 }
 
 type UserService struct {
@@ -31,12 +33,23 @@ func NewUserService(ctx context.Context, u userRepo, cfg config.Configuration) *
 }
 
 func (us *UserService) FetchUser(id string) (*entity.User, error) {
-	u, err := us.repo.FetchUser(id)
+	loadedUser, err := us.FetchUsers([]string{id})
 	if err != nil {
 		return nil, err
 	}
-	u.Password = ""
-	return u, nil
+	return loadedUser[0], nil
+}
+
+func (us *UserService) FetchUsers(ids []string) ([]*entity.User, error) {
+	loadedUsers, err := us.repo.FetchByIDs(ids)
+	if err != nil {
+		return nil, err
+	}
+	for _, u := range loadedUsers {
+		u.Redact()
+	}
+
+	return loadedUsers, nil
 }
 
 func (us *UserService) CreateUser(u entity.NewUser) (*entity.User, error) {
@@ -51,8 +64,24 @@ func (us *UserService) CreateUser(u entity.NewUser) (*entity.User, error) {
 	return us.repo.SaveUser(u)
 }
 
-func (us *UserService) FetchAll() ([]*entity.User, error) {
-	return us.repo.FetchAll()
+func (us *UserService) FetchByPagination(qp params.Pagination) ([]*entity.User, params.Pagination, error) {
+	p := NewPagination(qp, "users")
+
+	idQuery := p.GetCursorSQL()
+	fmt.Println(idQuery)
+	ids, err := us.repo.IDQuery(idQuery)
+	if err != nil {
+		return nil, params.Pagination{}, err
+	}
+
+	ids, pag := p.FinishPagination(ids)
+
+	loadedUsers, err := us.repo.FetchByIDs(ids)
+	if err != nil {
+		return nil, params.Pagination{}, err
+	}
+
+	return loadedUsers, pag, nil
 }
 func (us *UserService) DeleteUser(id string) error {
 	return us.repo.DeleteUser(id)

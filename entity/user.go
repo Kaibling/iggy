@@ -9,6 +9,11 @@ type User struct {
 	Active   bool     `json:"active"`
 	Meta     MetaData `json:"meta"`
 }
+
+func (u *User) Redact() {
+	u.Password = ""
+}
+
 type NewUser struct {
 	ID       string `json:"id"`
 	Username string `json:"username"`

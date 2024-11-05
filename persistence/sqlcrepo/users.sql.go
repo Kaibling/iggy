@@ -21,13 +21,14 @@ func (q *Queries) DeleteUser(ctx context.Context, id string) error {
 	return err
 }
 
-const fetchAll = `-- name: FetchAll :many
-SELECT id, username, password, active, created_at, created_by, modified_at, modified_by FROM users 
+const fetchByIDs = `-- name: FetchByIDs :many
+SELECT id, username, password, active, created_at, created_by, modified_at, modified_by FROM users
+WHERE id = ANY($1::text[])
 ORDER BY id
 `
 
-func (q *Queries) FetchAll(ctx context.Context) ([]User, error) {
-	rows, err := q.db.Query(ctx, fetchAll)
+func (q *Queries) FetchByIDs(ctx context.Context, dollar_1 []string) ([]User, error) {
+	rows, err := q.db.Query(ctx, fetchByIDs, dollar_1)
 	if err != nil {
 		return nil, err
 	}

@@ -69,7 +69,7 @@ type Run struct {
 	StartTime  time.Time
 	FinishTime time.Time
 	RunTime    string
-	Meta       MetaData `json:"meta"`
+	Meta       MetaData
 }
 
 type NewRunLog struct {

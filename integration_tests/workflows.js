@@ -113,6 +113,23 @@ function execute_workflow(id, global_tag) {
     if (!isValid) fail(`${tag} failed. Status: ${response.status}, Body: ${response.body}`);
 }
 
+function update_workflow(global_tag, id, payload) {
+    const tag = "fetch_workflow";
+    const response = http.patch(`${WORKFLOW_BASE_URL}/${id}`,payload, HEADERS);
+    const jsonResponse = response.json();
+
+    const isValid = check(response, {
+        [`${global_tag} ${tag} status is 200`]: (r) => r.status === 200,
+        [`${global_tag} ${tag} response body is not empty`]: (r) => r.body.length > 0,
+    }) && check(jsonResponse, {
+        [`${global_tag} ${tag} success is true`]: (r) => r.success === true,
+        // [`${global_tag} ${tag} check username`]: (r) => r.data.name == 'test_workflow_1',
+    });
+
+    if (!isValid) fail(`${tag} failed. Status: ${response.status}, Body: ${response.body}`);
+}
+
+
 function workflow_shared_data_logs() {
     const TAG = "workflow_shared_data_logs"
 
@@ -124,13 +141,33 @@ function workflow_shared_data_logs() {
     // const test_shared_workflow_2_payload = JSON.stringify({ name: 'test_shared_workflow_2', code: "log(shared_data['log_data'])", object_type: "javascript" });
     // const test_shared_workflow_2_id = create_workflow(TAG, test_shared_workflow_2_payload);
 
-    // // create folder, thata execute both workflows above
+    // // create folder, that execute both workflows above
     // const test_shared_folder_workflow_payload = JSON.stringify({ name: 'test_shared_folder_workflow', object_type: "folder" });
     // const test_shared_folder_workflow_id = create_workflow(TAG, test_shared_folder_workflow_payload);
-    // execute folder
-    const test_shared_folder_workflow_id = "01JBS5QJPVJS2RVQVKP4KQKX5Q"
-    execute_workflow(test_shared_folder_workflow_id, TAG)
 
+
+    // const test_shared_workflow_1_id = "01JBSQ7EVXM1JJ3B5Z5CY4C4X0"
+    // const test_shared_workflow_2_id = "01JBSQ7EVZB2RWPWBK3CBG5AM0"
+    const test_shared_folder_workflow_id = "01JBSQ7EW0Q0M6F969ABW7V7E0"
+
+
+    // // add children to folder
+    // const folder_update_payload = JSON.stringify({
+    //     "children": [
+    //       {
+    //         "id": test_shared_workflow_1_id
+    //       },
+    //       {"id":test_shared_workflow_2_id}
+    //     ]
+    //   });
+    // update_workflow(TAG,test_shared_folder_workflow_id, folder_update_payload);
+
+    // execute folder
+    const request_id = "01JBS5QJPVJS2RVQVKP4KQKX5Q";
+    HEADERS.headers['X-REQUEST-ID'] = request_id;
+
+    execute_workflow(test_shared_folder_workflow_id, TAG)
+    delete HEADERS.headers['X-REQUEST-ID'];
 
     // get run
 

@@ -6,8 +6,9 @@ WHERE id = $1 LIMIT 1;
 SELECT * FROM users
 WHERE username = $1 LIMIT 1;
 
--- name: FetchAll :many
-SELECT * FROM users 
+-- name: FetchByIDs :many
+SELECT * FROM users
+WHERE id = ANY($1::text[])
 ORDER BY id;
 
 -- name: SaveUser :one

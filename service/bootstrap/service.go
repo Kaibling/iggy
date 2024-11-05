@@ -64,6 +64,5 @@ func NewRunLogService(ctx context.Context) *service.RunLogService {
 
 func NewWorkflowEngineService(ctx context.Context) *service.WorkflowEngineService {
 	cfg := ctxkeys.GetValue(ctx, "cfg").(config.Configuration)
-	//runLogService := NewRunLogService(ctx)
 	return service.NewWorkflowEngineService(ctx, cfg)
 }

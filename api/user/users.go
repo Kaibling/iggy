@@ -3,8 +3,10 @@ package user
 import (
 	"net/http"
 
+	"github.com/kaibling/apiforge/ctxkeys"
 	"github.com/kaibling/apiforge/envelope"
 	apierror "github.com/kaibling/apiforge/error"
+	"github.com/kaibling/apiforge/params"
 	"github.com/kaibling/apiforge/route"
 
 	"github.com/kaibling/iggy/entity"
@@ -13,14 +15,14 @@ import (
 
 func usersGet(w http.ResponseWriter, r *http.Request) {
 	e := envelope.ReadEnvelope(r)
+	params := ctxkeys.GetValue(r.Context(), ctxkeys.PaginationKey).(params.Pagination)
 	us := bootstrap.NewUserService(r.Context())
-	users, err := us.FetchAll()
+	users, pageData, err := us.FetchByPagination(params)
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
 	}
-	e.SetResponse(users)
-	e.Finish(w, r)
+	e.SetResponse(users).SetPagination(pageData).Finish(w, r)
 }
 
 func userGet(w http.ResponseWriter, r *http.Request) {
