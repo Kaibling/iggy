@@ -7,8 +7,8 @@ import (
 	apierror "github.com/kaibling/apiforge/error"
 	"github.com/kaibling/apiforge/route"
 
+	"github.com/kaibling/iggy/bootstrap"
 	"github.com/kaibling/iggy/entity"
-	"github.com/kaibling/iggy/service/bootstrap"
 )
 
 func fetchRun(w http.ResponseWriter, r *http.Request) {

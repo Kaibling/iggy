@@ -2,24 +2,37 @@ package main
 
 import (
 	"fmt"
+	"os"
 
-	"github.com/kaibling/iggy/service/api"
+	"github.com/kaibling/iggy/bootstrap/app"
+	"github.com/urfave/cli/v2"
 )
 
 func main() {
-	if err := api.Start(); err != nil {
-		fmt.Println(err)
+	app := &cli.App{
+		Name:  "iggy",
+		Usage: "application for executing generative workflows",
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:     "api",
+				Aliases:  []string{"a"},
+				Usage:    "start of the web api",
+				Required: false,
+			},
+			&cli.BoolFlag{
+				Name:     "worker",
+				Aliases:  []string{"w"},
+				Usage:    "start of the worker",
+				Required: false,
+			},
+		},
+		Action: func(c *cli.Context) error {
+			return app.Run(c.Bool("worker"), c.Bool("api"))
+		},
 	}
 
-	// e := workflow.Engine{}
-
-	// wf := workflow.Workflow{Code: "shared_data['number'] = 3; f log('4'); 1 + 1", FailOnError: true, ObjectType: workflow.Javascript}
-	// wf2 := workflow.Workflow{Code: "log(shared_data['number']);", ObjectType: workflow.Javascript}
-	// wfolder := workflow.Workflow{ObjectType: workflow.Folder, Children: []workflow.Workflow{wf, wf2}}
-
-	// res := e.Execute(wfolder)
-	// if res.Error != nil {
-	// 	fmt.Printf("error: %s\n", res.Error.Error())
-	// }
-	// fmt.Printf("good: %s\n", res.Runs)
+	err := app.Run(os.Args)
+	if err != nil {
+		fmt.Println(err)
+	}
 }

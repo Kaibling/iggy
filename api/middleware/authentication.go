@@ -9,8 +9,8 @@ import (
 	"github.com/kaibling/apiforge/ctxkeys"
 	"github.com/kaibling/apiforge/envelope"
 	apierror "github.com/kaibling/apiforge/error"
+	"github.com/kaibling/iggy/bootstrap"
 	"github.com/kaibling/iggy/pkg/config"
-	"github.com/kaibling/iggy/service/bootstrap"
 )
 
 func Authentication(next http.Handler) http.Handler {

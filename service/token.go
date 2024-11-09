@@ -37,7 +37,7 @@ func (ts *TokenService) ReadTokenByValue(v string) (*entity.Token, error) {
 }
 
 func (ts *TokenService) CreateToken(u entity.NewToken) (*entity.Token, error) {
-	tokenVal, err := crypto.GenerateAPIKey(ts.cfg.TokenKeyLength)
+	tokenVal, err := crypto.GenerateAPIKey(ts.cfg.App.TokenKeyLength)
 	if err != nil {
 		return nil, err
 	}

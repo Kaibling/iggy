@@ -21,6 +21,7 @@ deps:
 	go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.61.0
 	go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate
+	go install golang.org/x/vuln/cmd/govulncheck@latest
 
 
 migrate:
@@ -30,3 +31,6 @@ rollback:
 	migrate -source file://migration/migration_data -database "postgres://${IGGY_DB_USER}:${IGGY_DB_PASSWORD}@${IGGY_DB_HOST}:${IGGY_DB_PORT}/${IGGY_DB_DATABASE}?sslmode=disable&x-migrations-table=\"public\".\"iggy_schema_migrations\"&x-migrations-table-quoted=1" down
 psql:
 	PGPASSWORD=${IGGY_DB_PASSWORD} psql -h ${IGGY_DB_HOST} -U ${IGGY_DB_USER} ${IGGY_DB_DATABASE}
+
+vuln:
+	govulncheck ./...

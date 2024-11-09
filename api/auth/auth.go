@@ -8,9 +8,9 @@ import (
 	"github.com/kaibling/apiforge/ctxkeys"
 	"github.com/kaibling/apiforge/envelope"
 	"github.com/kaibling/apiforge/route"
+	"github.com/kaibling/iggy/bootstrap"
 	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/pkg/config"
-	"github.com/kaibling/iggy/service/bootstrap"
 )
 
 func authLogin(w http.ResponseWriter, r *http.Request) {

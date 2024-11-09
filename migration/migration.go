@@ -13,7 +13,7 @@ import (
 //go:embed migration_data/*.sql
 var migrations embed.FS
 
-func SelfMigrate(cfg config.Configuration) error {
+func SelfMigrate(cfg config.DBConfig) error {
 	databaseURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&x-migrations-table=\"public\".\"iggy_schema_migrations\"&x-migrations-table-quoted=1",
 		cfg.DBUser,
 		cfg.DBPassword,

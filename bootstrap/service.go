@@ -2,8 +2,11 @@ package bootstrap
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/kaibling/apiforge/ctxkeys"
+	"github.com/kaibling/iggy/adapters/broker"
+	"github.com/kaibling/iggy/apperror"
 	repo "github.com/kaibling/iggy/persistence/repository"
 	"github.com/kaibling/iggy/pkg/config"
 	"github.com/kaibling/iggy/service"
@@ -65,4 +68,13 @@ func NewRunLogService(ctx context.Context) *service.RunLogService {
 func NewWorkflowEngineService(ctx context.Context) *service.WorkflowEngineService {
 	cfg := ctxkeys.GetValue(ctx, "cfg").(config.Configuration)
 	return service.NewWorkflowEngineService(ctx, cfg)
+}
+
+func NewWorker(ctx context.Context, workerName string) (broker.BrokerAdapter, error) {
+	switch workerName {
+	// case "loopback":
+	// 	return loopback.NewLoopback(ctx), nil
+	default:
+		return nil, apperror.NewGeneric(fmt.Errorf("worker adapter %s not found", workerName))
+	}
 }

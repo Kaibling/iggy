@@ -17,11 +17,16 @@ func NewJavascriptAdapter() *Javascript {
 }
 func (j *Javascript) Execute(code string, sharedData map[string]any) ExecutionResult {
 	vm := goja.New()
-
-	vm.Set("shared_data", sharedData)
-	vm.Set("log", j.log)
-	_, err := vm.RunString(code)
-
+	// TODO error hanndling... really???.....
+	err := vm.Set("shared_data", sharedData)
+	if err != nil {
+		return ExecutionResult{err, sharedData, j.logs}
+	}
+	err = vm.Set("log", j.log)
+	if err != nil {
+		return ExecutionResult{err, sharedData, j.logs}
+	}
+	_, err = vm.RunString(code)
 	if err != nil {
 		return ExecutionResult{err, sharedData, j.logs}
 	}

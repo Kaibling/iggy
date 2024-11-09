@@ -9,8 +9,8 @@ import (
 	"github.com/kaibling/apiforge/params"
 	"github.com/kaibling/apiforge/route"
 
+	"github.com/kaibling/iggy/bootstrap"
 	"github.com/kaibling/iggy/entity"
-	"github.com/kaibling/iggy/service/bootstrap"
 )
 
 func usersGet(w http.ResponseWriter, r *http.Request) {

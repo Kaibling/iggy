@@ -85,3 +85,9 @@ type RunLog struct {
 	Message   string
 	Timestamp time.Time
 }
+
+type Task struct {
+	ID         string
+	WorkflowID string
+	// EnqueueTime time.Time
+}

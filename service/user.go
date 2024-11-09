@@ -53,7 +53,7 @@ func (us *UserService) FetchUsers(ids []string) ([]*entity.User, error) {
 }
 
 func (us *UserService) CreateUser(u entity.NewUser) (*entity.User, error) {
-	pwd, err := crypto.HashPassword(u.Password, us.cfg.PasswordCost)
+	pwd, err := crypto.HashPassword(u.Password, us.cfg.App.PasswordCost)
 	if err != nil {
 		return nil, err
 	}
@@ -88,16 +88,16 @@ func (us *UserService) DeleteUser(id string) error {
 }
 
 func (us *UserService) EnsureAdmin(password string) (string, error) {
-	if _, err := us.repo.FetchUserByName(us.cfg.AdminUser); err != nil {
+	if _, err := us.repo.FetchUserByName(us.cfg.App.AdminUser); err != nil {
 		if err == sql.ErrNoRows {
 			// create Admin user
 			if password == "" {
 				password = utils.NewULID().String()
 			}
-			pwdhash, _ := crypto.HashPassword(password, us.cfg.PasswordCost)
+			pwdhash, _ := crypto.HashPassword(password, us.cfg.App.PasswordCost)
 			if _, err = us.repo.SaveUser(entity.NewUser{
 				ID:       utils.NewULID().String(),
-				Username: us.cfg.AdminUser,
+				Username: us.cfg.App.AdminUser,
 				Password: pwdhash,
 			}); err != nil {
 				return "", err
@@ -121,7 +121,7 @@ func (us *UserService) Login(login entity.Login, ts *TokenService) (*entity.Toke
 	if !ok {
 		return nil, fmt.Errorf("no")
 	}
-	expirationTime := time.Now().Add(time.Hour * time.Duration(us.cfg.TokenExpiration))
+	expirationTime := time.Now().Add(time.Hour * time.Duration(us.cfg.App.TokenExpiration))
 	return ts.CreateToken(entity.CreateNewToken(user.ID, expirationTime))
 }
 
