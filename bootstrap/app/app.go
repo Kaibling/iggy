@@ -16,13 +16,15 @@ import (
 	"github.com/kaibling/iggy/pkg/config"
 )
 
-func Run(withWorker bool, withApi bool) error {
+const innerChannelSize = 100
+
+func Run(withWorker bool, withAPI bool) error {
 	cfg, err := config.Load()
 	if err != nil {
 		return err
 	}
 
-	l := apiservice.BuildLogger(cfg.App.Logger)
+	logger := apiservice.BuildLogger(cfg.App.Logger)
 	//ctx := context.Background()
 	ctx, ctxCancel := context.WithCancel(context.Background())
 
@@ -31,10 +33,11 @@ func Run(withWorker bool, withApi bool) error {
 
 	if withWorker {
 		var worker broker.BrokerAdapter
+
 		if cfg.Broker.Broker == "loopback" {
-			// TODO no magic number
-			internalChannel := make(chan []byte, 100)
-			worker = loopback.NewLoopback(ctx, internalChannel, l)
+
+			internalChannel := make(chan []byte, innerChannelSize)
+			worker = loopback.NewLoopback(ctx, internalChannel, logger)
 		} else {
 			worker, err = bootstrap.NewWorker(ctx, "loopback")
 			if err != nil {
@@ -44,20 +47,27 @@ func Run(withWorker bool, withApi bool) error {
 
 		// hopefully not blocking
 		go worker.Subscribe(cfg.Broker.Channel)
-		l.LogLine("worker started")
+		logger.LogLine("worker started")
 	}
-	if withApi {
-		if err := api.Start(cfg, ctx, l); err != nil {
+
+	if withAPI {
+		if err := api.Start(ctx, cfg, logger); err != nil {
 			fmt.Println(err)
 		}
-		l.LogLine("api started")
+
+		logger.LogLine("api started")
 	}
-	l.LogLine("application started. Ready...")
+
+	logger.LogLine("application started. Ready...")
 
 	<-interrupt
-	l.LogLine("stopping application")
+
+	logger.LogLine("stopping application")
+
 	ctxCancel()
-	// TODO remove
-	time.Sleep(400 * time.Millisecond)
+	// TODO context should be with timeout
+	gracePeriod := 400 * time.Millisecond //nolint:gomnd,mnd
+	time.Sleep(gracePeriod)
+
 	return nil
 }

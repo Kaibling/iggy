@@ -6,19 +6,19 @@ import (
 	"github.com/kaibling/iggy/entity"
 )
 
-type WorkflowType string
+type Type string
 
 const (
-	Javascript WorkflowType = "javascript"
-	External   WorkflowType = "external"
-	Folder     WorkflowType = "folder"
+	Javascript Type = "javascript"
+	External   Type = "external"
+	Folder     Type = "folder"
 )
 
 type Workflow struct {
 	ID          string
 	Name        string
 	Code        string
-	ObjectType  WorkflowType
+	ObjectType  Type
 	Children    []Workflow
 	FailOnError bool
 }
@@ -32,7 +32,7 @@ func FromWorkflowEntity(e entity.Workflow) Workflow {
 		ID:          e.ID,
 		Name:        e.Name,
 		Code:        e.Code,
-		ObjectType:  WorkflowType(e.ObjectType),
+		ObjectType:  Type(e.ObjectType),
 		Children:    children,
 		FailOnError: e.FailOnError,
 	}
@@ -54,9 +54,11 @@ func (r Run) ToNewEntity() entity.NewRun {
 		FinishTime: r.FinishTime,
 		Logs:       r.Logs,
 	}
+
 	if r.Error != nil {
 		e := r.Error.Error()
 		newRun.Error = &e
 	}
+
 	return newRun
 }

@@ -15,6 +15,7 @@ import (
 
 func authLogin(w http.ResponseWriter, r *http.Request) {
 	e := envelope.ReadEnvelope(r)
+
 	var postLogin entity.Login
 	if err := route.ReadPostData(r, &postLogin); err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
@@ -27,6 +28,7 @@ func authLogin(w http.ResponseWriter, r *http.Request) {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
 	}
+
 	e.SetResponse(token).Finish(w, r)
 }
 
@@ -39,6 +41,7 @@ func authLogout(w http.ResponseWriter, r *http.Request) {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
 	}
+
 	e.SetSuccess().Finish(w, r)
 }
 
@@ -52,5 +55,6 @@ func authCheck(w http.ResponseWriter, r *http.Request) {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
 	}
+
 	e.SetResponse(t).Finish(w, r)
 }

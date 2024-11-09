@@ -8,8 +8,7 @@ import (
 	"github.com/kaibling/iggy/pkg/config"
 )
 
-func New(cfg config.DBConfig) (*pgxpool.Pool, error) {
-	ctx := context.Background()
+func New(ctx context.Context, cfg config.DBConfig) (*pgxpool.Pool, error) {
 	connStr := fmt.Sprintf("user=%s dbname=%s password=%s host=%s port=%s sslmode=disable",
 		cfg.DBUser,
 		cfg.DBDatabase,

@@ -23,12 +23,16 @@ func Authentication(next http.Handler) http.Handler {
 			e.SetError(apierror.Forbidden).Finish(w, r)
 			return
 		}
+
 		if len(r.Header["Authorization"]) != 1 {
 			e.SetError(apierror.Forbidden).Finish(w, r)
 			return
 		}
+
 		authSlice := strings.Split(r.Header["Authorization"][0], " ")
-		if len(authSlice) != 2 {
+
+		position := 2
+		if len(authSlice) != position {
 			e.SetError(apierror.Forbidden).Finish(w, r)
 			return
 		}

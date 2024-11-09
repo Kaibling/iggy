@@ -18,10 +18,9 @@ import (
 	"github.com/kaibling/iggy/pkg/config"
 )
 
-func Start(cfg config.Configuration, ctx context.Context, l logging.LogWriter) error {
-
-	ctx = context.WithValue(ctx, ctxkeys.LoggerKey, l)
-	conn, err := psql.New(cfg.DB)
+func Start(ctx context.Context, cfg config.Configuration, logger logging.LogWriter) error {
+	ctx = context.WithValue(ctx, ctxkeys.LoggerKey, logger)
+	conn, err := psql.New(ctx, cfg.DB)
 	if err != nil {
 		return err
 	}
@@ -29,9 +28,9 @@ func Start(cfg config.Configuration, ctx context.Context, l logging.LogWriter) e
 	ctx = context.WithValue(ctx, ctxkeys.String("cfg"), cfg)
 	if err = migration.SelfMigrate(cfg.DB); err != nil {
 		return err
-	} else {
-		l.LogLine("rh migration successful")
 	}
+
+	logger.LogLine("rh migration successful")
 
 	userService := bootstrap.NewUserServiceAnonym(ctx, config.SYSTEM_USER)
 
@@ -39,13 +38,14 @@ func Start(cfg config.Configuration, ctx context.Context, l logging.LogWriter) e
 	if err != nil {
 		fmt.Println(err.Error())
 	}
+
 	if pwd != "" {
-		l.LogLine(fmt.Sprintf("Admin Password: %s", pwd))
+		logger.LogLine("Admin Password: " + pwd)
 	}
 
 	root := chi.NewRouter()
 	// context
-	root.Use(middleware.AddContext("logger", l))
+	root.Use(middleware.AddContext("logger", logger))
 	root.Use(middleware.AddContext("db", conn))
 	root.Use(middleware.AddContext("cfg", cfg))
 
@@ -56,18 +56,17 @@ func Start(cfg config.Configuration, ctx context.Context, l logging.LogWriter) e
 	root.Use(middleware.Recoverer)
 
 	// mount api endpoint
-	root.Mount("/api/v1", api.ApiRoute())
+	root.Mount("/api/v1", api.Route())
 
 	root.NotFound(handler.NotFound)
 
-	a := apiservice.New(ctx, apiservice.ServerConfig{
+	apiServer := apiservice.New(ctx, apiservice.ServerConfig{
 		BindingIP:   cfg.App.BindingIP,
 		BindingPort: cfg.App.BindingPort,
 	})
 
-	a.AddCustomLogger(l)
-
+	apiServer.AddCustomLogger(logger)
 	status.IsReady.Store(true)
-	a.Start(root)
-	return nil
+
+	return apiServer.Start(root)
 }

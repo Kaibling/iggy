@@ -37,11 +37,14 @@ func (ts *RunService) CreateRun(newEntity entity.NewRun, runLogService *RunLogSe
 	if err != nil {
 		return err
 	}
+
 	runLogs := []entity.NewRunLog{}
+
 	for _, runLog := range newEntity.Logs {
 		runLog.RunID = newEntity.ID
 		runLogs = append(runLogs, runLog)
 	}
+
 	if err := runLogService.CreateRunLogs(runLogs); err != nil {
 		return err
 	}

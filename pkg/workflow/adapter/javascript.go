@@ -1,7 +1,6 @@
 package adapter
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/dop251/goja"
@@ -17,16 +16,16 @@ func NewJavascriptAdapter() *Javascript {
 }
 func (j *Javascript) Execute(code string, sharedData map[string]any) ExecutionResult {
 	vm := goja.New()
-	// TODO error hanndling... really???.....
-	err := vm.Set("shared_data", sharedData)
-	if err != nil {
+
+	vars := map[string]any{
+		"shared_data": sharedData,
+		"log":         j.log,
+	}
+
+	if err := setVariables(vm, vars); err != nil {
 		return ExecutionResult{err, sharedData, j.logs}
 	}
-	err = vm.Set("log", j.log)
-	if err != nil {
-		return ExecutionResult{err, sharedData, j.logs}
-	}
-	_, err = vm.RunString(code)
+	_, err := vm.RunString(code)
 	if err != nil {
 		return ExecutionResult{err, sharedData, j.logs}
 	}
@@ -36,10 +35,18 @@ func (j *Javascript) Execute(code string, sharedData map[string]any) ExecutionRe
 
 func (j *Javascript) log(msg string) {
 
-	fmt.Printf("-> log: %s\n", msg)
 	j.logs = append(j.logs, entity.NewRunLog{
 		Message:   msg,
 		Timestamp: time.Now(),
 	})
 
+}
+
+func setVariables(vm *goja.Runtime, variables map[string]any) error {
+	for k, v := range variables {
+		if err := vm.Set(k, v); err != nil {
+			return err
+		}
+	}
+	return nil
 }

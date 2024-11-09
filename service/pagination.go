@@ -7,6 +7,9 @@ import (
 	"github.com/kaibling/apiforge/params"
 )
 
+const ASC = "ASC"
+const DESC = "DESC"
+
 type Pagination struct {
 	Limit        int
 	Filter       string
@@ -19,25 +22,31 @@ type Pagination struct {
 
 func NewPagination(qp params.Pagination, tableName string) Pagination {
 	return Pagination{
-		Limit:     qp.Limit,
-		Order:     strings.ToUpper(qp.Order),
-		tableName: tableName,
-		before:    qp.Before,
-		after:     qp.After,
+		Filter:       qp.Filter,
+		Limit:        qp.Limit,
+		Order:        strings.ToUpper(qp.Order),
+		tableName:    tableName,
+		before:       qp.Before,
+		after:        qp.After,
+		WhereClauses: []string{},
 	}
 }
 
 func (p *Pagination) GetCursorSQL() string {
 	innerOrder := p.Order
 	if p.before != nil {
-		innerOrder = "DESC"
+		innerOrder = DESC
+
 		p.WhereClauses = append(p.WhereClauses, fmt.Sprintf("id %s '%s'", operator("before", p.Order), *p.before))
 	} else if p.after != nil {
-		innerOrder = "ASC"
+		innerOrder = ASC
+
 		p.WhereClauses = append(p.WhereClauses, fmt.Sprintf("id %s '%s'", operator("after", p.Order), *p.after))
 	}
 
-	inner_sql := fmt.Sprintf("SELECT id as pagination_id from %s %s ORDER BY id %s LIMIT %d", p.tableName, p.clauses(), innerOrder, p.Limit+1)
+	inner_sql := fmt.Sprintf("SELECT id as pagination_id from %s %s ORDER BY id %s LIMIT %d",
+		p.tableName, p.clauses(),
+		innerOrder, p.Limit+1)
 	return fmt.Sprintf("SELECT pagination_id FROM (%s) Order By pagination_id %s;", inner_sql, p.Order)
 }
 
@@ -47,6 +56,7 @@ func (p *Pagination) clauses() string {
 	if len(p.WhereClauses) > 0 {
 		clause.WriteString("WHERE ")
 	}
+
 	for _, c := range p.WhereClauses {
 		clause.WriteString(c)
 	}
@@ -56,13 +66,13 @@ func (p *Pagination) clauses() string {
 
 func (p *Pagination) FinishPagination(ids []string) ([]string, params.Pagination) {
 
-	pag := params.Pagination{
+	pag := params.Pagination{ //nolint: exhaustruct
 		Limit: p.Limit,
 		Order: p.Order,
 	}
 
 	if p.before != nil {
-		if p.Order == "ASC" {
+		if p.Order == ASC {
 			pag.After = &ids[len(ids)-1]
 			if len(ids) == p.Limit+1 {
 				pag.Before = &ids[1]
@@ -75,7 +85,8 @@ func (p *Pagination) FinishPagination(ids []string) ([]string, params.Pagination
 		}
 
 	} else {
-		if p.Order == "ASC" {
+		if p.Order == ASC {
+
 			if p.after != nil {
 				pag.Before = &ids[0]
 			}
@@ -84,7 +95,7 @@ func (p *Pagination) FinishPagination(ids []string) ([]string, params.Pagination
 				pag.After = &ids[len(ids)-2]
 			}
 		} else {
-			fmt.Printf("%v", ids)
+
 			if p.after != nil {
 				pag.Before = &ids[len(ids)-2]
 			}
@@ -107,15 +118,15 @@ func (p *Pagination) FinishPagination(ids []string) ([]string, params.Pagination
 }
 
 func operator(direction, order string) string {
-	op := ""
+	var op string
 	if direction == "before" {
-		if order == "ASC" {
+		if order == ASC {
 			op = "<"
 		} else {
 			op = ">"
 		}
 	} else {
-		if order == "ASC" {
+		if order == ASC {
 			op = ">"
 		} else {
 			op = "<"

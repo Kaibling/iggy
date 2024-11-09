@@ -30,8 +30,9 @@ type NewWorkflow struct {
 // TODO add more data, what is wrong
 func (w NewWorkflow) Validate() *apperror.AppError {
 	if w.ObjectType == "" {
-		return &apperror.MalformedRequest
+		return &apperror.ErrMalformedRequest
 	}
+
 	return nil
 }
 

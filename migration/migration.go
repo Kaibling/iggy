@@ -27,6 +27,7 @@ func SelfMigrate(cfg config.DBConfig) error {
 	if err != nil {
 		return err
 	}
+
 	defer driver.Close()
 	d, err := iofs.New(migrations, "migration_data")
 	if err != nil {

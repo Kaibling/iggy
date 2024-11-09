@@ -8,11 +8,11 @@ import (
 	"github.com/kaibling/iggy/pkg/workflow/adapter"
 )
 
-type WorkflowAdapter interface {
+type Adapter interface {
 	Execute(code string, sharedData map[string]any) adapter.ExecutionResult
 }
 
-type WorkflowResult struct {
+type Result struct {
 	Error      error
 	Runs       []Run
 	SharedData map[string]any
@@ -29,6 +29,7 @@ func (e Engine) Execute(workflow entity.Workflow) ([]entity.NewRun, error) {
 	sharedData := map[string]any{}
 	result := e.execute_workflow(wf, sharedData)
 	runs := []entity.NewRun{}
+
 	for _, r := range result.Runs {
 		runs = append(runs, r.ToNewEntity())
 	}
@@ -36,15 +37,16 @@ func (e Engine) Execute(workflow entity.Workflow) ([]entity.NewRun, error) {
 
 }
 
-func (e Engine) execute_workflow(w Workflow, sharedData map[string]any) WorkflowResult {
+func (e Engine) execute_workflow(w Workflow, sharedData map[string]any) Result {
 	if w.ObjectType == Folder {
-		return e.execute_folder(w, sharedData)
+		return e.executeFolder(w, sharedData)
 	}
 	return e.execute_adapter(w, sharedData)
 }
 
-func (e Engine) execute_folder(w Workflow, sharedData map[string]any) WorkflowResult {
+func (e Engine) executeFolder(w Workflow, sharedData map[string]any) Result {
 	runs := []Run{}
+
 	for _, child := range w.Children {
 		result := e.execute_workflow(child, sharedData)
 		runs = append(runs, result.Runs...)
@@ -52,25 +54,26 @@ func (e Engine) execute_folder(w Workflow, sharedData map[string]any) WorkflowRe
 
 		// handle fail on error
 		if result.Error != nil && child.FailOnError {
-			return WorkflowResult{
+			return Result{
 				Error: nil,
 				Runs:  runs,
 			}
 		}
 
 	}
-	return WorkflowResult{
+	return Result{
 		Error: nil,
 		Runs:  runs,
 	}
 }
 
-func (e Engine) execute_adapter(w Workflow, sharedData map[string]any) WorkflowResult {
+func (e Engine) execute_adapter(w Workflow, sharedData map[string]any) Result {
 	execAdapter, err := e.getAdapter(w.ObjectType)
 	if err != nil {
-		return WorkflowResult{
+		return Result{
 			Error:      err,
 			SharedData: sharedData,
+			Runs:       []Run{},
 		}
 	}
 
@@ -86,18 +89,22 @@ func (e Engine) execute_adapter(w Workflow, sharedData map[string]any) WorkflowR
 		FinishTime: finishTime,
 		Logs:       result.Logs,
 	}
-	return WorkflowResult{
+	return Result{
 		Error:      result.Error,
 		SharedData: result.SharedData,
 		Runs:       []Run{newRun},
 	}
 }
 
-func (e Engine) getAdapter(wft WorkflowType) (WorkflowAdapter, error) {
+func (e Engine) getAdapter(wft Type) (Adapter, error) { //nolint: ireturn
 	switch wft {
 	case Javascript:
 		return adapter.NewJavascriptAdapter(), nil
+	case External:
+		panic("not implemented")
+	case Folder:
+		panic("not implemented")
 	default:
-		return nil, apperror.MissingJSAdapter
+		return nil, apperror.ErrMissingJSAdapter
 	}
 }

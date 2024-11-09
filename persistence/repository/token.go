@@ -106,6 +106,7 @@ func (r *TokenRepo) ListTokens() ([]*entity.Token, error) {
 		return nil, err
 	}
 	users := []*entity.Token{}
+
 	for _, t := range rt {
 		users = append(users, &entity.Token{
 			ID:      t.ID,
@@ -130,6 +131,7 @@ func (r *TokenRepo) ListUserToken(username string) ([]*entity.Token, error) {
 		return nil, err
 	}
 	users := []*entity.Token{}
+
 	for _, t := range rt {
 		users = append(users, &entity.Token{
 			ID:      t.ID,

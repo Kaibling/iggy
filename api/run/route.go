@@ -5,7 +5,7 @@ import (
 	"github.com/kaibling/iggy/api/middleware"
 )
 
-func Route() chi.Router {
+func Route() chi.Router { //nolint: ireturn
 	r := chi.NewRouter()
 	r.Route("/", func(r chi.Router) {
 		r.Use(middleware.Authentication)
@@ -14,5 +14,6 @@ func Route() chi.Router {
 		r.Get("/{id}", fetchRun)
 		r.Get("/{id}/logs", fetchRunLogsByRun)
 	})
+
 	return r
 }

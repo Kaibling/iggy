@@ -17,5 +17,6 @@ func getTokens(w http.ResponseWriter, r *http.Request) {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
 	}
+
 	e.SetResponse(tokens).Finish(w, r)
 }

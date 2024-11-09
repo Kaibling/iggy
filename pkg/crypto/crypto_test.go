@@ -1,12 +1,16 @@
-package crypto
+package crypto_test
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/kaibling/iggy/pkg/crypto"
+)
 
 func TestHashPassword(t *testing.T) {
 
-	pwdHash, _ := HashPassword("password", 11)
+	pwdHash, _ := crypto.HashPassword("password", 11)
 
-	ok, err := CheckPasswordHash("password", pwdHash)
+	ok, err := crypto.CheckPasswordHash("password", pwdHash)
 	if err != nil {
 		t.Fail()
 	}

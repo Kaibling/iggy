@@ -9,17 +9,17 @@ import (
 )
 
 func main() {
-	app := &cli.App{
+	app := &cli.App{ //nolint:exhaustruct
 		Name:  "iggy",
 		Usage: "application for executing generative workflows",
 		Flags: []cli.Flag{
-			&cli.BoolFlag{
+			&cli.BoolFlag{ //nolint:exhaustruct
 				Name:     "api",
 				Aliases:  []string{"a"},
 				Usage:    "start of the web api",
 				Required: false,
 			},
-			&cli.BoolFlag{
+			&cli.BoolFlag{ //nolint:exhaustruct
 				Name:     "worker",
 				Aliases:  []string{"w"},
 				Usage:    "start of the worker",

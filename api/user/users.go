@@ -22,6 +22,7 @@ func usersGet(w http.ResponseWriter, r *http.Request) {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
 	}
+
 	e.SetResponse(users).SetPagination(pageData).Finish(w, r)
 }
 
@@ -34,11 +35,13 @@ func userGet(w http.ResponseWriter, r *http.Request) {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
 	}
+
 	e.SetResponse(user).Finish(w, r)
 }
 
 func userPost(w http.ResponseWriter, r *http.Request) {
 	e := envelope.ReadEnvelope(r)
+
 	var postUser entity.NewUser
 	if err := route.ReadPostData(r, &postUser); err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
@@ -51,6 +54,7 @@ func userPost(w http.ResponseWriter, r *http.Request) {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
 	}
+
 	e.SetResponse(newUser).Finish(w, r)
 }
 
@@ -62,6 +66,7 @@ func userDel(w http.ResponseWriter, r *http.Request) {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
 	}
+
 	e.SetSuccess().Finish(w, r)
 }
 
@@ -75,5 +80,6 @@ func getUserToken(w http.ResponseWriter, r *http.Request) {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
 	}
+
 	e.SetResponse(tokens).Finish(w, r)
 }

@@ -45,7 +45,6 @@ func (r *WorkflowRepo) SaveWorkflow(newModel entity.NewWorkflow) (*entity.Workfl
 		ObjectType:  string(newModel.ObjectType),
 		BuildIn:     newModel.BuildIn,
 		FailOnError: newModel.FailOnError,
-		//DeletedAt:   nil,
 		CreatedAt: pgtype.Timestamp{
 			Time:  time.Now(),
 			Valid: true,
@@ -57,9 +56,11 @@ func (r *WorkflowRepo) SaveWorkflow(newModel entity.NewWorkflow) (*entity.Workfl
 		},
 		ModifiedBy: r.username,
 	})
+
 	if err != nil {
 		return nil, err
 	}
+
 	if wfs, err := r.FetchWorkflows([]string{newWorkflowID}, maxDepth); err != nil {
 		return nil, err
 	} else {
@@ -69,14 +70,17 @@ func (r *WorkflowRepo) SaveWorkflow(newModel entity.NewWorkflow) (*entity.Workfl
 
 func (r *WorkflowRepo) UpdateWorkflow(workflowID string, updateEntity entity.UpdateWorkflow) (*entity.Workflow, error) {
 	maxDepth := 1
+
 	if err := r.q.UpdateWorkflow(r.ctx, ConvertToUpdateWorkflowParams(updateEntity, workflowID, r.username)); err != nil {
 		return nil, err
 	}
+
 	if updateEntity.Children != nil {
 		// delete old children
 		if err := r.q.DeleteWorkflowChildren(r.ctx, workflowID); err != nil {
 			return nil, err
 		}
+
 		for _, child := range updateEntity.Children {
 			// create new children
 			if err := r.q.SaveWorkflowChildren(r.ctx, sqlcrepo.SaveWorkflowChildrenParams{
@@ -148,7 +152,9 @@ func (r *WorkflowRepo) FetchWorkflows(workflowIDs []string, maxDepth int) ([]ent
 		log.Fatalf("failed to execute query: %v", err)
 	}
 	defer rows.Close()
+
 	var workflows []RawWorkflow
+
 	// Process the results
 	for rows.Next() {
 		var wf RawWorkflow
@@ -168,17 +174,20 @@ func (r *WorkflowRepo) FetchWorkflows(workflowIDs []string, maxDepth int) ([]ent
 		); err != nil {
 			log.Fatalf("failed to scan row: %v", err)
 		}
+
 		workflows = append(workflows, wf)
 	}
+
 	if err := rows.Err(); err != nil {
 		log.Fatalf("row iteration error: %v", err)
 	}
 
 	workflowMap := map[string][]entity.Workflow{}
 	root := doa(workflows, maxDepth, workflowMap)
+
 	v, ok := root["root"]
 	if !ok {
-		return nil, apperror.Forbidden
+		return nil, apperror.ErrForbidden
 	}
 	return v, nil
 }
@@ -215,7 +224,7 @@ type RawWorkflow struct {
 func doa(r []RawWorkflow, depth int, b map[string][]entity.Workflow) map[string][]entity.Workflow {
 	for _, rr := range r {
 		if rr.Depth == depth {
-			newModel := entity.Workflow{
+			newModel := entity.Workflow{ //nolint: exhaustruct
 				ID:          rr.ID,
 				Name:        rr.Name,
 				Code:        rr.Code,
@@ -233,9 +242,11 @@ func doa(r []RawWorkflow, depth int, b map[string][]entity.Workflow) map[string]
 
 			// If children exist for this workflow, merge them
 			if children, exists := b[newModel.ID]; exists {
+
 				if newModel.Children == nil {
 					newModel.Children = []entity.Workflow{}
 				}
+
 				newModel.Children = append(newModel.Children, children...)
 			}
 

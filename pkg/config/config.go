@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-var (
+const (
 	OS_PREFIX   = "IGGY"
 	SYSTEM_USER = "SYSTEM"
 )

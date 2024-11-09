@@ -97,6 +97,7 @@ func (r *RunRepo) FetchRunByWorkflow(workflowID string) ([]*entity.Run, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	runs := []*entity.Run{}
 	for _, rt := range t {
 		runs = append(runs, &entity.Run{

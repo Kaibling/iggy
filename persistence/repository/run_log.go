@@ -27,7 +27,7 @@ func NewRunLogRepo(ctx context.Context, username string) *RunLogRepo {
 	}
 }
 
-func (r *RunLogRepo) SaveRunLog(newModel entity.NewRunLog) (*entity.RunLog, error) {
+func (r *RunLogRepo) CreateRunLog(newModel entity.NewRunLog) (*entity.RunLog, error) {
 	newRunLogID, err := r.q.SaveRunLog(r.ctx, sqlcrepo.SaveRunLogParams{
 		ID:      newModel.ID,
 		RunID:   newModel.RunID,
@@ -48,7 +48,9 @@ func (r *RunLogRepo) FetchRunLogsByRun(runID string) ([]entity.RunLog, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	runLogs := []entity.RunLog{}
+
 	for _, run := range rt {
 		runLogs = append(runLogs,
 			entity.RunLog{

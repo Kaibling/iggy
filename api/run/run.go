@@ -20,11 +20,13 @@ func fetchRun(w http.ResponseWriter, r *http.Request) {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
 	}
+
 	e.SetResponse(run).Finish(w, r)
 }
 
 func createRun(w http.ResponseWriter, r *http.Request) {
 	e := envelope.ReadEnvelope(r)
+
 	var postRun entity.NewRun
 	if err := route.ReadPostData(r, &postRun); err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
@@ -37,6 +39,7 @@ func createRun(w http.ResponseWriter, r *http.Request) {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
 	}
+
 	e.SetSuccess().Finish(w, r)
 }
 
@@ -49,5 +52,6 @@ func fetchRunLogsByRun(w http.ResponseWriter, r *http.Request) {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
 	}
+
 	e.SetResponse(runLogs).Finish(w, r)
 }

@@ -45,6 +45,7 @@ func (us *UserService) FetchUsers(ids []string) ([]*entity.User, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	for _, u := range loadedUsers {
 		u.Redact()
 	}
@@ -95,10 +96,12 @@ func (us *UserService) EnsureAdmin(password string) (string, error) {
 				password = utils.NewULID().String()
 			}
 			pwdhash, _ := crypto.HashPassword(password, us.cfg.App.PasswordCost)
+
 			if _, err = us.repo.SaveUser(entity.NewUser{
 				ID:       utils.NewULID().String(),
 				Username: us.cfg.App.AdminUser,
 				Password: pwdhash,
+				Active:   true,
 			}); err != nil {
 				return "", err
 			}
@@ -118,6 +121,7 @@ func (us *UserService) Login(login entity.Login, ts *TokenService) (*entity.Toke
 	if err != nil {
 		return nil, err
 	}
+
 	if !ok {
 		return nil, fmt.Errorf("no")
 	}

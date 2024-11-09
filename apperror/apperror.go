@@ -23,16 +23,16 @@ func (e AppError) HTTPStatus() int {
 	return e.StatusCode
 }
 
-var Forbidden = AppError{
+var ErrForbidden = AppError{
 	msg:        "permission denied",
 	StatusCode: http.StatusForbidden,
 }
-var MissingJSAdapter = AppError{
+var ErrMissingJSAdapter = AppError{
 	msg:        "Adapter missing",
 	StatusCode: http.StatusInternalServerError,
 }
 
-var MalformedRequest = AppError{
+var ErrMalformedRequest = AppError{
 	msg:        "client request malformed",
 	StatusCode: http.StatusUnprocessableEntity,
 }

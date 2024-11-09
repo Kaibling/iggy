@@ -120,6 +120,7 @@ func (r *UserRepo) IDQuery(idQuery string) ([]string, error) {
 	if err != nil {
 		log.Fatalf("failed to execute query: %v", err)
 	}
+
 	var ids []string
 	// Process the results
 	for rows.Next() {
@@ -129,8 +130,10 @@ func (r *UserRepo) IDQuery(idQuery string) ([]string, error) {
 		); err != nil {
 			log.Fatalf("failed to scan row: %v", err)
 		}
+
 		ids = append(ids, id)
 	}
+
 	if err := rows.Err(); err != nil {
 		log.Fatalf("row iteration error: %v", err)
 	}

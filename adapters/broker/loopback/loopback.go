@@ -19,7 +19,7 @@ type Loopback struct {
 	l   logging.LogWriter
 }
 
-func (l *Loopback) Subscribe(channelName string) error {
+func (l *Loopback) Subscribe(_ string) error {
 	for {
 		select {
 		case <-l.ctx.Done():
@@ -38,7 +38,7 @@ func (l *Loopback) Subscribe(channelName string) error {
 	}
 
 }
-func (l *Loopback) Publish(channelName string, message []byte) error {
+func (l *Loopback) Publish(_ string, message []byte) error {
 	l.c <- message
 	return nil
 }
