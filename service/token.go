@@ -47,6 +47,7 @@ func (ts *TokenService) CreateToken(u entity.NewToken) (*entity.Token, error) {
 	if u.ID == "" {
 		u.ID = utils.NewULID().String()
 	}
+
 	return ts.repo.CreateToken(u)
 }
 

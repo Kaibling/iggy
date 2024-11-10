@@ -30,9 +30,10 @@ func (l *Loopback) Subscribe(_ string) error {
 			t, err := utility.DecodeToStruct[entity.Task](newMessage)
 			if err != nil {
 				// log
-				fmt.Println(err.Error())
+				fmt.Println(err.Error()) //nolint: forbidigo
 			}
-			fmt.Println(utility.Pretty(t))
+
+			fmt.Println(utility.Pretty(t)) //nolint: forbidigo
 		}
 	}
 }

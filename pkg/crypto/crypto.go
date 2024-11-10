@@ -9,15 +9,16 @@ import (
 
 func HashPassword(password string, passwordCost int) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), passwordCost)
+
 	return string(bytes), err
 }
 
 func CheckPasswordHash(password, hash string) (bool, error) {
 	if err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)); err != nil {
 		return false, err
-	} else {
-		return true, nil
 	}
+
+	return true, nil
 }
 
 func GenerateAPIKey(length int) (string, error) {
@@ -27,5 +28,6 @@ func GenerateAPIKey(length int) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return hex.EncodeToString(key), nil
 }

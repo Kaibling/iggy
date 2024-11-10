@@ -49,6 +49,7 @@ func (p *Pagination) GetCursorSQL() string {
 	innerSQL := fmt.Sprintf("SELECT id as pagination_id from %s %s ORDER BY id %s LIMIT %d",
 		p.tableName, p.clauses(),
 		innerOrder, p.Limit+1)
+
 	return fmt.Sprintf("SELECT pagination_id FROM (%s) Order By pagination_id %s;", innerSQL, p.Order)
 }
 
@@ -66,12 +67,13 @@ func (p *Pagination) clauses() string {
 	return clause.String()
 }
 
-func (p *Pagination) FinishPagination(ids []string) ([]string, params.Pagination) {
+func (p *Pagination) FinishPagination(ids []string) ([]string, params.Pagination) { //nolint: cyclop
 	pag := params.Pagination{ //nolint: exhaustruct
 		Limit: p.Limit,
 		Order: p.Order,
 	}
 
+	//nolint: nestif
 	if p.before != nil {
 		if p.Order == ASC {
 			pag.After = &ids[len(ids)-1]
@@ -117,7 +119,8 @@ func (p *Pagination) FinishPagination(ids []string) ([]string, params.Pagination
 
 func operator(direction, order string) string {
 	var op string
-	if direction == "before" {
+
+	if direction == "before" { //nolint: nestif
 		if order == ASC {
 			op = "<"
 		} else {

@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -32,7 +31,7 @@ func Run(withWorker bool, withAPI bool) error {
 	signal.Notify(interrupt, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
 	if withWorker {
-		var worker broker.BrokerAdapter
+		var worker broker.Adapter
 
 		if cfg.Broker.Broker == "loopback" {
 			internalChannel := make(chan []byte, innerChannelSize)
@@ -40,18 +39,18 @@ func Run(withWorker bool, withAPI bool) error {
 		} else {
 			worker, err = bootstrap.NewWorker(ctx, "loopback")
 			if err != nil {
-				fmt.Println(err.Error())
+				logger.LogLine(err.Error())
 			}
 		}
 
 		// hopefully not blocking
-		go worker.Subscribe(cfg.Broker.Channel)
+		go worker.Subscribe(cfg.Broker.Channel) //nolint: errcheck
 		logger.LogLine("worker started")
 	}
 
 	if withAPI {
 		if err := api.Start(ctx, cfg, logger); err != nil {
-			fmt.Println(err)
+			logger.LogLine(err.Error())
 		}
 
 		logger.LogLine("api started")

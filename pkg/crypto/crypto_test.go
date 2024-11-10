@@ -7,6 +7,8 @@ import (
 )
 
 func TestHashPassword(t *testing.T) {
+	t.Parallel()
+
 	pwdHash, _ := crypto.HashPassword("password", 11)
 
 	ok, err := crypto.CheckPasswordHash("password", pwdHash)

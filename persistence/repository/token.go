@@ -51,6 +51,7 @@ func (r *TokenRepo) CreateToken(t entity.NewToken) (*entity.Token, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return r.ReadToken(newTokenID)
 }
 
@@ -59,6 +60,7 @@ func (r *TokenRepo) ReadToken(id string) (*entity.Token, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &entity.Token{
 		ID:      rt.ID,
 		Value:   rt.Value,
@@ -80,8 +82,10 @@ func (r *TokenRepo) ReadTokenByValue(t string) (*entity.Token, error) {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, sql.ErrNoRows
 		}
+
 		return nil, err
 	}
+
 	return &entity.Token{
 		ID:      rt.ID,
 		Value:   rt.Value,
@@ -120,6 +124,7 @@ func (r *TokenRepo) ListTokens() ([]*entity.Token, error) {
 			},
 		})
 	}
+
 	return users, nil
 }
 
@@ -146,6 +151,7 @@ func (r *TokenRepo) ListUserToken(username string) ([]*entity.Token, error) {
 			},
 		})
 	}
+
 	return users, nil
 }
 
@@ -155,7 +161,9 @@ func (r *TokenRepo) DeleteTokenByValue(t string) error {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return sql.ErrNoRows
 		}
+
 		return err
 	}
+
 	return nil
 }

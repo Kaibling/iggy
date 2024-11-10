@@ -61,7 +61,7 @@ func (r *WorkflowRepo) SaveWorkflow(newModel entity.NewWorkflow) (*entity.Workfl
 
 	if wfs, err := r.FetchWorkflows([]string{newWorkflowID}, maxDepth); err != nil {
 		return nil, err
-	} else {
+	} else { //nolint: revive
 		return &wfs[0], nil
 	}
 }
@@ -92,12 +92,12 @@ func (r *WorkflowRepo) UpdateWorkflow(workflowID string, updateEntity entity.Upd
 
 	if wfs, err := r.FetchWorkflows([]string{workflowID}, maxDepth); err != nil {
 		return nil, err
-	} else {
+	} else { //nolint: revive
 		return &wfs[0], nil
 	}
 }
 
-func (r *WorkflowRepo) FetchWorkflows(ids []string, depth int) ([]entity.Workflow, error) {
+func (r *WorkflowRepo) FetchWorkflows(ids []string, depth int) ([]entity.Workflow, error) { //nolint: funlen
 	rawQuery := `
 	WITH RECURSIVE workflow_hierarchy AS (
 		SELECT 
@@ -187,6 +187,7 @@ func (r *WorkflowRepo) FetchWorkflows(ids []string, depth int) ([]entity.Workflo
 	if !ok {
 		return nil, apperror.ErrForbidden
 	}
+
 	return v, nil
 }
 
@@ -202,8 +203,10 @@ func (r *WorkflowRepo) DeleteWorkflow(id string) error {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return sql.ErrNoRows
 		}
+
 		return err
 	}
+
 	return nil
 }
 
@@ -221,7 +224,7 @@ type RawWorkflow struct {
 
 func doa(r []RawWorkflow, depth int, b map[string][]entity.Workflow) map[string][]entity.Workflow {
 	for _, rr := range r {
-		if rr.Depth == depth {
+		if rr.Depth == depth { //nolint: nestif
 			newModel := entity.Workflow{ //nolint: exhaustruct
 				ID:          rr.ID,
 				Name:        rr.Name,

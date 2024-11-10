@@ -48,5 +48,6 @@ func setVariables(vm *goja.Runtime, variables map[string]any) error {
 			return err
 		}
 	}
+
 	return nil
 }

@@ -27,19 +27,21 @@ func NewEngine() Engine {
 func (e Engine) Execute(workflow entity.Workflow) ([]entity.NewRun, error) {
 	wf := FromWorkflowEntity(workflow)
 	sharedData := map[string]any{}
-	result := e.execute_workflow(wf, sharedData)
+	result := e.executeWorkflow(wf, sharedData)
 	runs := []entity.NewRun{}
 
 	for _, r := range result.Runs {
 		runs = append(runs, r.ToNewEntity())
 	}
+
 	return runs, result.Error
 }
 
-func (e Engine) execute_workflow(w Workflow, sharedData map[string]any) Result {
+func (e Engine) executeWorkflow(w Workflow, sharedData map[string]any) Result {
 	if w.ObjectType == Folder {
 		return e.executeFolder(w, sharedData)
 	}
+
 	return e.executeAdapter(w, sharedData)
 }
 
@@ -47,7 +49,7 @@ func (e Engine) executeFolder(w Workflow, sharedData map[string]any) Result {
 	runs := []Run{}
 
 	for _, child := range w.Children {
-		result := e.execute_workflow(child, sharedData)
+		result := e.executeWorkflow(child, sharedData)
 		runs = append(runs, result.Runs...)
 		sharedData = result.SharedData
 
@@ -59,6 +61,7 @@ func (e Engine) executeFolder(w Workflow, sharedData map[string]any) Result {
 			}
 		}
 	}
+
 	return Result{
 		Error: nil,
 		Runs:  runs,
@@ -87,6 +90,7 @@ func (e Engine) executeAdapter(w Workflow, sharedData map[string]any) Result {
 		FinishTime: finishTime,
 		Logs:       result.Logs,
 	}
+
 	return Result{
 		Error:      result.Error,
 		SharedData: result.SharedData,

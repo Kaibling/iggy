@@ -4,11 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/kaibling/apiforge/lib/utils"
 	"github.com/kaibling/apiforge/params"
+	"github.com/kaibling/iggy/apperror"
 	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/pkg/config"
 	"github.com/kaibling/iggy/pkg/crypto"
@@ -95,7 +95,7 @@ func (us *UserService) DeleteUser(id string) error {
 }
 
 func (us *UserService) EnsureAdmin(password string) (string, error) {
-	if _, err := us.repo.FetchUserByName(us.cfg.App.AdminUser); err != nil {
+	if _, err := us.repo.FetchUserByName(us.cfg.App.AdminUser); err != nil { //nolint: nestif
 		if errors.Is(err, sql.ErrNoRows) {
 			// create Admin user
 			if password == "" {
@@ -112,8 +112,10 @@ func (us *UserService) EnsureAdmin(password string) (string, error) {
 			}); err != nil {
 				return "", err
 			}
+
 			return password, nil
 		}
+
 		return "", err
 	}
 
@@ -132,7 +134,7 @@ func (us *UserService) Login(login entity.Login, ts *TokenService) (*entity.Toke
 	}
 
 	if !ok {
-		return nil, fmt.Errorf("no")
+		return nil, apperror.ErrForbidden
 	}
 
 	expirationTime := time.Now().Add(time.Hour * time.Duration(us.cfg.App.TokenExpiration))

@@ -1,6 +1,6 @@
 package broker
 
-type BrokerAdapter interface {
+type Adapter interface {
 	Subscribe(channelName string) error
 	Publish(channelName string, message []byte) error
 }

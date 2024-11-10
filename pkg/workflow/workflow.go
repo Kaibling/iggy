@@ -28,6 +28,7 @@ func FromWorkflowEntity(e entity.Workflow) Workflow {
 	for _, c := range e.Children {
 		children = append(children, FromWorkflowEntity(c))
 	}
+
 	return Workflow{
 		ID:          e.ID,
 		Name:        e.Name,

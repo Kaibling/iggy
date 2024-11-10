@@ -31,7 +31,7 @@ func (ws *WorkflowService) FetchWorkflows(ids []string) (*entity.Workflow, error
 	maxDepth := 10
 	if workflows, err := ws.repo.FetchWorkflows(ids, maxDepth); err != nil {
 		return nil, err
-	} else {
+	} else { //nolint: revive
 		return &workflows[0], nil
 	}
 }
@@ -40,6 +40,7 @@ func (ws *WorkflowService) CreateWorkflow(u entity.NewWorkflow) (*entity.Workflo
 	if u.ID == "" {
 		u.ID = utils.NewULID().String()
 	}
+
 	return ws.repo.SaveWorkflow(u)
 }
 

@@ -86,5 +86,6 @@ func getEnv(key string, defaultValue string) string {
 			return defaultValue
 		}
 	}
+
 	return val
 }

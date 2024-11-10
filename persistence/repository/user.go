@@ -50,6 +50,7 @@ func (r *UserRepo) SaveUser(t entity.NewUser) (*entity.User, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return marshalUser(ret), nil
 }
 
@@ -58,6 +59,7 @@ func (r *UserRepo) FetchUser(id string) (*entity.User, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return marshalUser(rt), nil
 }
 
@@ -66,6 +68,7 @@ func (r *UserRepo) FetchByIDs(ids []string) ([]*entity.User, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return marshalUsers(rt), nil
 }
 
@@ -75,8 +78,10 @@ func (r *UserRepo) FetchUserByName(name string) (*entity.User, error) {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, sql.ErrNoRows
 		}
+
 		return nil, err
 	}
+
 	return marshalUser(rt), nil
 }
 
@@ -86,8 +91,10 @@ func (r *UserRepo) DeleteUser(id string) error {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return sql.ErrNoRows
 		}
+
 		return err
 	}
+
 	return nil
 }
 
@@ -108,8 +115,10 @@ func (r *UserRepo) UpdatePassword(passwordHash string, userID string) (*entity.U
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, sql.ErrNoRows
 		}
+
 		return nil, err
 	}
+
 	return marshalUser(user), nil
 }
 
@@ -137,6 +146,7 @@ func (r *UserRepo) IDQuery(idQuery string) ([]string, error) {
 	}
 
 	defer rows.Close()
+
 	return ids, nil
 }
 
@@ -153,6 +163,7 @@ func marshalUser(t sqlcrepo.User) *entity.User {
 			ModifiedBy: t.ModifiedBy,
 		},
 	}
+
 	return u
 }
 
@@ -172,6 +183,7 @@ func marshalUsers(repoUsers []sqlcrepo.User) []*entity.User {
 			},
 		})
 	}
+
 	return users
 }
 
@@ -183,5 +195,6 @@ func bool2Int(b bool) int32 {
 	if b {
 		return 1
 	}
+
 	return 0
 }

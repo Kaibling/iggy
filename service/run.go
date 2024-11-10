@@ -48,6 +48,7 @@ func (ts *RunService) CreateRun(newEntity entity.NewRun, runLogService *RunLogSe
 	if err := runLogService.CreateRunLogs(runLogs); err != nil {
 		return err
 	}
+
 	return nil
 }
 

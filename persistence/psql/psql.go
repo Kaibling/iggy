@@ -15,5 +15,6 @@ func New(ctx context.Context, cfg config.DBConfig) (*pgxpool.Pool, error) {
 		cfg.DBPassword,
 		cfg.DBHost,
 		cfg.DBPort)
+
 	return pgxpool.New(ctx, connStr)
 }

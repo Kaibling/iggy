@@ -15,6 +15,10 @@ func NewGeneric(err error) AppError {
 	return AppError{msg: err.Error(), StatusCode: http.StatusInternalServerError}
 }
 
+func NewStringGeneric(errMsg string) AppError {
+	return AppError{msg: errMsg, StatusCode: http.StatusInternalServerError}
+}
+
 func (e AppError) Error() string {
 	return e.msg
 }

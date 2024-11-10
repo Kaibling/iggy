@@ -2,13 +2,13 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/kaibling/apiforge/ctxkeys"
 	"github.com/kaibling/apiforge/envelope"
 	apierror "github.com/kaibling/apiforge/error"
+	"github.com/kaibling/iggy/apperror"
 	"github.com/kaibling/iggy/bootstrap"
 	"github.com/kaibling/iggy/pkg/config"
 )
@@ -21,11 +21,13 @@ func Authentication(next http.Handler) http.Handler {
 		// read token
 		if _, ok := r.Header["Authorization"]; !ok {
 			e.SetError(apierror.Forbidden).Finish(w, r)
+
 			return
 		}
 
 		if len(r.Header["Authorization"]) != 1 {
 			e.SetError(apierror.Forbidden).Finish(w, r)
+
 			return
 		}
 
@@ -34,6 +36,7 @@ func Authentication(next http.Handler) http.Handler {
 		position := 2
 		if len(authSlice) != position {
 			e.SetError(apierror.Forbidden).Finish(w, r)
+
 			return
 		}
 
@@ -46,6 +49,7 @@ func Authentication(next http.Handler) http.Handler {
 
 			return
 		}
+
 		us, err := bootstrap.NewUserServiceAnonym(r.Context(), config.SystemUser)
 		if err != nil {
 			e.SetError(apierror.NewGeneric(err)).Finish(w, r)
@@ -56,7 +60,8 @@ func Authentication(next http.Handler) http.Handler {
 		// TODO use not found sql error
 		user, err := us.ValidateToken(token, ts)
 		if err != nil {
-			e.SetError(apierror.New(fmt.Errorf("invalid token"), http.StatusUnauthorized)).Finish(w, r)
+			e.SetError(apierror.New(apperror.NewStringGeneric("invalid token"), http.StatusUnauthorized)).Finish(w, r)
+
 			return
 		}
 

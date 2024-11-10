@@ -35,6 +35,7 @@ func (rls *RunLogService) CreateRunLogs(newEntities []entity.NewRunLog) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
@@ -42,6 +43,7 @@ func (rls *RunLogService) CreateRunLog(u entity.NewRunLog) (*entity.RunLog, erro
 	if u.ID == "" {
 		u.ID = utils.NewULID().String()
 	}
+
 	return rls.repo.CreateRunLog(u)
 }
 
@@ -59,5 +61,6 @@ func (rls *RunLogService) Log(msg, runID string) error {
 	if _, err := rls.CreateRunLog(logLine); err != nil {
 		return err
 	}
+
 	return nil
 }

@@ -13,6 +13,7 @@ import (
 func fetchRun(w http.ResponseWriter, r *http.Request) {
 	runID := route.ReadUrlParam("id", r)
 	e := envelope.ReadEnvelope(r)
+
 	us, err := bootstrap.NewRunService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
@@ -23,6 +24,7 @@ func fetchRun(w http.ResponseWriter, r *http.Request) {
 	run, err := us.FetchRun(runID)
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
 		return
 	}
 
@@ -35,6 +37,7 @@ func createRun(w http.ResponseWriter, r *http.Request) {
 	var postRun entity.NewRun
 	if err := route.ReadPostData(r, &postRun); err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
 		return
 	}
 
@@ -55,6 +58,7 @@ func createRun(w http.ResponseWriter, r *http.Request) {
 	err = us.CreateRun(postRun, rs)
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
 		return
 	}
 
@@ -64,6 +68,7 @@ func createRun(w http.ResponseWriter, r *http.Request) {
 func fetchRunLogsByRun(w http.ResponseWriter, r *http.Request) {
 	runID := route.ReadUrlParam("id", r)
 	e := envelope.ReadEnvelope(r)
+
 	us, err := bootstrap.NewRunLogService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
@@ -74,6 +79,7 @@ func fetchRunLogsByRun(w http.ResponseWriter, r *http.Request) {
 	runLogs, err := us.FetchRunLogsByRun(runID)
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
 		return
 	}
 

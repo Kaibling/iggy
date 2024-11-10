@@ -10,6 +10,7 @@ import (
 
 func getTokens(w http.ResponseWriter, r *http.Request) {
 	e := envelope.ReadEnvelope(r)
+
 	ts, err := bootstrap.NewTokenService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
@@ -20,6 +21,7 @@ func getTokens(w http.ResponseWriter, r *http.Request) {
 	tokens, err := ts.ListTokens()
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
 		return
 	}
 

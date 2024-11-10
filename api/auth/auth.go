@@ -49,6 +49,13 @@ func authLogin(w http.ResponseWriter, r *http.Request) {
 func authLogout(w http.ResponseWriter, r *http.Request) {
 	e := envelope.ReadEnvelope(r)
 
+	token, err := bootstrap.ContextToken(r.Context())
+	if err != nil {
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
+		return
+	}
+
 	ts, err := bootstrap.NewTokenServiceAnonym(r.Context(), config.SystemUser)
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
@@ -56,7 +63,7 @@ func authLogout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = ts.DeleteTokenByValue(ctxkeys.GetValue(r.Context(), ctxkeys.TokenKey).(string))
+	err = ts.DeleteTokenByValue(token)
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 

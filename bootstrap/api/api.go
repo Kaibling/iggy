@@ -19,6 +19,7 @@ import (
 
 func Start(ctx context.Context, cfg config.Configuration, logger logging.LogWriter) error {
 	ctx = context.WithValue(ctx, ctxkeys.LoggerKey, logger)
+
 	conn, err := psql.New(ctx, cfg.DB)
 	if err != nil {
 		return err

@@ -15,6 +15,7 @@ func Pretty(data interface{}) string {
 func EncodeToBytes(p interface{}) ([]byte, error) {
 	buf := bytes.Buffer{}
 	enc := gob.NewEncoder(&buf)
+
 	err := enc.Encode(p)
 	if err != nil {
 		return nil, err

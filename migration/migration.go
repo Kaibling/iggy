@@ -4,6 +4,7 @@ import (
 	"embed"
 	"errors"
 	"fmt"
+	"net"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
@@ -15,11 +16,12 @@ import (
 var migrations embed.FS
 
 func SelfMigrate(cfg config.DBConfig) error {
-	databaseURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&x-migrations-table=\"public\".\"iggy_schema_migrations\"&x-migrations-table-quoted=1",
+	hostPort := net.JoinHostPort(cfg.DBHost, cfg.DBPort)
+	//nolint: lll,nosprintfhostport
+	databaseURL := fmt.Sprintf("postgres://%s@%s:%s/%s?sslmode=disable&x-migrations-table=\"public\".\"iggy_schema_migrations\"&x-migrations-table-quoted=1",
 		cfg.DBUser,
 		cfg.DBPassword,
-		cfg.DBHost,
-		cfg.DBPort,
+		hostPort,
 		cfg.DBDatabase,
 	)
 
@@ -52,7 +54,7 @@ func SelfMigrate(cfg config.DBConfig) error {
 }
 
 // func MigrateDB(prefix string, path string, cfg config.Configuration) error {
-
+//nolint: lll
 // 	databaseURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&x-migrations-table=\"public\".\"%s_schema_migrations\"&x-migrations-table-quoted=1",
 // 		cfg.DBUser,
 // 		cfg.DBPassword,

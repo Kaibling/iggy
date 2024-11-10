@@ -6,6 +6,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/kaibling/apiforge/ctxkeys"
+	"github.com/kaibling/apiforge/params"
 	"github.com/kaibling/iggy/adapters/broker"
 	"github.com/kaibling/iggy/apperror"
 	repo "github.com/kaibling/iggy/persistence/repository"
@@ -142,11 +143,30 @@ func NewWorkflowEngineService(ctx context.Context) (*service.WorkflowEngineServi
 	return service.NewWorkflowEngineService(ctx, cfg), nil
 }
 
-func NewWorker(ctx context.Context, workerName string) (broker.BrokerAdapter, error) {
+func NewWorker(_ context.Context, workerName string) (broker.Adapter, error) { //nolint:ireturn
 	switch workerName {
-	// case "loopback":
-	// 	return loopback.NewLoopback(ctx), nil
+	case "rabbitMQ":
+		panic("not implemented")
+
 	default:
-		return nil, apperror.NewGeneric(fmt.Errorf("worker adapter %s not found", workerName))
+		return nil, apperror.NewStringGeneric(fmt.Sprintf("worker adapter %s not found", workerName))
 	}
+}
+
+func ContextParams(ctx context.Context) (params.Pagination, error) {
+	p, ok := ctxkeys.GetValue(ctx, ctxkeys.PaginationKey).(params.Pagination)
+	if !ok {
+		return params.Pagination{}, apperror.ErrMissingContext
+	}
+
+	return p, nil
+}
+
+func ContextToken(ctx context.Context) (string, error) {
+	t, ok := ctxkeys.GetValue(ctx, ctxkeys.TokenKey).(string)
+	if !ok {
+		return "", apperror.ErrMissingContext
+	}
+
+	return t, nil
 }

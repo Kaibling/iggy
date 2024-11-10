@@ -13,15 +13,18 @@ import (
 func fetchWorkflow(w http.ResponseWriter, r *http.Request) {
 	workflowID := route.ReadUrlParam("id", r)
 	e := envelope.ReadEnvelope(r)
+
 	us, err := bootstrap.NewWorkflowService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 
 		return
 	}
+
 	workflow, err := us.FetchWorkflows([]string{workflowID})
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
 		return
 	}
 
@@ -32,19 +35,21 @@ func createWorkflow(w http.ResponseWriter, r *http.Request) {
 	e := envelope.ReadEnvelope(r)
 
 	var postWorkflow entity.NewWorkflow
-
 	if err := route.ReadPostData(r, &postWorkflow); err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
 		return
 	}
 
 	if err := postWorkflow.Validate(); err != nil {
 		e.SetError(err).Finish(w, r)
+
 		return
 	}
 
 	postWorkflow.ID = ""
 	postWorkflow.BuildIn = false
+
 	us, err := bootstrap.NewWorkflowService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
@@ -55,6 +60,7 @@ func createWorkflow(w http.ResponseWriter, r *http.Request) {
 	newWorkflow, err := us.CreateWorkflow(postWorkflow)
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
 		return
 	}
 
@@ -74,6 +80,7 @@ func deleteWorkflow(w http.ResponseWriter, r *http.Request) {
 
 	if err := us.DeleteWorkflow(workflowID); err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
 		return
 	}
 
@@ -90,9 +97,11 @@ func fetchRunsByWorkflow(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+
 	runs, err := us.FetchRunByWorkflow(workflowID)
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
 		return
 	}
 
@@ -133,6 +142,7 @@ func executeWorkflow(w http.ResponseWriter, r *http.Request) {
 
 	if err := wfs.Execute(workflowID, wfes, rs, rls); err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
 		return
 	}
 
@@ -146,6 +156,7 @@ func patchWorkflow(w http.ResponseWriter, r *http.Request) {
 	var updateWorkflow entity.UpdateWorkflow
 	if err := route.ReadPostData(r, &updateWorkflow); err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
 		return
 	}
 
@@ -159,6 +170,7 @@ func patchWorkflow(w http.ResponseWriter, r *http.Request) {
 	updatedWorkflow, err := ws.Update(workflowID, updateWorkflow)
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
 		return
 	}
 

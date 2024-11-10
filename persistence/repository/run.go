@@ -28,6 +28,7 @@ func NewRunRepo(ctx context.Context, username, requestID string, dbPool *pgxpool
 
 func (r *RunRepo) SaveRun(newModel entity.NewRun) (*entity.Run, error) {
 	var pgError pgtype.Text
+
 	if newModel.Error != nil {
 		pgError.String = *newModel.Error
 		pgError.Valid = true
@@ -97,11 +98,13 @@ func (r *RunRepo) FetchRunByWorkflow(workflowID string) ([]*entity.Run, error) {
 	}
 
 	runs := []*entity.Run{}
+
 	for _, rt := range t {
+		pErr := rt.Error
 		runs = append(runs, &entity.Run{
 			ID:         rt.ID,
 			WorkflowID: rt.WorkflowID,
-			Error:      &rt.Error.String, // TODO fix pointer
+			Error:      &pErr.String,
 			StartTime:  rt.StartTime.Time,
 			FinishTime: rt.FinishTime.Time,
 			Meta: entity.MetaData{
