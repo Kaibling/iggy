@@ -8,22 +8,20 @@ linters:
   enable-all: true
 
   disable:
+    - exportloopref  # deprecated
+    - execinquery # deprecated
+    - gomnd # deprecated
     - wrapcheck
     - varnamelen
     - exhaustruct
     - godox
-    - depguard # TODO fix config
+    - depguard # disabled, until sub packages can be allowed, withaout listing all of the packages
     - containedctx # TODO change repos
   # Disable specific linter
   # https://golangci-lint.run/usage/linters/#disabled-by-default
   # Enable only fast linters from enabled linters set (first run won't be fast)
   # Default: false
   fast: false
-  issues:
-    exclude-rules:
-      - lintes:
-          - godox
-        text: "Line contains TODO/BUG/FIXME:(.*)"
 linters-settings:
   tagliatelle:
     case:

@@ -41,3 +41,6 @@ vuln:
 
 gci:
 	gci write --skip-generated -s standard -s default .
+
+
+full-lint: gci fmt lint vuln
