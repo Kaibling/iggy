@@ -64,7 +64,7 @@ func Run(withWorker bool, withAPI bool) error {
 
 	ctxCancel()
 	// TODO context should be with timeout
-	gracePeriod := 400 * time.Millisecond //nolint:gomnd,mnd
+	gracePeriod := 400 * time.Millisecond //nolint:,mnd
 	time.Sleep(gracePeriod)
 
 	return nil
