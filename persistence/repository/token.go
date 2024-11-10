@@ -6,13 +6,11 @@ import (
 	"errors"
 	"time"
 
-	"github.com/kaibling/apiforge/ctxkeys"
-	"github.com/kaibling/iggy/entity"
-	"github.com/kaibling/iggy/persistence/sqlcrepo"
-
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/kaibling/iggy/entity"
+	"github.com/kaibling/iggy/persistence/sqlcrepo"
 )
 
 type TokenRepo struct {
@@ -21,11 +19,10 @@ type TokenRepo struct {
 	Username string
 }
 
-func NewTokenRepo(ctx context.Context, username string) *TokenRepo {
+func NewTokenRepo(ctx context.Context, username string, dbPool *pgxpool.Pool) *TokenRepo {
 	return &TokenRepo{
-		ctx: ctx,
-		q:   sqlcrepo.New(ctx.Value(ctxkeys.DBConnKey).(*pgxpool.Pool)),
-		// username: ctx.Value(apictx.String("user_name")).(string),
+		ctx:      ctx,
+		q:        sqlcrepo.New(dbPool),
 		Username: username,
 	}
 }

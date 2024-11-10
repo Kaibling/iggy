@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/kaibling/apiforge/ctxkeys"
 	"github.com/kaibling/iggy/adapters/broker"
 	"github.com/kaibling/iggy/apperror"
@@ -12,62 +13,133 @@ import (
 	"github.com/kaibling/iggy/service"
 )
 
-func NewUserService(ctx context.Context) *service.UserService {
-	username := ctxkeys.GetValue(ctx, ctxkeys.UserNameKey).(string)
-	cfg := ctxkeys.GetValue(ctx, "cfg").(config.Configuration)
+func contextDefaultData(ctx context.Context) (config.Configuration, *pgxpool.Pool, string, error) {
+	cfg, dbPool, err := contextBasisData(ctx)
+	if err != nil {
+		return cfg, dbPool, "", apperror.ErrMissingContext
+	}
 
-	userRepo := repo.NewUserRepo(ctx, username)
-	return service.NewUserService(ctx, userRepo, cfg)
+	username, ok := ctxkeys.GetValue(ctx, ctxkeys.UserNameKey).(string)
+	if !ok {
+		return cfg, dbPool, "", apperror.ErrMissingContext
+	}
+
+	return cfg, dbPool, username, nil
 }
 
-func NewTokenService(ctx context.Context) *service.TokenService {
-	username := ctxkeys.GetValue(ctx, ctxkeys.UserNameKey).(string)
-	cfg := ctxkeys.GetValue(ctx, "cfg").(config.Configuration)
+func contextBasisData(ctx context.Context) (config.Configuration, *pgxpool.Pool, error) {
+	cfg, ok := ctxkeys.GetValue(ctx, ctxkeys.AppConfigKey).(config.Configuration)
+	if !ok {
+		return config.Configuration{}, nil, apperror.ErrMissingContext
+	}
 
-	tokenRepo := repo.NewTokenRepo(ctx, username)
-	return service.NewTokenService(ctx, tokenRepo, cfg)
+	dbPool, ok := ctxkeys.GetValue(ctx, ctxkeys.DBConnKey).(*pgxpool.Pool)
+	if !ok {
+		return config.Configuration{}, nil, apperror.ErrMissingContext
+	}
+
+	return cfg, dbPool, nil
 }
 
-func NewUserServiceAnonym(ctx context.Context, username string) *service.UserService {
-	cfg := ctxkeys.GetValue(ctx, "cfg").(config.Configuration)
-	userRepo := repo.NewUserRepo(ctx, username)
-	return service.NewUserService(ctx, userRepo, cfg)
+func NewUserService(ctx context.Context) (*service.UserService, error) {
+	cfg, dbPool, username, err := contextDefaultData(ctx)
+	if err != nil {
+		return nil, apperror.ErrMissingContext
+	}
+
+	userRepo := repo.NewUserRepo(ctx, username, dbPool)
+
+	return service.NewUserService(ctx, userRepo, cfg), nil
 }
 
-func NewTokenServiceAnonym(ctx context.Context, username string) *service.TokenService {
-	cfg := ctxkeys.GetValue(ctx, "cfg").(config.Configuration)
-	tokenRepo := repo.NewTokenRepo(ctx, username)
-	return service.NewTokenService(ctx, tokenRepo, cfg)
+func NewTokenService(ctx context.Context) (*service.TokenService, error) {
+	cfg, dbPool, username, err := contextDefaultData(ctx)
+	if err != nil {
+		return nil, apperror.ErrMissingContext
+	}
+
+	tokenRepo := repo.NewTokenRepo(ctx, username, dbPool)
+
+	return service.NewTokenService(ctx, tokenRepo, cfg), nil
 }
 
-func NewWorkflowService(ctx context.Context) *service.WorkflowService {
-	username := ctxkeys.GetValue(ctx, ctxkeys.UserNameKey).(string)
-	cfg := ctxkeys.GetValue(ctx, "cfg").(config.Configuration)
+func NewUserServiceAnonym(ctx context.Context, username string) (*service.UserService, error) {
+	cfg, ok := ctxkeys.GetValue(ctx, ctxkeys.AppConfigKey).(config.Configuration)
+	if !ok {
+		return nil, apperror.ErrMissingContext
+	}
 
-	workflowRepo := repo.NewWorkflowRepo(ctx, username)
-	return service.NewWorkflowService(ctx, workflowRepo, cfg)
+	dbPool, ok := ctxkeys.GetValue(ctx, ctxkeys.DBConnKey).(*pgxpool.Pool)
+	if !ok {
+		return nil, apperror.ErrMissingContext
+	}
+
+	userRepo := repo.NewUserRepo(ctx, username, dbPool)
+
+	return service.NewUserService(ctx, userRepo, cfg), nil
 }
 
-func NewRunService(ctx context.Context) *service.RunService {
-	username := ctxkeys.GetValue(ctx, ctxkeys.UserNameKey).(string)
-	cfg := ctxkeys.GetValue(ctx, "cfg").(config.Configuration)
-	requestID := ctxkeys.GetValue(ctx, ctxkeys.RequestIDKey).(string)
+func NewTokenServiceAnonym(ctx context.Context, username string) (*service.TokenService, error) {
+	cfg, ok := ctxkeys.GetValue(ctx, ctxkeys.AppConfigKey).(config.Configuration)
+	if !ok {
+		return nil, apperror.ErrMissingContext
+	}
 
-	runRepo := repo.NewRunRepo(ctx, username, requestID)
-	return service.NewRunService(ctx, runRepo, cfg)
+	dbPool, ok := ctxkeys.GetValue(ctx, ctxkeys.DBConnKey).(*pgxpool.Pool)
+	if !ok {
+		return nil, apperror.ErrMissingContext
+	}
+
+	tokenRepo := repo.NewTokenRepo(ctx, username, dbPool)
+
+	return service.NewTokenService(ctx, tokenRepo, cfg), nil
 }
 
-func NewRunLogService(ctx context.Context) *service.RunLogService {
-	username := ctxkeys.GetValue(ctx, ctxkeys.UserNameKey).(string)
-	cfg := ctxkeys.GetValue(ctx, "cfg").(config.Configuration)
+func NewWorkflowService(ctx context.Context) (*service.WorkflowService, error) {
+	cfg, dbPool, username, err := contextDefaultData(ctx)
+	if err != nil {
+		return nil, apperror.ErrMissingContext
+	}
 
-	runLogRepo := repo.NewRunLogRepo(ctx, username)
-	return service.NewRunLogService(ctx, runLogRepo, cfg)
+	workflowRepo := repo.NewWorkflowRepo(ctx, username, dbPool)
+
+	return service.NewWorkflowService(ctx, workflowRepo, cfg), nil
 }
 
-func NewWorkflowEngineService(ctx context.Context) *service.WorkflowEngineService {
-	cfg := ctxkeys.GetValue(ctx, "cfg").(config.Configuration)
-	return service.NewWorkflowEngineService(ctx, cfg)
+func NewRunService(ctx context.Context) (*service.RunService, error) {
+	cfg, dbPool, username, err := contextDefaultData(ctx)
+	if err != nil {
+		return nil, apperror.ErrMissingContext
+	}
+
+	requestID, ok := ctxkeys.GetValue(ctx, ctxkeys.RequestIDKey).(string)
+	if !ok {
+		return nil, apperror.ErrMissingContext
+	}
+
+	runRepo := repo.NewRunRepo(ctx, username, requestID, dbPool)
+
+	return service.NewRunService(ctx, runRepo, cfg), nil
+}
+
+func NewRunLogService(ctx context.Context) (*service.RunLogService, error) {
+	cfg, dbPool, username, err := contextDefaultData(ctx)
+	if err != nil {
+		return nil, apperror.ErrMissingContext
+	}
+
+	runLogRepo := repo.NewRunLogRepo(ctx, username, dbPool)
+
+	return service.NewRunLogService(ctx, runLogRepo, cfg), nil
+}
+
+func NewWorkflowEngineService(ctx context.Context) (*service.WorkflowEngineService, error) {
+	cfg, ok := ctxkeys.GetValue(ctx, ctxkeys.AppConfigKey).(config.Configuration)
+	if !ok {
+		return nil, apperror.ErrMissingContext
+	}
+
+	return service.NewWorkflowEngineService(ctx, cfg), nil
 }
 
 func NewWorker(ctx context.Context, workerName string) (broker.BrokerAdapter, error) {

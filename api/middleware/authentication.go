@@ -40,8 +40,18 @@ func Authentication(next http.Handler) http.Handler {
 		token := authSlice[1]
 
 		// validate token and get username
-		ts := bootstrap.NewTokenServiceAnonym(r.Context(), config.SystemUser)
-		us := bootstrap.NewUserServiceAnonym(r.Context(), config.SystemUser)
+		ts, err := bootstrap.NewTokenServiceAnonym(r.Context(), config.SystemUser)
+		if err != nil {
+			e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
+			return
+		}
+		us, err := bootstrap.NewUserServiceAnonym(r.Context(), config.SystemUser)
+		if err != nil {
+			e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
+			return
+		}
 		// todo set token last used
 		// TODO use not found sql error
 		user, err := us.ValidateToken(token, ts)

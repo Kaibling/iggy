@@ -3,10 +3,9 @@ package auth
 import (
 	"net/http"
 
-	apierror "github.com/kaibling/apiforge/error"
-
 	"github.com/kaibling/apiforge/ctxkeys"
 	"github.com/kaibling/apiforge/envelope"
+	apierror "github.com/kaibling/apiforge/error"
 	"github.com/kaibling/apiforge/route"
 	"github.com/kaibling/iggy/bootstrap"
 	"github.com/kaibling/iggy/entity"
@@ -19,15 +18,28 @@ func authLogin(w http.ResponseWriter, r *http.Request) {
 	var postLogin entity.Login
 	if err := route.ReadPostData(r, &postLogin); err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
 		return
 	}
 
-	us := bootstrap.NewUserServiceAnonym(r.Context(), config.SystemUser)
-	ts := bootstrap.NewTokenServiceAnonym(r.Context(), config.SystemUser)
+	us, err := bootstrap.NewUserServiceAnonym(r.Context(), config.SystemUser)
+	if err != nil {
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
+		return
+	}
+
+	ts, err := bootstrap.NewTokenServiceAnonym(r.Context(), config.SystemUser)
+	if err != nil {
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
+		return
+	}
 
 	token, err := us.Login(postLogin, ts)
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
 		return
 	}
 
@@ -37,10 +49,17 @@ func authLogin(w http.ResponseWriter, r *http.Request) {
 func authLogout(w http.ResponseWriter, r *http.Request) {
 	e := envelope.ReadEnvelope(r)
 
-	ts := bootstrap.NewTokenServiceAnonym(r.Context(), config.SystemUser)
-	err := ts.DeleteTokenByValue(ctxkeys.GetValue(r.Context(), ctxkeys.TokenKey).(string))
+	ts, err := bootstrap.NewTokenServiceAnonym(r.Context(), config.SystemUser)
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
+		return
+	}
+
+	err = ts.DeleteTokenByValue(ctxkeys.GetValue(r.Context(), ctxkeys.TokenKey).(string))
+	if err != nil {
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
 		return
 	}
 
@@ -50,11 +69,18 @@ func authLogout(w http.ResponseWriter, r *http.Request) {
 func authCheck(w http.ResponseWriter, r *http.Request) {
 	e := envelope.ReadEnvelope(r)
 
-	ts := bootstrap.NewTokenServiceAnonym(r.Context(), config.SystemUser)
+	ts, err := bootstrap.NewTokenServiceAnonym(r.Context(), config.SystemUser)
+	if err != nil {
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
+		return
+	}
+
 	// TODO check expiration
 	t, err := ts.ReadTokenByValue(ctxkeys.GetValue(r.Context(), ctxkeys.TokenKey).(string))
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
 		return
 	}
 

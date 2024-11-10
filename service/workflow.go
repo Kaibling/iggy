@@ -2,12 +2,10 @@ package service
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/kaibling/apiforge/lib/utils"
 	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/pkg/config"
-	"github.com/kaibling/iggy/pkg/utility"
 )
 
 type workflowRepo interface {
@@ -53,7 +51,7 @@ func (ws *WorkflowService) DeleteWorkflow(id string) error {
 	return ws.repo.DeleteWorkflow(id)
 }
 
-func (ws *WorkflowService) Execute(workflowID string, workflowExecutionService *WorkflowEngineService, runService *RunService, runLogService *RunLogService) error { // nolint: lll
+func (ws *WorkflowService) Execute(workflowID string, workflowExecutionService *WorkflowEngineService, runService *RunService, runLogService *RunLogService) error { //nolint: lll
 	// get workflow
 	wf, err := ws.FetchWorkflows([]string{workflowID})
 	if err != nil {
@@ -65,7 +63,7 @@ func (ws *WorkflowService) Execute(workflowID string, workflowExecutionService *
 	if err != nil {
 		return err
 	}
-	fmt.Println(utility.Pretty(executedRuns))
+
 	// save runs
 	for _, newRun := range executedRuns {
 		if err := runService.CreateRun(newRun, runLogService); err != nil {

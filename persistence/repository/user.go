@@ -7,13 +7,11 @@ import (
 	"log"
 	"time"
 
-	"github.com/kaibling/apiforge/ctxkeys"
-	"github.com/kaibling/iggy/entity"
-	"github.com/kaibling/iggy/persistence/sqlcrepo"
-
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/kaibling/iggy/entity"
+	"github.com/kaibling/iggy/persistence/sqlcrepo"
 )
 
 type UserRepo struct {
@@ -23,12 +21,11 @@ type UserRepo struct {
 	Username string
 }
 
-func NewUserRepo(ctx context.Context, username string) *UserRepo {
+func NewUserRepo(ctx context.Context, username string, dbPool *pgxpool.Pool) *UserRepo {
 	return &UserRepo{
-		ctx: ctx,
-		q:   sqlcrepo.New(ctx.Value(ctxkeys.DBConnKey).(*pgxpool.Pool)),
-		db:  ctx.Value(ctxkeys.DBConnKey).(*pgxpool.Pool),
-		// username: ctx.Value(apictx.String("user_name")).(string),
+		ctx:      ctx,
+		q:        sqlcrepo.New(dbPool),
+		db:       dbPool,
 		Username: username,
 	}
 }

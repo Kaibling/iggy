@@ -4,12 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/kaibling/apiforge/ctxkeys"
-	"github.com/kaibling/iggy/entity"
-	"github.com/kaibling/iggy/persistence/sqlcrepo"
-
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/kaibling/iggy/entity"
+	"github.com/kaibling/iggy/persistence/sqlcrepo"
 )
 
 type RunRepo struct {
@@ -19,11 +17,10 @@ type RunRepo struct {
 	requestID string
 }
 
-func NewRunRepo(ctx context.Context, username, requestID string) *RunRepo {
+func NewRunRepo(ctx context.Context, username, requestID string, dbPool *pgxpool.Pool) *RunRepo {
 	return &RunRepo{
-		ctx: ctx,
-		q:   sqlcrepo.New(ctx.Value(ctxkeys.DBConnKey).(*pgxpool.Pool)),
-		// username: ctx.Value(apictx.String("user_name")).(string),
+		ctx:       ctx,
+		q:         sqlcrepo.New(dbPool),
 		username:  username,
 		requestID: requestID,
 	}

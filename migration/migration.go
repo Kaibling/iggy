@@ -2,6 +2,7 @@ package migration
 
 import (
 	"embed"
+	"errors"
 	"fmt"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -23,12 +24,14 @@ func SelfMigrate(cfg config.DBConfig) error {
 	)
 
 	p := &postgres.Postgres{}
+
 	driver, err := p.Open(databaseURL)
 	if err != nil {
 		return err
 	}
 
 	defer driver.Close()
+
 	d, err := iofs.New(migrations, "migration_data")
 	if err != nil {
 		return err
@@ -40,7 +43,8 @@ func SelfMigrate(cfg config.DBConfig) error {
 	}
 
 	err = m.Up()
-	if err != nil && err != migrate.ErrNoChange {
+
+	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		return err
 	}
 

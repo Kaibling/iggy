@@ -7,14 +7,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kaibling/apiforge/ctxkeys"
-	"github.com/kaibling/iggy/apperror"
-	"github.com/kaibling/iggy/entity"
-	"github.com/kaibling/iggy/persistence/sqlcrepo"
-
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/kaibling/iggy/apperror"
+	"github.com/kaibling/iggy/entity"
+	"github.com/kaibling/iggy/persistence/sqlcrepo"
 )
 
 type WorkflowRepo struct {
@@ -24,18 +22,18 @@ type WorkflowRepo struct {
 	username string
 }
 
-func NewWorkflowRepo(ctx context.Context, username string) *WorkflowRepo {
+func NewWorkflowRepo(ctx context.Context, username string, dbPool *pgxpool.Pool) *WorkflowRepo {
 	return &WorkflowRepo{
-		ctx: ctx,
-		q:   sqlcrepo.New(ctx.Value(ctxkeys.DBConnKey).(*pgxpool.Pool)),
-		db:  ctx.Value(ctxkeys.DBConnKey).(*pgxpool.Pool),
-		// username: ctx.Value(apictx.String("user_name")).(string),
+		ctx:      ctx,
+		q:        sqlcrepo.New(dbPool),
+		db:       dbPool,
 		username: username,
 	}
 }
 
 func (r *WorkflowRepo) SaveWorkflow(newModel entity.NewWorkflow) (*entity.Workflow, error) {
 	maxDepth := 1
+
 	newWorkflowID, err := r.q.SaveWorkflow(r.ctx, sqlcrepo.SaveWorkflowParams{
 		ID:   newModel.ID,
 		Name: newModel.Name,
@@ -57,7 +55,6 @@ func (r *WorkflowRepo) SaveWorkflow(newModel entity.NewWorkflow) (*entity.Workfl
 		},
 		ModifiedBy: r.username,
 	})
-
 	if err != nil {
 		return nil, err
 	}

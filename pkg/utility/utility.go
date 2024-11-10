@@ -27,6 +27,7 @@ func DecodeToStruct[T any](s []byte) (T, error) { //nolint: ireturn
 	var p T
 
 	dec := gob.NewDecoder(bytes.NewReader(s))
+
 	err := dec.Decode(&p)
 	if err != nil {
 		return p, err

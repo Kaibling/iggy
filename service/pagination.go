@@ -62,6 +62,7 @@ func (p *Pagination) clauses() string {
 	for _, c := range p.WhereClauses {
 		clause.WriteString(c)
 	}
+
 	return clause.String()
 }
 
@@ -129,5 +130,6 @@ func operator(direction, order string) string {
 			op = "<"
 		}
 	}
+
 	return op
 }

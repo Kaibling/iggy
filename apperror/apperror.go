@@ -38,6 +38,11 @@ var ErrMalformedRequest = AppError{
 	StatusCode: http.StatusUnprocessableEntity,
 }
 
+var ErrMissingContext = AppError{
+	msg:        "context data missing",
+	StatusCode: http.StatusInternalServerError,
+}
+
 // var ServerError = AppError{
 // 	msg:        "internal server error",
 // 	StatusCode: http.StatusInternalServerError,

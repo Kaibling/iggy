@@ -27,7 +27,7 @@ type NewWorkflow struct {
 	Children    []Identifier `json:"children"`
 }
 
-// TODO add more data, what is wrong
+// TODO add more data, what is wrong.
 func (w NewWorkflow) Validate() *apperror.AppError {
 	if w.ObjectType == "" {
 		return &apperror.ErrMalformedRequest

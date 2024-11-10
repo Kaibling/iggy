@@ -33,12 +33,12 @@ func (l *Loopback) Subscribe(_ string) error {
 				fmt.Println(err.Error())
 			}
 			fmt.Println(utility.Pretty(t))
-
 		}
 	}
 }
 
 func (l *Loopback) Publish(_ string, message []byte) error {
 	l.c <- message
+
 	return nil
 }

@@ -40,4 +40,4 @@ vuln:
 	govulncheck ./...
 
 gci:
-	gci write --skip-generated -s standard -s default
+	gci write --skip-generated -s standard -s default .

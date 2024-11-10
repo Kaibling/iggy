@@ -6,7 +6,6 @@ import (
 	"github.com/kaibling/apiforge/envelope"
 	apierror "github.com/kaibling/apiforge/error"
 	"github.com/kaibling/apiforge/route"
-
 	"github.com/kaibling/iggy/bootstrap"
 	"github.com/kaibling/iggy/entity"
 )
@@ -14,7 +13,12 @@ import (
 func fetchWorkflow(w http.ResponseWriter, r *http.Request) {
 	workflowID := route.ReadUrlParam("id", r)
 	e := envelope.ReadEnvelope(r)
-	us := bootstrap.NewWorkflowService(r.Context())
+	us, err := bootstrap.NewWorkflowService(r.Context())
+	if err != nil {
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
+		return
+	}
 	workflow, err := us.FetchWorkflows([]string{workflowID})
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
@@ -38,9 +42,16 @@ func createWorkflow(w http.ResponseWriter, r *http.Request) {
 		e.SetError(err).Finish(w, r)
 		return
 	}
+
 	postWorkflow.ID = ""
 	postWorkflow.BuildIn = false
-	us := bootstrap.NewWorkflowService(r.Context())
+	us, err := bootstrap.NewWorkflowService(r.Context())
+	if err != nil {
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
+		return
+	}
+
 	newWorkflow, err := us.CreateWorkflow(postWorkflow)
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
@@ -53,7 +64,14 @@ func createWorkflow(w http.ResponseWriter, r *http.Request) {
 func deleteWorkflow(w http.ResponseWriter, r *http.Request) {
 	e := envelope.ReadEnvelope(r)
 	workflowID := route.ReadUrlParam("id", r)
-	us := bootstrap.NewWorkflowService(r.Context())
+
+	us, err := bootstrap.NewWorkflowService(r.Context())
+	if err != nil {
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
+		return
+	}
+
 	if err := us.DeleteWorkflow(workflowID); err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
@@ -65,7 +83,13 @@ func deleteWorkflow(w http.ResponseWriter, r *http.Request) {
 func fetchRunsByWorkflow(w http.ResponseWriter, r *http.Request) {
 	workflowID := route.ReadUrlParam("id", r)
 	e := envelope.ReadEnvelope(r)
-	us := bootstrap.NewRunService(r.Context())
+
+	us, err := bootstrap.NewRunService(r.Context())
+	if err != nil {
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
+		return
+	}
 	runs, err := us.FetchRunByWorkflow(workflowID)
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
@@ -79,10 +103,34 @@ func executeWorkflow(w http.ResponseWriter, r *http.Request) {
 	workflowID := route.ReadUrlParam("id", r)
 	e := envelope.ReadEnvelope(r)
 
-	wfs := bootstrap.NewWorkflowService(r.Context())
-	rs := bootstrap.NewRunService(r.Context())
-	rls := bootstrap.NewRunLogService(r.Context())
-	wfes := bootstrap.NewWorkflowEngineService(r.Context())
+	wfs, err := bootstrap.NewWorkflowService(r.Context())
+	if err != nil {
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
+		return
+	}
+
+	rs, err := bootstrap.NewRunService(r.Context())
+	if err != nil {
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
+		return
+	}
+
+	rls, err := bootstrap.NewRunLogService(r.Context())
+	if err != nil {
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
+		return
+	}
+
+	wfes, err := bootstrap.NewWorkflowEngineService(r.Context())
+	if err != nil {
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
+		return
+	}
+
 	if err := wfs.Execute(workflowID, wfes, rs, rls); err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
@@ -101,7 +149,13 @@ func patchWorkflow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ws := bootstrap.NewWorkflowService(r.Context())
+	ws, err := bootstrap.NewWorkflowService(r.Context())
+	if err != nil {
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+
+		return
+	}
+
 	updatedWorkflow, err := ws.Update(workflowID, updateWorkflow)
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)

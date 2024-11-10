@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/kaibling/apiforge/ctxkeys"
@@ -24,19 +23,24 @@ func Start(ctx context.Context, cfg config.Configuration, logger logging.LogWrit
 	if err != nil {
 		return err
 	}
+
 	ctx = context.WithValue(ctx, ctxkeys.DBConnKey, conn)
 	ctx = context.WithValue(ctx, ctxkeys.String("cfg"), cfg)
+
 	if err = migration.SelfMigrate(cfg.DB); err != nil {
 		return err
 	}
 
 	logger.LogLine("rh migration successful")
 
-	userService := bootstrap.NewUserServiceAnonym(ctx, config.SystemUser)
+	userService, err := bootstrap.NewUserServiceAnonym(ctx, config.SystemUser)
+	if err != nil {
+		logger.LogLine(err.Error())
+	}
 
 	pwd, err := userService.EnsureAdmin(cfg.App.AdminPassword)
 	if err != nil {
-		fmt.Println(err.Error())
+		logger.LogLine(err.Error())
 	}
 
 	if pwd != "" {

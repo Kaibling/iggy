@@ -4,12 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/kaibling/apiforge/ctxkeys"
-	"github.com/kaibling/iggy/entity"
-	"github.com/kaibling/iggy/persistence/sqlcrepo"
-
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/kaibling/iggy/entity"
+	"github.com/kaibling/iggy/persistence/sqlcrepo"
 )
 
 type RunLogRepo struct {
@@ -18,11 +16,10 @@ type RunLogRepo struct {
 	username string
 }
 
-func NewRunLogRepo(ctx context.Context, username string) *RunLogRepo {
+func NewRunLogRepo(ctx context.Context, username string, dbPool *pgxpool.Pool) *RunLogRepo {
 	return &RunLogRepo{
-		ctx: ctx,
-		q:   sqlcrepo.New(ctx.Value(ctxkeys.DBConnKey).(*pgxpool.Pool)),
-		// username: ctx.Value(apictx.String("user_name")).(string),
+		ctx:      ctx,
+		q:        sqlcrepo.New(dbPool),
 		username: username,
 	}
 }
@@ -40,6 +37,7 @@ func (r *RunLogRepo) CreateRunLog(newModel entity.NewRunLog) (*entity.RunLog, er
 	if err != nil {
 		return nil, err
 	}
+
 	return r.FetchRunLog(newRunLogID)
 }
 
@@ -69,6 +67,7 @@ func (r *RunLogRepo) FetchRunLog(id string) (*entity.RunLog, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &entity.RunLog{
 		ID:        rt.ID,
 		RunID:     rt.RunID,

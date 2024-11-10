@@ -40,7 +40,7 @@ func (e Engine) execute_workflow(w Workflow, sharedData map[string]any) Result {
 	if w.ObjectType == Folder {
 		return e.executeFolder(w, sharedData)
 	}
-	return e.execute_adapter(w, sharedData)
+	return e.executeAdapter(w, sharedData)
 }
 
 func (e Engine) executeFolder(w Workflow, sharedData map[string]any) Result {
@@ -58,7 +58,6 @@ func (e Engine) executeFolder(w Workflow, sharedData map[string]any) Result {
 				Runs:  runs,
 			}
 		}
-
 	}
 	return Result{
 		Error: nil,
@@ -66,7 +65,7 @@ func (e Engine) executeFolder(w Workflow, sharedData map[string]any) Result {
 	}
 }
 
-func (e Engine) execute_adapter(w Workflow, sharedData map[string]any) Result {
+func (e Engine) executeAdapter(w Workflow, sharedData map[string]any) Result {
 	execAdapter, err := e.getAdapter(w.ObjectType)
 	if err != nil {
 		return Result{

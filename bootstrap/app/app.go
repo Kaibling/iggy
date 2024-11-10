@@ -35,7 +35,6 @@ func Run(withWorker bool, withAPI bool) error {
 		var worker broker.BrokerAdapter
 
 		if cfg.Broker.Broker == "loopback" {
-
 			internalChannel := make(chan []byte, innerChannelSize)
 			worker = loopback.NewLoopback(ctx, internalChannel, logger)
 		} else {
