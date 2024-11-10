@@ -45,7 +45,6 @@ func SelfMigrate(cfg config.DBConfig) error {
 	}
 
 	return nil
-
 }
 
 // func MigrateDB(prefix string, path string, cfg config.Configuration) error {

@@ -9,7 +9,7 @@ func Route() chi.Router { //nolint: ireturn
 	r := chi.NewRouter()
 	r.Route("/", func(r chi.Router) {
 		r.Use(middleware.Authentication)
-		//r.Use(middleware.Authorization)
+		// r.Use(middleware.Authorization)
 		r.Post("/", createWorkflow)
 		r.Patch("/{id}", patchWorkflow)
 		r.Get("/{id}", fetchWorkflow)

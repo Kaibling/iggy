@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -17,7 +18,7 @@ type userRepo interface {
 	SaveUser(u entity.NewUser) (*entity.User, error)
 	FetchUserByName(name string) (*entity.User, error)
 	FetchByIDs(ids []string) ([]*entity.User, error)
-	//FetchAll() ([]*entity.User, error)
+	// FetchAll() ([]*entity.User, error)
 	DeleteUser(id string) error
 	IDQuery(query string) ([]string, error)
 }
@@ -37,6 +38,7 @@ func (us *UserService) FetchUser(id string) (*entity.User, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return loadedUser[0], nil
 }
 
@@ -58,10 +60,13 @@ func (us *UserService) CreateUser(u entity.NewUser) (*entity.User, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	u.Password = pwd
+
 	if u.ID == "" {
 		u.ID = utils.NewULID().String()
 	}
+
 	return us.repo.SaveUser(u)
 }
 
@@ -69,7 +74,7 @@ func (us *UserService) FetchByPagination(qp params.Pagination) ([]*entity.User, 
 	p := NewPagination(qp, "users")
 
 	idQuery := p.GetCursorSQL()
-	fmt.Println(idQuery)
+
 	ids, err := us.repo.IDQuery(idQuery)
 	if err != nil {
 		return nil, params.Pagination{}, err
@@ -84,17 +89,19 @@ func (us *UserService) FetchByPagination(qp params.Pagination) ([]*entity.User, 
 
 	return loadedUsers, pag, nil
 }
+
 func (us *UserService) DeleteUser(id string) error {
 	return us.repo.DeleteUser(id)
 }
 
 func (us *UserService) EnsureAdmin(password string) (string, error) {
 	if _, err := us.repo.FetchUserByName(us.cfg.App.AdminUser); err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			// create Admin user
 			if password == "" {
 				password = utils.NewULID().String()
 			}
+
 			pwdhash, _ := crypto.HashPassword(password, us.cfg.App.PasswordCost)
 
 			if _, err = us.repo.SaveUser(entity.NewUser{
@@ -109,6 +116,7 @@ func (us *UserService) EnsureAdmin(password string) (string, error) {
 		}
 		return "", err
 	}
+
 	return "", nil
 }
 
@@ -117,6 +125,7 @@ func (us *UserService) Login(login entity.Login, ts *TokenService) (*entity.Toke
 	if err != nil {
 		return nil, err
 	}
+
 	ok, err := crypto.CheckPasswordHash(login.Password, user.Password)
 	if err != nil {
 		return nil, err
@@ -125,14 +134,15 @@ func (us *UserService) Login(login entity.Login, ts *TokenService) (*entity.Toke
 	if !ok {
 		return nil, fmt.Errorf("no")
 	}
+
 	expirationTime := time.Now().Add(time.Hour * time.Duration(us.cfg.App.TokenExpiration))
+
 	return ts.CreateToken(entity.CreateNewToken(user.ID, expirationTime))
 }
 
 func (us *UserService) ValidateToken(token string, ts *TokenService) (*entity.User, error) {
 	t, err := ts.ReadTokenByValue(token)
 	if err != nil {
-		fmt.Printf("_> %v\n", err.Error())
 		return nil, err
 	}
 

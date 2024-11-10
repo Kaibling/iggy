@@ -3,7 +3,8 @@ package repo
 import (
 	"context"
 	"database/sql"
-	"log"
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/kaibling/apiforge/ctxkeys"
@@ -99,11 +100,11 @@ func (r *WorkflowRepo) UpdateWorkflow(workflowID string, updateEntity entity.Upd
 	}
 }
 
-func (r *WorkflowRepo) FetchWorkflows(workflowIDs []string, maxDepth int) ([]entity.Workflow, error) {
+func (r *WorkflowRepo) FetchWorkflows(ids []string, depth int) ([]entity.Workflow, error) {
 	rawQuery := `
 	WITH RECURSIVE workflow_hierarchy AS (
 		SELECT 
-			w.id,
+			w.id
 			w.name,
 			w.code,
 			w.object_type,
@@ -147,9 +148,9 @@ func (r *WorkflowRepo) FetchWorkflows(workflowIDs []string, maxDepth int) ([]ent
 	SELECT * FROM workflow_hierarchy;
 `
 
-	rows, err := r.db.Query(context.Background(), rawQuery, workflowIDs, maxDepth)
+	rows, err := r.db.Query(context.Background(), rawQuery, ids, depth)
 	if err != nil {
-		log.Fatalf("failed to execute query: %v", err)
+		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
 	defer rows.Close()
 
@@ -172,18 +173,18 @@ func (r *WorkflowRepo) FetchWorkflows(workflowIDs []string, maxDepth int) ([]ent
 			&wf.Parent,
 			&wf.Depth,
 		); err != nil {
-			log.Fatalf("failed to scan row: %v", err)
+			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
 
 		workflows = append(workflows, wf)
 	}
 
 	if err := rows.Err(); err != nil {
-		log.Fatalf("row iteration error: %v", err)
+		return nil, fmt.Errorf("row iteration error: %w", err)
 	}
 
 	workflowMap := map[string][]entity.Workflow{}
-	root := doa(workflows, maxDepth, workflowMap)
+	root := doa(workflows, depth, workflowMap)
 
 	v, ok := root["root"]
 	if !ok {
@@ -201,7 +202,7 @@ func (r *WorkflowRepo) DeleteWorkflow(id string) error {
 		ID: id,
 	})
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return sql.ErrNoRows
 		}
 		return err
@@ -242,7 +243,6 @@ func doa(r []RawWorkflow, depth int, b map[string][]entity.Workflow) map[string]
 
 			// If children exist for this workflow, merge them
 			if children, exists := b[newModel.ID]; exists {
-
 				if newModel.Children == nil {
 					newModel.Children = []entity.Workflow{}
 				}
@@ -270,7 +270,10 @@ func doa(r []RawWorkflow, depth int, b map[string][]entity.Workflow) map[string]
 	return b
 }
 
-func ConvertToUpdateWorkflowParams(input entity.UpdateWorkflow, workflowID, modifiedBy string) sqlcrepo.UpdateWorkflowParams {
+func ConvertToUpdateWorkflowParams(
+	input entity.UpdateWorkflow,
+	workflowID, modifiedBy string,
+) sqlcrepo.UpdateWorkflowParams {
 	var params sqlcrepo.UpdateWorkflowParams
 
 	params.ID = workflowID

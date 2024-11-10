@@ -14,6 +14,7 @@ type Javascript struct {
 func NewJavascriptAdapter() *Javascript {
 	return &Javascript{logs: []entity.NewRunLog{}}
 }
+
 func (j *Javascript) Execute(code string, sharedData map[string]any) ExecutionResult {
 	vm := goja.New()
 
@@ -25,6 +26,7 @@ func (j *Javascript) Execute(code string, sharedData map[string]any) ExecutionRe
 	if err := setVariables(vm, vars); err != nil {
 		return ExecutionResult{err, sharedData, j.logs}
 	}
+
 	_, err := vm.RunString(code)
 	if err != nil {
 		return ExecutionResult{err, sharedData, j.logs}
@@ -34,12 +36,10 @@ func (j *Javascript) Execute(code string, sharedData map[string]any) ExecutionRe
 }
 
 func (j *Javascript) log(msg string) {
-
 	j.logs = append(j.logs, entity.NewRunLog{
 		Message:   msg,
 		Timestamp: time.Now(),
 	})
-
 }
 
 func setVariables(vm *goja.Runtime, variables map[string]any) error {

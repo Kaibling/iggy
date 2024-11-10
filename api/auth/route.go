@@ -10,7 +10,6 @@ func Route() chi.Router { //nolint: ireturn
 		r.Post("/login", authLogin)
 		r.Get("/logout", authLogout)
 		r.Get("/check", authCheck)
-
 	})
 
 	return r

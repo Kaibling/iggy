@@ -34,7 +34,6 @@ func (e Engine) Execute(workflow entity.Workflow) ([]entity.NewRun, error) {
 		runs = append(runs, r.ToNewEntity())
 	}
 	return runs, result.Error
-
 }
 
 func (e Engine) execute_workflow(w Workflow, sharedData map[string]any) Result {

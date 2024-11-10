@@ -47,6 +47,7 @@ func userPost(w http.ResponseWriter, r *http.Request) {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
 	}
+
 	postUser.ID = ""
 	us := bootstrap.NewUserService(r.Context())
 	newUser, err := us.CreateUser(postUser)

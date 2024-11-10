@@ -22,6 +22,7 @@ func CheckPasswordHash(password, hash string) (bool, error) {
 
 func GenerateAPIKey(length int) (string, error) {
 	key := make([]byte, length)
+
 	_, err := rand.Read(key)
 	if err != nil {
 		return "", err

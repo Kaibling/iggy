@@ -7,10 +7,13 @@
       "listMode": "Strict",
       "allow": [
         "$gostd",
-        "github.com/OpenPeeDeeP"
+        "github.com/kaibling/apiforge",
+        "github.com/dop251/goja",
+        "github.com/jackc/pgx/v5",
+        "$gomodname"
       ],
       "deny": {
-        "reflect": "Who needs reflection",
+        "reflect": "Who needs reflection"
       }
     },
     "tests": {

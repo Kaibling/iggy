@@ -10,6 +10,10 @@ linters:
   disable:
     - wrapcheck
     - varnamelen
+    - exhaustruct
+    - godox
+    - depguard # TODO fix config
+    - containedctx # TODO change repos
   # Disable specific linter
   # https://golangci-lint.run/usage/linters/#disabled-by-default
   # Enable only fast linters from enabled linters set (first run won't be fast)

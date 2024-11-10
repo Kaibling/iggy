@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/kaibling/apiforge/ctxkeys"
@@ -24,13 +25,12 @@ func NewTokenRepo(ctx context.Context, username string) *TokenRepo {
 	return &TokenRepo{
 		ctx: ctx,
 		q:   sqlcrepo.New(ctx.Value(ctxkeys.DBConnKey).(*pgxpool.Pool)),
-		//username: ctx.Value(apictx.String("user_name")).(string),
+		// username: ctx.Value(apictx.String("user_name")).(string),
 		Username: username,
 	}
 }
 
 func (r *TokenRepo) CreateToken(t entity.NewToken) (*entity.Token, error) {
-
 	newTokenID, err := r.q.CreateToken(r.ctx, sqlcrepo.CreateTokenParams{
 		Value:  t.Value,
 		ID:     t.ID,
@@ -80,7 +80,7 @@ func (r *TokenRepo) ReadToken(id string) (*entity.Token, error) {
 func (r *TokenRepo) ReadTokenByValue(t string) (*entity.Token, error) {
 	rt, err := r.q.GetTokenByValue(r.ctx, t)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, sql.ErrNoRows
 		}
 		return nil, err
@@ -105,6 +105,7 @@ func (r *TokenRepo) ListTokens() ([]*entity.Token, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	users := []*entity.Token{}
 
 	for _, t := range rt {
@@ -130,6 +131,7 @@ func (r *TokenRepo) ListUserToken(username string) ([]*entity.Token, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	users := []*entity.Token{}
 
 	for _, t := range rt {
@@ -153,7 +155,7 @@ func (r *TokenRepo) ListUserToken(username string) ([]*entity.Token, error) {
 func (r *TokenRepo) DeleteTokenByValue(t string) error {
 	err := r.q.DeleteTokenByValue(r.ctx, t)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return sql.ErrNoRows
 		}
 		return err

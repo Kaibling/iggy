@@ -27,6 +27,7 @@ var ErrForbidden = AppError{
 	msg:        "permission denied",
 	StatusCode: http.StatusForbidden,
 }
+
 var ErrMissingJSAdapter = AppError{
 	msg:        "Adapter missing",
 	StatusCode: http.StatusInternalServerError,

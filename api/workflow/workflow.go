@@ -100,6 +100,7 @@ func patchWorkflow(w http.ResponseWriter, r *http.Request) {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
 	}
+
 	ws := bootstrap.NewWorkflowService(r.Context())
 	updatedWorkflow, err := ws.Update(workflowID, updateWorkflow)
 	if err != nil {

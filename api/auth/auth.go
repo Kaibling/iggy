@@ -21,8 +21,10 @@ func authLogin(w http.ResponseWriter, r *http.Request) {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
 		return
 	}
-	us := bootstrap.NewUserServiceAnonym(r.Context(), config.SYSTEM_USER)
-	ts := bootstrap.NewTokenServiceAnonym(r.Context(), config.SYSTEM_USER)
+
+	us := bootstrap.NewUserServiceAnonym(r.Context(), config.SystemUser)
+	ts := bootstrap.NewTokenServiceAnonym(r.Context(), config.SystemUser)
+
 	token, err := us.Login(postLogin, ts)
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
@@ -35,7 +37,7 @@ func authLogin(w http.ResponseWriter, r *http.Request) {
 func authLogout(w http.ResponseWriter, r *http.Request) {
 	e := envelope.ReadEnvelope(r)
 
-	ts := bootstrap.NewTokenServiceAnonym(r.Context(), config.SYSTEM_USER)
+	ts := bootstrap.NewTokenServiceAnonym(r.Context(), config.SystemUser)
 	err := ts.DeleteTokenByValue(ctxkeys.GetValue(r.Context(), ctxkeys.TokenKey).(string))
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
@@ -48,7 +50,7 @@ func authLogout(w http.ResponseWriter, r *http.Request) {
 func authCheck(w http.ResponseWriter, r *http.Request) {
 	e := envelope.ReadEnvelope(r)
 
-	ts := bootstrap.NewTokenServiceAnonym(r.Context(), config.SYSTEM_USER)
+	ts := bootstrap.NewTokenServiceAnonym(r.Context(), config.SystemUser)
 	// TODO check expiration
 	t, err := ts.ReadTokenByValue(ctxkeys.GetValue(r.Context(), ctxkeys.TokenKey).(string))
 	if err != nil {

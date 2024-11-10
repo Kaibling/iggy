@@ -32,7 +32,7 @@ func Start(ctx context.Context, cfg config.Configuration, logger logging.LogWrit
 
 	logger.LogLine("rh migration successful")
 
-	userService := bootstrap.NewUserServiceAnonym(ctx, config.SYSTEM_USER)
+	userService := bootstrap.NewUserServiceAnonym(ctx, config.SystemUser)
 
 	pwd, err := userService.EnsureAdmin(cfg.App.AdminPassword)
 	if err != nil {

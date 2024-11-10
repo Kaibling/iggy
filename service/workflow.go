@@ -13,9 +13,9 @@ import (
 type workflowRepo interface {
 	SaveWorkflow(newModel entity.NewWorkflow) (*entity.Workflow, error)
 	UpdateWorkflow(id string, updateEntity entity.UpdateWorkflow) (*entity.Workflow, error)
-	//FetchWorkflow(id string) (*entity.Workflow, error)
+	// FetchWorkflow(id string) (*entity.Workflow, error)
 	FetchWorkflows(ids []string, depth int) ([]entity.Workflow, error)
-	//FetchAll() ([]*entity.Workflow, error)
+	// FetchAll() ([]*entity.Workflow, error)
 	DeleteWorkflow(id string) error
 }
 
@@ -36,7 +36,6 @@ func (ws *WorkflowService) FetchWorkflows(ids []string) (*entity.Workflow, error
 	} else {
 		return &workflows[0], nil
 	}
-
 }
 
 func (ws *WorkflowService) CreateWorkflow(u entity.NewWorkflow) (*entity.Workflow, error) {
@@ -54,7 +53,7 @@ func (ws *WorkflowService) DeleteWorkflow(id string) error {
 	return ws.repo.DeleteWorkflow(id)
 }
 
-func (ws *WorkflowService) Execute(workflowID string, workflowExecutionService *WorkflowEngineService, runService *RunService, runLogService *RunLogService) error {
+func (ws *WorkflowService) Execute(workflowID string, workflowExecutionService *WorkflowEngineService, runService *RunService, runLogService *RunLogService) error { // nolint: lll
 	// get workflow
 	wf, err := ws.FetchWorkflows([]string{workflowID})
 	if err != nil {
@@ -72,7 +71,6 @@ func (ws *WorkflowService) Execute(workflowID string, workflowExecutionService *
 		if err := runService.CreateRun(newRun, runLogService); err != nil {
 			return err
 		}
-
 	}
 
 	return nil

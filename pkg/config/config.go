@@ -6,8 +6,9 @@ import (
 )
 
 const (
-	OS_PREFIX   = "IGGY"
-	SYSTEM_USER = "SYSTEM"
+	osPrefix     = "IGGY"
+	SystemUser   = "SYSTEM"
+	passwordCost = 11
 )
 
 type Configuration struct {
@@ -42,7 +43,12 @@ type BrokerConfig struct {
 func Load() (Configuration, error) {
 	tokenExpiration, err := strconv.Atoi(getEnv("TOKEN_EXPIRATION", "2"))
 	if err != nil {
-		return Configuration{}, nil
+		return Configuration{}, err
+	}
+
+	tokenLength, err := strconv.Atoi(getEnv("TOKEN_LENGTH", "32"))
+	if err != nil {
+		return Configuration{}, err
 	}
 
 	return Configuration{
@@ -53,8 +59,8 @@ func Load() (Configuration, error) {
 			AdminPassword:   getEnv("ADMIN_PASSWORD", ""),
 			BindingIP:       getEnv("BINDING_IP", "0.0.0.0"),
 			BindingPort:     getEnv("BINDING_PORT", "7800"),
-			PasswordCost:    11,
-			TokenKeyLength:  32,
+			PasswordCost:    passwordCost,
+			TokenKeyLength:  tokenLength,
 		},
 		DB: DBConfig{
 			DBUser:     getEnv("DB_USER", ""),
@@ -72,7 +78,8 @@ func Load() (Configuration, error) {
 }
 
 func getEnv(key string, defaultValue string) string {
-	fullKey := OS_PREFIX + "_" + key
+	fullKey := osPrefix + "_" + key
+
 	val := os.Getenv(fullKey)
 	if val == "" {
 		if defaultValue != "" {

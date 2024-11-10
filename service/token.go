@@ -41,7 +41,9 @@ func (ts *TokenService) CreateToken(u entity.NewToken) (*entity.Token, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	u.Value = tokenVal
+
 	if u.ID == "" {
 		u.ID = utils.NewULID().String()
 	}
@@ -51,9 +53,11 @@ func (ts *TokenService) CreateToken(u entity.NewToken) (*entity.Token, error) {
 func (ts *TokenService) ListTokens() ([]*entity.Token, error) {
 	return ts.repo.ListTokens()
 }
+
 func (ts *TokenService) ListUserToken(username string) ([]*entity.Token, error) {
 	return ts.repo.ListUserToken(username)
 }
+
 func (ts *TokenService) DeleteTokenByValue(v string) error {
 	return ts.repo.DeleteTokenByValue(v)
 }

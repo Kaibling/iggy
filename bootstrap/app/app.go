@@ -25,7 +25,7 @@ func Run(withWorker bool, withAPI bool) error {
 	}
 
 	logger := apiservice.BuildLogger(cfg.App.Logger)
-	//ctx := context.Background()
+	// ctx := context.Background()
 	ctx, ctxCancel := context.WithCancel(context.Background())
 
 	interrupt := make(chan os.Signal, 1)

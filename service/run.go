@@ -49,7 +49,6 @@ func (ts *RunService) CreateRun(newEntity entity.NewRun, runLogService *RunLogSe
 		return err
 	}
 	return nil
-
 }
 
 func (ts *RunService) FetchRunByWorkflow(id string) ([]*entity.Run, error) {

@@ -24,6 +24,7 @@ func (l *Loopback) Subscribe(_ string) error {
 		select {
 		case <-l.ctx.Done():
 			l.l.LogLine("shuting down worker")
+
 			return l.ctx.Err()
 		case newMessage := <-l.c:
 			t, err := utility.DecodeToStruct[entity.Task](newMessage)
@@ -34,10 +35,9 @@ func (l *Loopback) Subscribe(_ string) error {
 			fmt.Println(utility.Pretty(t))
 
 		}
-
 	}
-
 }
+
 func (l *Loopback) Publish(_ string, message []byte) error {
 	l.c <- message
 	return nil

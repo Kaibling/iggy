@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"log"
 	"time"
 
@@ -74,7 +75,7 @@ func (r *UserRepo) FetchByIDs(ids []string) ([]*entity.User, error) {
 func (r *UserRepo) FetchUserByName(name string) (*entity.User, error) {
 	rt, err := r.q.FetchUserByName(r.ctx, name)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, sql.ErrNoRows
 		}
 		return nil, err
@@ -85,7 +86,7 @@ func (r *UserRepo) FetchUserByName(name string) (*entity.User, error) {
 func (r *UserRepo) DeleteUser(id string) error {
 	err := r.q.DeleteUser(r.ctx, id)
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return sql.ErrNoRows
 		}
 		return err
@@ -107,7 +108,7 @@ func (r *UserRepo) UpdatePassword(passwordHash string, userID string) (*entity.U
 		ModifiedBy: r.Username,
 	})
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, sql.ErrNoRows
 		}
 		return nil, err
@@ -180,10 +181,10 @@ func marshalUsers(repoUsers []sqlcrepo.User) []*entity.User {
 func int2Bool(i int32) bool {
 	return i == 1
 }
+
 func bool2Int(b bool) int32 {
 	if b {
 		return 1
-	} else {
-		return 0
 	}
+	return 0
 }

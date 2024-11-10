@@ -13,19 +13,19 @@ import (
 )
 
 type RunRepo struct {
-	ctx        context.Context
-	q          *sqlcrepo.Queries
-	username   string
-	request_id string
+	ctx       context.Context
+	q         *sqlcrepo.Queries
+	username  string
+	requestID string
 }
 
-func NewRunRepo(ctx context.Context, username, request_id string) *RunRepo {
+func NewRunRepo(ctx context.Context, username, requestID string) *RunRepo {
 	return &RunRepo{
 		ctx: ctx,
 		q:   sqlcrepo.New(ctx.Value(ctxkeys.DBConnKey).(*pgxpool.Pool)),
 		// username: ctx.Value(apictx.String("user_name")).(string),
-		username:   username,
-		request_id: request_id,
+		username:  username,
+		requestID: requestID,
 	}
 }
 
@@ -40,7 +40,7 @@ func (r *RunRepo) SaveRun(newModel entity.NewRun) (*entity.Run, error) {
 
 	newRunID, err := r.q.SaveRun(r.ctx, sqlcrepo.SaveRunParams{
 		RequestID: pgtype.Text{
-			String: r.request_id,
+			String: r.requestID,
 			Valid:  true,
 		},
 		ID:         newModel.ID,
@@ -77,6 +77,7 @@ func (r *RunRepo) FetchRun(id string) (*entity.Run, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return &entity.Run{
 		ID:         rt.ID,
 		WorkflowID: rt.WorkflowID,
@@ -103,7 +104,7 @@ func (r *RunRepo) FetchRunByWorkflow(workflowID string) ([]*entity.Run, error) {
 		runs = append(runs, &entity.Run{
 			ID:         rt.ID,
 			WorkflowID: rt.WorkflowID,
-			Error:      &rt.Error.String,
+			Error:      &rt.Error.String, // TODO fix pointer
 			StartTime:  rt.StartTime.Time,
 			FinishTime: rt.FinishTime.Time,
 			Meta: entity.MetaData{
@@ -114,5 +115,6 @@ func (r *RunRepo) FetchRunByWorkflow(workflowID string) ([]*entity.Run, error) {
 			},
 		})
 	}
+
 	return runs, nil
 }

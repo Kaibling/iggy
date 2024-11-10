@@ -28,6 +28,7 @@ func NewRunLogService(ctx context.Context, u runLogRepo, cfg config.Configuratio
 func (rls *RunLogService) FetchRunLog(id string) (*entity.RunLog, error) {
 	return rls.repo.FetchRunLog(id)
 }
+
 func (rls *RunLogService) CreateRunLogs(newEntities []entity.NewRunLog) error {
 	for _, e := range newEntities {
 		if _, err := rls.repo.CreateRunLog(e); err != nil {

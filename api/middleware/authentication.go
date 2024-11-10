@@ -36,11 +36,12 @@ func Authentication(next http.Handler) http.Handler {
 			e.SetError(apierror.Forbidden).Finish(w, r)
 			return
 		}
+
 		token := authSlice[1]
 
 		// validate token and get username
-		ts := bootstrap.NewTokenServiceAnonym(r.Context(), config.SYSTEM_USER)
-		us := bootstrap.NewUserServiceAnonym(r.Context(), config.SYSTEM_USER)
+		ts := bootstrap.NewTokenServiceAnonym(r.Context(), config.SystemUser)
+		us := bootstrap.NewUserServiceAnonym(r.Context(), config.SystemUser)
 		// todo set token last used
 		// TODO use not found sql error
 		user, err := us.ValidateToken(token, ts)
@@ -48,6 +49,7 @@ func Authentication(next http.Handler) http.Handler {
 			e.SetError(apierror.New(fmt.Errorf("invalid token"), http.StatusUnauthorized)).Finish(w, r)
 			return
 		}
+
 		ctx := context.WithValue(r.Context(), ctxkeys.UserNameKey, user.Username)
 		ctx = context.WithValue(ctx, ctxkeys.UserIDKey, user.ID)
 		ctx = context.WithValue(ctx, ctxkeys.TokenKey, token)
