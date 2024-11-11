@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/kaibling/apiforge/ctxkeys"
 	"github.com/kaibling/apiforge/handler"
 	"github.com/kaibling/apiforge/logging"
@@ -13,46 +14,45 @@ import (
 	"github.com/kaibling/iggy/api"
 	"github.com/kaibling/iggy/bootstrap"
 	"github.com/kaibling/iggy/migration"
-	"github.com/kaibling/iggy/persistence/psql"
 	"github.com/kaibling/iggy/pkg/config"
 )
 
-func Start(ctx context.Context, cfg config.Configuration, logger logging.LogWriter) error {
+func Start(ctx context.Context, cfg config.Configuration, logger logging.Writer, conn *pgxpool.Pool) error {
+	logger = logger.NewScope("api_startup")
+
 	ctx = context.WithValue(ctx, ctxkeys.LoggerKey, logger)
-
-	conn, err := psql.New(ctx, cfg.DB)
-	if err != nil {
-		return err
-	}
-
 	ctx = context.WithValue(ctx, ctxkeys.DBConnKey, conn)
-	ctx = context.WithValue(ctx, ctxkeys.String("cfg"), cfg)
+	ctx = context.WithValue(ctx, ctxkeys.AppConfigKey, cfg)
 
-	if err = migration.SelfMigrate(cfg.DB); err != nil {
+	if err := migration.SelfMigrate(cfg.DB); err != nil {
 		return err
 	}
 
-	logger.LogLine("rh migration successful")
+	logger.Info("rh migration successful")
 
 	userService, err := bootstrap.NewUserServiceAnonym(ctx, config.SystemUser)
 	if err != nil {
-		logger.LogLine(err.Error())
+		logger.Error(err)
+
+		return err
 	}
 
 	pwd, err := userService.EnsureAdmin(cfg.App.AdminPassword)
 	if err != nil {
-		logger.LogLine(err.Error())
+		logger.Error(err)
+
+		return err
 	}
 
 	if pwd != "" {
-		logger.LogLine("Admin Password: " + pwd)
+		logger.Info("Admin Password: " + pwd)
 	}
 
 	root := chi.NewRouter()
 	// context
-	root.Use(middleware.AddContext("logger", logger))
-	root.Use(middleware.AddContext("db", conn))
-	root.Use(middleware.AddContext("cfg", cfg))
+	root.Use(middleware.AddContext(ctxkeys.LoggerKey, logger))
+	root.Use(middleware.AddContext(ctxkeys.DBConnKey, conn))
+	root.Use(middleware.AddContext(ctxkeys.AppConfigKey, cfg))
 
 	// middleware
 	root.Use(middleware.InitEnvelope)
@@ -68,6 +68,7 @@ func Start(ctx context.Context, cfg config.Configuration, logger logging.LogWrit
 	apiServer := apiservice.New(ctx, apiservice.ServerConfig{
 		BindingIP:   cfg.App.BindingIP,
 		BindingPort: cfg.App.BindingPort,
+		LogLevel:    "debug",
 	})
 
 	apiServer.AddCustomLogger(logger)

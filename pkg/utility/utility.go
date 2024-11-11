@@ -24,7 +24,7 @@ func EncodeToBytes(p interface{}) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func DecodeToStruct[T any](s []byte) (T, error) { //nolint: ireturn
+func DecodeToStruct[T any](s []byte) (T, error) { //nolint: ireturn, nolintlint
 	var p T
 
 	dec := gob.NewDecoder(bytes.NewReader(s))

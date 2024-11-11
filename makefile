@@ -1,7 +1,7 @@
 lint:
 	golangci-lint run
 
-gen-sql:
+sql:
 	sqlc generate
 
 pkg-update:
@@ -12,7 +12,7 @@ cache-clean:
 	go clean -modcache
 
 run:
-	go build && ./iggy
+	go build && ./iggy --api --worker
 
 int-test:
 	k6 run integration_tests/main.js

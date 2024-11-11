@@ -14,7 +14,7 @@ package middleware
 // func Authorization(next http.Handler) http.Handler {
 // 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 // 		// read envelope
-// 		e := envelope.ReadEnvelope(r)
+// 		e, l := envelope.GetEnvelopeAndLogger(r)
 // 		username := apictx.GetValue(r.Context(), "user_name").(string)
 // 		if username != "admin" {
 
@@ -23,34 +23,34 @@ package middleware
 // 			permission, err := ps.CollectionPermission(username, base_url)
 
 // 			if err != nil {
-// 				e.SetError(apierror.ServerError).Finish(w, r)
+// 				e.SetError(apierror.ServerError).Finish(w, r,l)
 // 				return
 // 			}
 
 // 			decision, err := ps.Validate(r.Method, permission)
 // 			if err != nil {
-// 				e.SetError(apierror.ServerError).Finish(w, r)
+// 				e.SetError(apierror.ServerError).Finish(w, r,l)
 // 				return
 // 			}
 
 // 			if !decision {
-// 				e.SetError(apierror.Forbidden).Finish(w, r)
+// 				e.SetError(apierror.Forbidden).Finish(w, r,l)
 // 				return
 // 			}
 // 		}
 
 // 		// // read token
 // 		// if _, ok := r.Header["Authorization"]; !ok {
-// 		// 	e.SetError(apierror.Forbidden).Finish(w, r)
+// 		// 	e.SetError(apierror.Forbidden).Finish(w, r,l)
 // 		// 	return
 // 		// }
 // 		// if len(r.Header["Authorization"]) != 1 {
-// 		// 	e.SetError(apierror.Forbidden).Finish(w, r)
+// 		// 	e.SetError(apierror.Forbidden).Finish(w, r,l)
 // 		// 	return
 // 		// }
 // 		// authSlice := strings.Split(r.Header["Authorization"][0], " ")
 // 		// if len(authSlice) != 2 {
-// 		// 	e.SetError(apierror.Forbidden).Finish(w, r)
+// 		// 	e.SetError(apierror.Forbidden).Finish(w, r,l)
 // 		// 	return
 // 		// }
 // 		// token := authSlice[1]
@@ -60,7 +60,7 @@ package middleware
 // 		// // todo set token last used
 // 		// user, err := us.ValidateToken(token, ts)
 // 		// if err != nil {
-// 		// 	e.SetError(apierror.New(fmt.Errorf("unvalid token"), http.StatusBadRequest)).Finish(w, r)
+// 		// 	e.SetError(apierror.New(fmt.Errorf("unvalid token"), http.StatusBadRequest)).Finish(w, r,l)
 // 		// 	return
 // 		// }
 // 		// ctx := context.WithValue(r.Context(), apictx.String("user_name"), user.Username)

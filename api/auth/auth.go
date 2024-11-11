@@ -13,72 +13,72 @@ import (
 )
 
 func authLogin(w http.ResponseWriter, r *http.Request) {
-	e := envelope.ReadEnvelope(r)
+	e, l := envelope.GetEnvelopeAndLogger(r)
 
 	var postLogin entity.Login
 	if err := route.ReadPostData(r, &postLogin); err != nil {
-		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return
 	}
 
 	us, err := bootstrap.NewUserServiceAnonym(r.Context(), config.SystemUser)
 	if err != nil {
-		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return
 	}
 
 	ts, err := bootstrap.NewTokenServiceAnonym(r.Context(), config.SystemUser)
 	if err != nil {
-		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return
 	}
 
 	token, err := us.Login(postLogin, ts)
 	if err != nil {
-		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return
 	}
 
-	e.SetResponse(token).Finish(w, r)
+	e.SetResponse(token).Finish(w, r, l)
 }
 
 func authLogout(w http.ResponseWriter, r *http.Request) {
-	e := envelope.ReadEnvelope(r)
+	e, l := envelope.GetEnvelopeAndLogger(r)
 
 	token, err := bootstrap.ContextToken(r.Context())
 	if err != nil {
-		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return
 	}
 
 	ts, err := bootstrap.NewTokenServiceAnonym(r.Context(), config.SystemUser)
 	if err != nil {
-		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return
 	}
 
 	err = ts.DeleteTokenByValue(token)
 	if err != nil {
-		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return
 	}
 
-	e.SetSuccess().Finish(w, r)
+	e.SetSuccess().Finish(w, r, l)
 }
 
 func authCheck(w http.ResponseWriter, r *http.Request) {
-	e := envelope.ReadEnvelope(r)
+	e, l := envelope.GetEnvelopeAndLogger(r)
 
 	ts, err := bootstrap.NewTokenServiceAnonym(r.Context(), config.SystemUser)
 	if err != nil {
-		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return
 	}
@@ -86,10 +86,10 @@ func authCheck(w http.ResponseWriter, r *http.Request) {
 	// TODO check expiration
 	t, err := ts.ReadTokenByValue(ctxkeys.GetValue(r.Context(), ctxkeys.TokenKey).(string))
 	if err != nil {
-		e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return
 	}
 
-	e.SetResponse(t).Finish(w, r)
+	e.SetResponse(t).Finish(w, r, l)
 }

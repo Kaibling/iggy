@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"log"
+	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -125,7 +125,7 @@ func (r *UserRepo) UpdatePassword(passwordHash string, userID string) (*entity.U
 func (r *UserRepo) IDQuery(idQuery string) ([]string, error) {
 	rows, err := r.db.Query(context.Background(), idQuery)
 	if err != nil {
-		log.Fatalf("failed to execute query: %v", err)
+		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
 
 	var ids []string
@@ -135,14 +135,14 @@ func (r *UserRepo) IDQuery(idQuery string) ([]string, error) {
 		if err := rows.Scan(
 			&id,
 		); err != nil {
-			log.Fatalf("failed to scan row: %v", err)
+			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
 
 		ids = append(ids, id)
 	}
 
 	if err := rows.Err(); err != nil {
-		log.Fatalf("row iteration error: %v", err)
+		return nil, fmt.Errorf("row iteration error: %w", err)
 	}
 
 	defer rows.Close()

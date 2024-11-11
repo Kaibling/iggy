@@ -17,8 +17,8 @@ var migrations embed.FS
 
 func SelfMigrate(cfg config.DBConfig) error {
 	hostPort := net.JoinHostPort(cfg.DBHost, cfg.DBPort)
-	//nolint: lll,nosprintfhostport
-	databaseURL := fmt.Sprintf("postgres://%s@%s:%s/%s?sslmode=disable&x-migrations-table=\"public\".\"iggy_schema_migrations\"&x-migrations-table-quoted=1",
+	//nolint: lll,nosprintfhostport, nolintlint
+	databaseURL := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable&x-migrations-table=\"public\".\"iggy_schema_migrations\"&x-migrations-table-quoted=1",
 		cfg.DBUser,
 		cfg.DBPassword,
 		hostPort,

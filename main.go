@@ -18,6 +18,7 @@ func main() {
 				Aliases:  []string{"a"},
 				Usage:    "start of the web api",
 				Required: false,
+				Value:    true,
 			},
 			&cli.BoolFlag{ //nolint:exhaustruct
 				Name:     "worker",
@@ -27,6 +28,10 @@ func main() {
 			},
 		},
 		Action: func(c *cli.Context) error {
+			if !c.Bool("worker") && !c.Bool("api") {
+				cli.ShowAppHelpAndExit(c, 0)
+			}
+
 			return app.Run(c.Bool("worker"), c.Bool("api"))
 		},
 	}

@@ -90,5 +90,6 @@ type RunLog struct {
 type Task struct {
 	ID         string
 	WorkflowID string
+	RequestID  string
 	// EnqueueTime time.Time
 }

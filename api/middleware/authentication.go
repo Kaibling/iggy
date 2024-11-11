@@ -16,17 +16,17 @@ import (
 func Authentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// read envelope
-		e := envelope.ReadEnvelope(r)
+		e, l := envelope.GetEnvelopeAndLogger(r)
 
 		// read token
 		if _, ok := r.Header["Authorization"]; !ok {
-			e.SetError(apierror.Forbidden).Finish(w, r)
+			e.SetError(apierror.Forbidden).Finish(w, r, l)
 
 			return
 		}
 
 		if len(r.Header["Authorization"]) != 1 {
-			e.SetError(apierror.Forbidden).Finish(w, r)
+			e.SetError(apierror.Forbidden).Finish(w, r, l)
 
 			return
 		}
@@ -35,7 +35,7 @@ func Authentication(next http.Handler) http.Handler {
 
 		position := 2
 		if len(authSlice) != position {
-			e.SetError(apierror.Forbidden).Finish(w, r)
+			e.SetError(apierror.Forbidden).Finish(w, r, l)
 
 			return
 		}
@@ -45,14 +45,14 @@ func Authentication(next http.Handler) http.Handler {
 		// validate token and get username
 		ts, err := bootstrap.NewTokenServiceAnonym(r.Context(), config.SystemUser)
 		if err != nil {
-			e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+			e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 			return
 		}
 
 		us, err := bootstrap.NewUserServiceAnonym(r.Context(), config.SystemUser)
 		if err != nil {
-			e.SetError(apierror.NewGeneric(err)).Finish(w, r)
+			e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 			return
 		}
@@ -60,7 +60,7 @@ func Authentication(next http.Handler) http.Handler {
 		// TODO use not found sql error
 		user, err := us.ValidateToken(token, ts)
 		if err != nil {
-			e.SetError(apierror.New(apperror.NewStringGeneric("invalid token"), http.StatusUnauthorized)).Finish(w, r)
+			e.SetError(apierror.New(apperror.NewStringGeneric("invalid token"), http.StatusUnauthorized)).Finish(w, r, l)
 
 			return
 		}

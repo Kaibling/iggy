@@ -118,3 +118,26 @@ func (r *RunRepo) FetchRunByWorkflow(workflowID string) ([]*entity.Run, error) {
 
 	return runs, nil
 }
+
+func (r *RunRepo) FetchRunByRequestID(requestID string) (*entity.Run, error) {
+	rt, err := r.q.FetchRunByRequestID(r.ctx, pgtype.Text{String: requestID, Valid: true})
+	if err != nil {
+		return nil, err
+	}
+
+	pErr := rt.Error
+
+	return &entity.Run{
+		ID:         rt.ID,
+		WorkflowID: rt.WorkflowID,
+		Error:      &pErr.String,
+		StartTime:  rt.StartTime.Time,
+		FinishTime: rt.FinishTime.Time,
+		Meta: entity.MetaData{
+			CreatedAt:  rt.CreatedAt.Time,
+			CreatedBy:  rt.CreatedBy,
+			ModifiedAt: rt.ModifiedAt.Time,
+			ModifiedBy: rt.ModifiedBy,
+		},
+	}, nil
+}

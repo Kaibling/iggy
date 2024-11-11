@@ -12,6 +12,7 @@ type runRepo interface {
 	SaveRun(newModel entity.NewRun) (*entity.Run, error)
 	FetchRun(id string) (*entity.Run, error)
 	FetchRunByWorkflow(workflowID string) ([]*entity.Run, error)
+	FetchRunByRequestID(requestID string) (*entity.Run, error)
 }
 
 type RunService struct {
@@ -54,4 +55,8 @@ func (ts *RunService) CreateRun(newEntity entity.NewRun, runLogService *RunLogSe
 
 func (ts *RunService) FetchRunByWorkflow(id string) ([]*entity.Run, error) {
 	return ts.repo.FetchRunByWorkflow(id)
+}
+
+func (ts *RunService) FetchRunByRequestID(requestID string) (*entity.Run, error) {
+	return ts.repo.FetchRunByRequestID(requestID)
 }

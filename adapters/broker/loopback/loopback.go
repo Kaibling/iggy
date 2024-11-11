@@ -2,44 +2,50 @@ package loopback
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/kaibling/apiforge/logging"
+	"github.com/kaibling/iggy/adapters/broker"
+	"github.com/kaibling/iggy/bootstrap"
 	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/pkg/utility"
 )
 
-func NewLoopback(ctx context.Context, c chan []byte, l logging.LogWriter) *Loopback {
-	return &Loopback{ctx, c, l}
+var LoopbackChannel = make(chan []byte) //nolint: gochecknoglobals
+
+func NewLoopback(subConfig broker.SubscriberConfig, l logging.Writer) *Loopback {
+	return &Loopback{subConfig, l.NewScope("Subscriber")}
 }
 
 type Loopback struct {
-	ctx context.Context
-	c   chan []byte
-	l   logging.LogWriter
+	cfg broker.SubscriberConfig
+	l   logging.Writer
 }
 
-func (l *Loopback) Subscribe(_ string) error {
+func (l *Loopback) Subscribe(ctx context.Context, _ string) error {
+	// TODO multi goroutine
+	l.l.Info("loopback worker waiting...")
+
 	for {
 		select {
-		case <-l.ctx.Done():
-			l.l.LogLine("shuting down worker")
-
-			return l.ctx.Err()
-		case newMessage := <-l.c:
+		case newMessage := <-LoopbackChannel:
 			t, err := utility.DecodeToStruct[entity.Task](newMessage)
 			if err != nil {
-				// log
-				fmt.Println(err.Error()) //nolint: forbidigo
+				l.l.Error(err)
 			}
 
-			fmt.Println(utility.Pretty(t)) //nolint: forbidigo
+			if err := bootstrap.WorkerExecution(ctx, l.cfg, t); err != nil {
+				l.l.Error(err)
+			}
+		case <-ctx.Done():
+			l.l.Info("shuting down loopback worker")
+
+			return ctx.Err()
 		}
 	}
 }
 
-func (l *Loopback) Publish(_ string, message []byte) error {
-	l.c <- message
+func (l *Loopback) Publish(_ context.Context, _ string, message []byte) error {
+	LoopbackChannel <- message
 
 	return nil
 }

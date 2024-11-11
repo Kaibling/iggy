@@ -52,6 +52,47 @@ func (q *Queries) FetchRun(ctx context.Context, id string) (FetchRunRow, error) 
 	return i, err
 }
 
+const fetchRunByRequestID = `-- name: FetchRunByRequestID :one
+SELECT runs.id, runs.request_id, runs.workflow_id, runs.error, runs.start_time, runs.finish_time, runs.created_at, runs.modified_at, runs.created_by, runs.modified_by,workflows.name FROM runs
+JOIN workflows
+ON workflows.id = runs.workflow_id
+WHERE runs.request_id = $1
+LIMIT 1
+`
+
+type FetchRunByRequestIDRow struct {
+	ID         string
+	RequestID  pgtype.Text
+	WorkflowID string
+	Error      pgtype.Text
+	StartTime  pgtype.Timestamp
+	FinishTime pgtype.Timestamp
+	CreatedAt  pgtype.Timestamp
+	ModifiedAt pgtype.Timestamp
+	CreatedBy  string
+	ModifiedBy string
+	Name       string
+}
+
+func (q *Queries) FetchRunByRequestID(ctx context.Context, requestID pgtype.Text) (FetchRunByRequestIDRow, error) {
+	row := q.db.QueryRow(ctx, fetchRunByRequestID, requestID)
+	var i FetchRunByRequestIDRow
+	err := row.Scan(
+		&i.ID,
+		&i.RequestID,
+		&i.WorkflowID,
+		&i.Error,
+		&i.StartTime,
+		&i.FinishTime,
+		&i.CreatedAt,
+		&i.ModifiedAt,
+		&i.CreatedBy,
+		&i.ModifiedBy,
+		&i.Name,
+	)
+	return i, err
+}
+
 const fetchRunByWorkflow = `-- name: FetchRunByWorkflow :many
 SELECT runs.id, runs.request_id, runs.workflow_id, runs.error, runs.start_time, runs.finish_time, runs.created_at, runs.modified_at, runs.created_by, runs.modified_by,workflows.name FROM runs
 JOIN workflows

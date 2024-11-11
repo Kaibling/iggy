@@ -9,13 +9,11 @@ import (
 
 	apiservice "github.com/kaibling/apiforge/service"
 	"github.com/kaibling/iggy/adapters/broker"
-	"github.com/kaibling/iggy/adapters/broker/loopback"
-	"github.com/kaibling/iggy/bootstrap"
 	"github.com/kaibling/iggy/bootstrap/api"
+	bootstrap_broker "github.com/kaibling/iggy/bootstrap/broker"
+	"github.com/kaibling/iggy/persistence/psql"
 	"github.com/kaibling/iggy/pkg/config"
 )
-
-const innerChannelSize = 100
 
 func Run(withWorker bool, withAPI bool) error {
 	cfg, err := config.Load()
@@ -23,47 +21,57 @@ func Run(withWorker bool, withAPI bool) error {
 		return err
 	}
 
-	logger := apiservice.BuildLogger(cfg.App.Logger)
-	// ctx := context.Background()
+	logger := apiservice.BuildLogger(apiservice.LogConfig{
+		LogDriver: cfg.App.Logger,
+		LogLevel:  "debug",
+	})
+	logger.AddStringField("scope", "startup")
+
 	ctx, ctxCancel := context.WithCancel(context.Background())
+
+	conn, err := psql.New(ctx, cfg.DB)
+	if err != nil {
+		ctxCancel()
+
+		return err
+	}
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 
-	if withWorker {
-		var worker broker.Adapter
+	workerConfig := broker.SubscriberConfig{
+		Config:   cfg,
+		Username: config.SystemUser,
+		DBPool:   conn,
+	}
 
-		if cfg.Broker.Broker == "loopback" {
-			internalChannel := make(chan []byte, innerChannelSize)
-			worker = loopback.NewLoopback(ctx, internalChannel, logger)
-		} else {
-			worker, err = bootstrap.NewWorker(ctx, "loopback")
-			if err != nil {
-				logger.LogLine(err.Error())
-			}
+	if withWorker {
+		var worker broker.Subscriber
+
+		worker, err = bootstrap_broker.NewSubscriber(workerConfig, "loopback", logger)
+		if err != nil {
+			logger.Error(err)
 		}
 
 		// hopefully not blocking
-		go worker.Subscribe(cfg.Broker.Channel) //nolint: errcheck
-		logger.LogLine("worker started")
+		go worker.Subscribe(ctx, cfg.Broker.Channel) //nolint: errcheck
+		logger.Info("worker started")
 	}
 
 	if withAPI {
-		if err := api.Start(ctx, cfg, logger); err != nil {
-			logger.LogLine(err.Error())
+		if err := api.Start(ctx, cfg, logger, conn); err != nil {
+			logger.Error(err)
 		}
 
-		logger.LogLine("api started")
+		logger.Info("api started")
 	}
 
-	logger.LogLine("application started. Ready...")
-
+	logger.Info("application started. Ready...")
 	<-interrupt
 
-	logger.LogLine("stopping application")
-
+	logger.Info("stopping application")
 	ctxCancel()
-	// TODO context should be with timeout
+
 	gracePeriod := 400 * time.Millisecond //nolint:mnd
 	time.Sleep(gracePeriod)
 
