@@ -4,16 +4,22 @@ import (
 	"net/http"
 	"strings"
 
+	apierror "github.com/kaibling/apiforge/apierror"
 	"github.com/kaibling/apiforge/envelope"
-	apierror "github.com/kaibling/apiforge/error"
 	"github.com/kaibling/apiforge/route"
 	"github.com/kaibling/iggy/bootstrap"
 	"github.com/kaibling/iggy/entity"
 )
 
 func fetchRun(w http.ResponseWriter, r *http.Request) {
-	runID := route.ReadUrlParam("id", r)
-	e, l := envelope.GetEnvelopeAndLogger(r)
+	runID := route.ReadURLParam("id", r)
+
+	e, l, merr := envelope.GetEnvelopeAndLogger(r)
+	if merr != nil {
+		e.SetError(merr).Finish(w, r, l)
+
+		return
+	}
 
 	us, err := bootstrap.NewRunService(r.Context())
 	if err != nil {
@@ -33,7 +39,12 @@ func fetchRun(w http.ResponseWriter, r *http.Request) {
 }
 
 func createRun(w http.ResponseWriter, r *http.Request) {
-	e, l := envelope.GetEnvelopeAndLogger(r)
+	e, l, merr := envelope.GetEnvelopeAndLogger(r)
+	if merr != nil {
+		e.SetError(merr).Finish(w, r, l)
+
+		return
+	}
 
 	var postRun entity.NewRun
 	if err := route.ReadPostData(r, &postRun); err != nil {
@@ -67,8 +78,14 @@ func createRun(w http.ResponseWriter, r *http.Request) {
 }
 
 func fetchRunLogsByRun(w http.ResponseWriter, r *http.Request) {
-	runID := route.ReadUrlParam("id", r)
-	e, l := envelope.GetEnvelopeAndLogger(r)
+	runID := route.ReadURLParam("id", r)
+
+	e, l, merr := envelope.GetEnvelopeAndLogger(r)
+	if merr != nil {
+		e.SetError(merr).Finish(w, r, l)
+
+		return
+	}
 
 	us, err := bootstrap.NewRunLogService(r.Context())
 	if err != nil {
@@ -88,7 +105,12 @@ func fetchRunLogsByRun(w http.ResponseWriter, r *http.Request) {
 }
 
 func fetchRuns(w http.ResponseWriter, r *http.Request) {
-	e, l := envelope.GetEnvelopeAndLogger(r)
+	e, l, merr := envelope.GetEnvelopeAndLogger(r)
+	if merr != nil {
+		e.SetError(merr).Finish(w, r, l)
+
+		return
+	}
 
 	params, err := bootstrap.ContextParams(r.Context())
 	if err != nil {

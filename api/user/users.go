@@ -3,15 +3,20 @@ package user
 import (
 	"net/http"
 
+	apierror "github.com/kaibling/apiforge/apierror"
 	"github.com/kaibling/apiforge/envelope"
-	apierror "github.com/kaibling/apiforge/error"
 	"github.com/kaibling/apiforge/route"
 	"github.com/kaibling/iggy/bootstrap"
 	"github.com/kaibling/iggy/entity"
 )
 
 func usersGet(w http.ResponseWriter, r *http.Request) {
-	e, l := envelope.GetEnvelopeAndLogger(r)
+	e, l, merr := envelope.GetEnvelopeAndLogger(r)
+	if merr != nil {
+		e.SetError(merr).Finish(w, r, l)
+
+		return
+	}
 
 	params, err := bootstrap.ContextParams(r.Context())
 	if err != nil {
@@ -38,8 +43,14 @@ func usersGet(w http.ResponseWriter, r *http.Request) {
 }
 
 func userGet(w http.ResponseWriter, r *http.Request) {
-	userID := route.ReadUrlParam("id", r)
-	e, l := envelope.GetEnvelopeAndLogger(r)
+	userID := route.ReadURLParam("id", r)
+
+	e, l, merr := envelope.GetEnvelopeAndLogger(r)
+	if merr != nil {
+		e.SetError(merr).Finish(w, r, l)
+
+		return
+	}
 
 	us, err := bootstrap.NewUserService(r.Context())
 	if err != nil {
@@ -59,7 +70,12 @@ func userGet(w http.ResponseWriter, r *http.Request) {
 }
 
 func userPost(w http.ResponseWriter, r *http.Request) {
-	e, l := envelope.GetEnvelopeAndLogger(r)
+	e, l, merr := envelope.GetEnvelopeAndLogger(r)
+	if merr != nil {
+		e.SetError(merr).Finish(w, r, l)
+
+		return
+	}
 
 	var postUser entity.NewUser
 	if err := route.ReadPostData(r, &postUser); err != nil {
@@ -88,8 +104,14 @@ func userPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func userDel(w http.ResponseWriter, r *http.Request) {
-	e, l := envelope.GetEnvelopeAndLogger(r)
-	userID := route.ReadUrlParam("id", r)
+	e, l, merr := envelope.GetEnvelopeAndLogger(r)
+	if merr != nil {
+		e.SetError(merr).Finish(w, r, l)
+
+		return
+	}
+
+	userID := route.ReadURLParam("id", r)
 
 	us, err := bootstrap.NewUserService(r.Context())
 	if err != nil {
@@ -108,8 +130,14 @@ func userDel(w http.ResponseWriter, r *http.Request) {
 }
 
 func getUserToken(w http.ResponseWriter, r *http.Request) {
-	e, l := envelope.GetEnvelopeAndLogger(r)
-	userID := route.ReadUrlParam("id", r)
+	e, l, merr := envelope.GetEnvelopeAndLogger(r)
+	if merr != nil {
+		e.SetError(merr).Finish(w, r, l)
+
+		return
+	}
+
+	userID := route.ReadURLParam("id", r)
 
 	ts, err := bootstrap.NewTokenService(r.Context())
 	if err != nil {

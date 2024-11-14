@@ -1,3 +1,6 @@
+buildTime := $(shell date -u "+%Y-%m-%dT%H:%M:%S")
+#version := $(shell git describe --tags)
+version := "0.0.1"
 lint:
 	golangci-lint run
 
@@ -11,8 +14,8 @@ pkg-update:
 cache-clean:
 	go clean -modcache
 
-run:
-	go build && ./iggy --api --worker
+run: build
+	./iggy --api --worker
 
 int-test:
 	k6 run integration_tests/main.js
@@ -42,5 +45,7 @@ vuln:
 gci:
 	gci write --skip-generated -s standard -s default .
 
-
+build:
+	CGO_ENABLED=0 go build -ldflags "-X main.version=${version} -X main.buildTime=${buildTime}" -o iggy
+	#CGO_ENABLED=0 go build -ldflags="-s -w" -o iggy .
 full-lint: gci fmt lint vuln

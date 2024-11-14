@@ -3,13 +3,18 @@ package token
 import (
 	"net/http"
 
+	apierror "github.com/kaibling/apiforge/apierror"
 	"github.com/kaibling/apiforge/envelope"
-	apierror "github.com/kaibling/apiforge/error"
 	"github.com/kaibling/iggy/bootstrap"
 )
 
 func getTokens(w http.ResponseWriter, r *http.Request) {
-	e, l := envelope.GetEnvelopeAndLogger(r)
+	e, l, merr := envelope.GetEnvelopeAndLogger(r)
+	if merr != nil {
+		e.SetError(merr).Finish(w, r, l)
+
+		return
+	}
 
 	ts, err := bootstrap.NewTokenService(r.Context())
 	if err != nil {

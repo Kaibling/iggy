@@ -15,7 +15,7 @@ import (
 	"github.com/kaibling/iggy/pkg/config"
 )
 
-func Run(withWorker bool, withAPI bool) error {
+func Run(withWorker bool, withAPI bool, version, buildTime string) error { //nolint: funlen
 	cfg, err := config.Load()
 	if err != nil {
 		return err
@@ -26,6 +26,8 @@ func Run(withWorker bool, withAPI bool) error {
 		LogLevel:  "debug",
 	})
 	logger.AddStringField("scope", "startup")
+	logger.Info("version: " + version)
+	logger.Info("build time: " + buildTime)
 
 	ctx, ctxCancel := context.WithCancel(context.Background())
 

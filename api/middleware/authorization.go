@@ -6,7 +6,7 @@ package middleware
 
 // 	"github.com/kaibling/apiforge/apictx"
 // 	"github.com/kaibling/apiforge/envelope"
-// 	apierror "github.com/kaibling/apiforge/error"
+// 	apierror "github.com/kaibling/apiforge/apierror"
 // 	"github.com/kaibling/iggy/config"
 // 	"github.com/kaibling/iggy/bootstrap"
 // )
@@ -14,7 +14,12 @@ package middleware
 // func Authorization(next http.Handler) http.Handler {
 // 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 // 		// read envelope
-// 		e, l := envelope.GetEnvelopeAndLogger(r)
+// 		e, l, err := envelope.GetEnvelopeAndLogger(r)
+// if err != nil {
+// 	e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
+
+// 	return
+// }
 // 		username := apictx.GetValue(r.Context(), "user_name").(string)
 // 		if username != "admin" {
 

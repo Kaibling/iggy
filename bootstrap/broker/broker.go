@@ -9,11 +9,10 @@ import (
 	"github.com/kaibling/iggy/apperror"
 )
 
-func NewSubscriber(subConfig broker.SubscriberConfig, //nolint:ireturn
+func NewSubscriber(subConfig broker.SubscriberConfig, //nolint:ireturn,nolintlint
 	workerName string, logger logging.Writer,
 ) (broker.Subscriber, error) {
 	l := logger.NewScope("subscriber")
-	l.Info("what")
 
 	switch workerName {
 	case "rabbitMQ":
@@ -25,7 +24,7 @@ func NewSubscriber(subConfig broker.SubscriberConfig, //nolint:ireturn
 	}
 }
 
-func NewPublisher(subConfig broker.SubscriberConfig, //nolint:ireturn
+func NewPublisher(subConfig broker.SubscriberConfig, //nolint:ireturn,nolintlint
 	workerName string, logger logging.Writer,
 ) (broker.Publisher, error) {
 	l := logger.NewScope("publisher")

@@ -23,7 +23,7 @@ func ContextDefaultData(ctx context.Context) (config.Configuration, *pgxpool.Poo
 
 	username, ok := ctxkeys.GetValue(ctx, ctxkeys.UserNameKey).(string)
 	if !ok {
-		return cfg, dbPool, "", apperror.ErrMissingContext("username")
+		return cfg, dbPool, "", apperror.ErrNewMissingContext("username")
 	}
 
 	return cfg, dbPool, username, nil
@@ -32,12 +32,12 @@ func ContextDefaultData(ctx context.Context) (config.Configuration, *pgxpool.Poo
 func contextBasisData(ctx context.Context) (config.Configuration, *pgxpool.Pool, error) {
 	cfg, ok := ctxkeys.GetValue(ctx, ctxkeys.AppConfigKey).(config.Configuration)
 	if !ok {
-		return config.Configuration{}, nil, apperror.ErrMissingContext("config")
+		return config.Configuration{}, nil, apperror.ErrNewMissingContext("config")
 	}
 
 	dbPool, ok := ctxkeys.GetValue(ctx, ctxkeys.DBConnKey).(*pgxpool.Pool)
 	if !ok {
-		return config.Configuration{}, nil, apperror.ErrMissingContext("db pool")
+		return config.Configuration{}, nil, apperror.ErrNewMissingContext("db pool")
 	}
 
 	return cfg, dbPool, nil
@@ -146,7 +146,7 @@ func NewRunLogServiceV2(ctx context.Context, cfg config.Configuration, dbPool *p
 func NewWorkflowEngineService(ctx context.Context) (*service.WorkflowEngineService, error) {
 	cfg, ok := ctxkeys.GetValue(ctx, ctxkeys.AppConfigKey).(config.Configuration)
 	if !ok {
-		return nil, apperror.ErrMissingContext("config")
+		return nil, apperror.ErrNewMissingContext("config")
 	}
 
 	return service.NewWorkflowEngineService(ctx, cfg), nil
@@ -159,7 +159,7 @@ func NewWorkflowEngineServiceV2(ctx context.Context, cfg config.Configuration) (
 func ContextParams(ctx context.Context) (params.Pagination, error) {
 	p, ok := ctxkeys.GetValue(ctx, ctxkeys.PaginationKey).(params.Pagination)
 	if !ok {
-		return params.Pagination{}, apperror.ErrMissingContext("pagination")
+		return params.Pagination{}, apperror.ErrNewMissingContext("pagination")
 	}
 
 	return p, nil
@@ -168,7 +168,7 @@ func ContextParams(ctx context.Context) (params.Pagination, error) {
 func ContextToken(ctx context.Context) (string, error) {
 	t, ok := ctxkeys.GetValue(ctx, ctxkeys.TokenKey).(string)
 	if !ok {
-		return "", apperror.ErrMissingContext("token")
+		return "", apperror.ErrNewMissingContext("token")
 	}
 
 	return t, nil
@@ -177,7 +177,7 @@ func ContextToken(ctx context.Context) (string, error) {
 func ContextLogger(ctx context.Context) (logging.Writer, error) { //nolint: ireturn
 	l, ok := ctxkeys.GetValue(ctx, ctxkeys.LoggerKey).(logging.Writer)
 	if !ok {
-		return nil, apperror.ErrMissingContext("logger")
+		return nil, apperror.ErrNewMissingContext("logger")
 	}
 
 	return l, nil
@@ -186,7 +186,7 @@ func ContextLogger(ctx context.Context) (logging.Writer, error) { //nolint: iret
 func ContextRequestID(ctx context.Context) (string, error) {
 	requestID, ok := ctxkeys.GetValue(ctx, ctxkeys.RequestIDKey).(string)
 	if !ok {
-		return "", apperror.ErrMissingContext("requestID")
+		return "", apperror.ErrNewMissingContext("requestID")
 	}
 
 	return requestID, nil

@@ -8,10 +8,16 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+var (
+	version   string
+	buildTime string //nolint: gochecknoglobals
+)
+
 func main() {
 	app := &cli.App{ //nolint:exhaustruct
-		Name:  "iggy",
-		Usage: "application for executing generative workflows",
+		Name:    "iggy",
+		Version: version + "-" + buildTime,
+		Usage:   "application for executing generative workflows",
 		Flags: []cli.Flag{
 			&cli.BoolFlag{ //nolint:exhaustruct
 				Name:     "api",
@@ -32,7 +38,7 @@ func main() {
 				cli.ShowAppHelpAndExit(c, 0)
 			}
 
-			return app.Run(c.Bool("worker"), c.Bool("api"))
+			return app.Run(c.Bool("worker"), c.Bool("api"), version, buildTime)
 		},
 	}
 

@@ -3,9 +3,9 @@ package auth
 import (
 	"net/http"
 
+	apierror "github.com/kaibling/apiforge/apierror"
 	"github.com/kaibling/apiforge/ctxkeys"
 	"github.com/kaibling/apiforge/envelope"
-	apierror "github.com/kaibling/apiforge/error"
 	"github.com/kaibling/apiforge/route"
 	"github.com/kaibling/iggy/bootstrap"
 	"github.com/kaibling/iggy/entity"
@@ -13,7 +13,12 @@ import (
 )
 
 func authLogin(w http.ResponseWriter, r *http.Request) {
-	e, l := envelope.GetEnvelopeAndLogger(r)
+	e, l, merr := envelope.GetEnvelopeAndLogger(r)
+	if merr != nil {
+		e.SetError(merr).Finish(w, r, l)
+
+		return
+	}
 
 	var postLogin entity.Login
 	if err := route.ReadPostData(r, &postLogin); err != nil {
@@ -47,7 +52,12 @@ func authLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func authLogout(w http.ResponseWriter, r *http.Request) {
-	e, l := envelope.GetEnvelopeAndLogger(r)
+	e, l, merr := envelope.GetEnvelopeAndLogger(r)
+	if merr != nil {
+		e.SetError(merr).Finish(w, r, l)
+
+		return
+	}
 
 	token, err := bootstrap.ContextToken(r.Context())
 	if err != nil {
@@ -74,7 +84,12 @@ func authLogout(w http.ResponseWriter, r *http.Request) {
 }
 
 func authCheck(w http.ResponseWriter, r *http.Request) {
-	e, l := envelope.GetEnvelopeAndLogger(r)
+	e, l, merr := envelope.GetEnvelopeAndLogger(r)
+	if merr != nil {
+		e.SetError(merr).Finish(w, r, l)
+
+		return
+	}
 
 	ts, err := bootstrap.NewTokenServiceAnonym(r.Context(), config.SystemUser)
 	if err != nil {
