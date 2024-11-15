@@ -23,6 +23,7 @@ func Authentication(next http.Handler) http.Handler {
 
 			return
 		}
+
 		l.Debug("trying authentication")
 
 		token, err := extractToken(r.Header)
@@ -38,6 +39,7 @@ func Authentication(next http.Handler) http.Handler {
 
 			return
 		}
+
 		l.AddStringField("username", user.Username)
 		l.Debug("client authenticated")
 

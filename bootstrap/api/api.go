@@ -12,12 +12,19 @@ import (
 	apiservice "github.com/kaibling/apiforge/service"
 	"github.com/kaibling/apiforge/status"
 	"github.com/kaibling/iggy/api"
+	"github.com/kaibling/iggy/api/metrics"
+	appmidleware "github.com/kaibling/iggy/api/middleware"
 	"github.com/kaibling/iggy/bootstrap"
 	"github.com/kaibling/iggy/migration"
 	"github.com/kaibling/iggy/pkg/config"
 )
 
-func Start(ctx context.Context, cfg config.Configuration, logger logging.Writer, conn *pgxpool.Pool) error {
+func Start( //nolint:funlen
+	ctx context.Context,
+	cfg config.Configuration,
+	logger logging.Writer,
+	conn *pgxpool.Pool,
+) error {
 	logger = logger.NewScope("api_startup")
 
 	ctx = context.WithValue(ctx, ctxkeys.LoggerKey, logger)
@@ -48,6 +55,12 @@ func Start(ctx context.Context, cfg config.Configuration, logger logging.Writer,
 		logger.Info("Admin Password: " + pwd)
 	}
 
+	if err := appmidleware.InitMetrics(); err != nil {
+		logger.Error(err)
+
+		return err
+	}
+
 	root := chi.NewRouter()
 	// context
 	root.Use(middleware.AddContext(ctxkeys.LoggerKey, logger))
@@ -59,9 +72,11 @@ func Start(ctx context.Context, cfg config.Configuration, logger logging.Writer,
 	root.Use(middleware.SaveBody)
 	root.Use(middleware.LogRequest)
 	root.Use(middleware.Recoverer)
+	root.Use(appmidleware.Metrics)
 
 	// mount api endpoint
 	root.Mount("/api/v1", api.Route())
+	root.Mount("/metrics", metrics.Route())
 
 	root.NotFound(handler.NotFound)
 
