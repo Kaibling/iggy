@@ -22,7 +22,7 @@ type Loopback struct {
 }
 
 func (l *Loopback) Subscribe(ctx context.Context, _ string) error {
-	// TODO multi goroutine
+	// TODO multi worker goroutine
 	l.l.Info("loopback worker waiting...")
 
 	for {
@@ -32,6 +32,7 @@ func (l *Loopback) Subscribe(ctx context.Context, _ string) error {
 			if err != nil {
 				l.l.Error(err)
 			}
+			l.l.AddAnyField("request_id", t.RequestID)
 
 			if err := bootstrap.WorkerExecution(ctx, l.cfg, t); err != nil {
 				l.l.Error(err)

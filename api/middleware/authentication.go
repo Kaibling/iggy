@@ -17,12 +17,13 @@ import (
 func Authentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// read envelope
-		e, l, merr := envelope.GetEnvelopeAndLogger(r)
-		if merr != nil {
-			e.SetError(apierror.NewGeneric(merr)).Finish(w, r, l)
+		e, l, multiErr := envelope.GetEnvelopeAndLogger(r)
+		if multiErr != nil {
+			e.SetError(apierror.NewGeneric(multiErr)).Finish(w, r, l)
 
 			return
 		}
+		l.Debug("trying authentication")
 
 		token, err := extractToken(r.Header)
 		if err != nil {
@@ -37,6 +38,8 @@ func Authentication(next http.Handler) http.Handler {
 
 			return
 		}
+		l.AddStringField("username", user.Username)
+		l.Debug("client authenticated")
 
 		ctx := context.WithValue(r.Context(), ctxkeys.UserNameKey, user.Username)
 		ctx = context.WithValue(ctx, ctxkeys.UserIDKey, user.ID)

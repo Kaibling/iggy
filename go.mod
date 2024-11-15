@@ -9,7 +9,7 @@ require (
 	github.com/go-chi/chi/v5 v5.1.0
 	github.com/golang-migrate/migrate/v4 v4.18.1
 	github.com/jackc/pgx/v5 v5.7.1
-	github.com/kaibling/apiforge v0.0.15
+	github.com/kaibling/apiforge v0.0.16
 	github.com/urfave/cli/v2 v2.27.5
 	golang.org/x/crypto v0.29.0
 )
