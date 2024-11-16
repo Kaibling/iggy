@@ -1,15 +1,31 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { getApiData } from '../utils/api.tsx';
-
-import { Run } from '../utils/types.tsx'
+import { formatDate } from '../utils/api'
+import { Run, RunLog } from '../utils/types.tsx'
 import '../detail.css'
 import { NotifyContainer, showError } from '../utils/notify.tsx';
 
 
+
+
+const RunLogCard: React.FC<{ runLog: RunLog }> = ({ runLog }) => {
+    return (
+        <>
+            <tr>
+                {/* <td>{runLog.id}</td> */}
+                <td>{formatDate(runLog.timestamp)}</td>
+                <td>{runLog.message}</td>
+                
+            </tr>
+        </>
+    );
+};
+
 const RunDetail: React.FC = () => {
     const { id } = useParams<{ id: string | undefined }>();
     const [run, setRun] = useState<Run | null>(null);
+    const [logs, setLogs] = useState<RunLog[] | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -26,6 +42,14 @@ const RunDetail: React.FC = () => {
                 return;
             }
             setRun(runResponse.response);
+
+            const logsResponse = await getApiData("runs/" + id + "/logs");
+            if (logsResponse.error) {
+                showError(String(logsResponse.error));
+                return;
+            }
+            setLogs(logsResponse.response);
+
             document.title = runResponse.response?.id + " - iggy" || "Workflow - iggy";
         } catch (err) {
             if (err instanceof Error) {
@@ -37,6 +61,7 @@ const RunDetail: React.FC = () => {
             setLoading(false);
         }
     };
+
     useEffect(() => {
         fetchData();
     }, [id]);
@@ -59,56 +84,53 @@ const RunDetail: React.FC = () => {
         <div>
             <NotifyContainer />
             <div className='top-banner' >
-                <h1 >{run.id}</h1>
+                <h2 >{run.workflow.name} Run</h2>
             </div>
 
             <div className="detail-container-row">
 
-                    <div className="detail-card">
-                        <h2 >Details</h2>
+                <div className="detail-card">
+                    <h2 >Details</h2>
 
-                        <div className="detail-row">
-                            <span className="detail-label">ID:</span>
-                            <span className="detail-value">{run.id}</span>
-                        </div>
-
-                        <div className="detail-row">
-                            <span className="detail-label">name:</span>
-                            <span className="detail-value">{run.id}</span>
-                        </div>
-
-                        <div className="detail-row">
-                            <span className="detail-label">error:</span>
-                            <span className="detail-value">{run.error}</span>
-                        </div>
-
-                        <div className="detail-row">
-                            <span className="detail-label">result:</span>
-                            <span className="detail-value"> {run.result}</span>
-                        </div>
-
-                        <div className="detail-row">
-                            <span className="detail-label">Run time:</span>
-                            <span className="detail-value">{run.run_time}</span>
-                        </div>
-
-                        <div className="detail-row">
-                            <span className="detail-label">Created at:</span>
-                            <span className="detail-value">{run.meta.created_at}</span>
-                        </div>
-                        <div className="detail-row">
-                            <span className="detail-label">Created by:</span>
-                            <span className="detail-value">{run.meta.created_by}</span>
-                        </div>
-                        <div className="detail-row">
-                            <span className="detail-label">Updated_at:</span>
-                            <span className="detail-value">{run.meta.modified_at}</span>
-                        </div>
-                        <div className="detail-row">
-                            <span className="detail-label">Updated_by:</span>
-                            <span className="detail-value">{run.meta.modified_by}</span>
-                        </div>
+                    <div className="detail-row">
+                        <span className="detail-label">ID:</span>
+                        <span className="detail-value">{run.id}</span>
                     </div>
+
+                    <div className="detail-row">
+                        <span className="detail-label">Workflow:</span>
+                        <span className="detail-value">{run.workflow.name}</span>
+                    </div>
+
+                    <div className="detail-row">
+                        <span className="detail-label">error:</span>
+                        <span className="detail-value">{run.error}</span>
+                    </div>
+
+                    <div className="detail-row">
+                        <span className="detail-label">result:</span>
+                        <span className="detail-value"> {run.result}</span>
+                    </div>
+
+                    <div className="detail-row">
+                        <span className="detail-label">Run time:</span>
+                        <span className="detail-value">{run.run_time}</span>
+                    </div>
+                </div>
+
+            </div>
+            <div className="detail-container-row">
+                <div className="detail-card-max-width">
+                    <h2 >Logs</h2>
+                    <table>
+                        <tbody>
+                            {logs?.map((log: RunLog) => (
+                                <RunLogCard key={log.id} runLog={log} />
+                            ))}
+                        </tbody>
+
+                    </table>
+                </div>
             </div>
         </div>
     );

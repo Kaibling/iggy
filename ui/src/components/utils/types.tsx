@@ -57,13 +57,9 @@ export interface Run {
     meta: Meta;
 }
 
-
-// types.ts
-export interface Workflow2 {
-    id: string;
-    name: string;
-    code: string;
-    object_type: string;
-    children: Workflow2[] | null;
-  }
-  
+export interface RunLog {
+    id: string,
+    run_id: string;
+    message: string;
+    timestamp: string;
+}

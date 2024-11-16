@@ -34,7 +34,8 @@ func fetchRun(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	e.SetResponse(run).Finish(w, r, l)
+	//todo check length
+	e.SetResponse(run[0]).Finish(w, r, l)
 }
 
 func createRun(w http.ResponseWriter, r *http.Request) {
