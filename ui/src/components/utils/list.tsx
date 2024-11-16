@@ -142,5 +142,5 @@ export default workflow_list;
 
   const handleRunClick = (id: string) => {
     console.log(`run clicked for ${id}`);
-    sendApi(`workflows/${id}/run`,"POST","");
+    sendApi(`workflows/${id}/execute`,"POST","");
   };

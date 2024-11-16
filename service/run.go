@@ -53,6 +53,7 @@ func (ts *RunService) CreateRun(newEntity entity.NewRun, runLogService *RunLogSe
 	runLogs := []entity.NewRunLog{}
 
 	for _, runLog := range newEntity.Logs {
+		runLog.ID = utils.NewULID().String()
 		runLog.RunID = newEntity.ID
 		runLogs = append(runLogs, runLog)
 	}
