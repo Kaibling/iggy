@@ -1,0 +1,131 @@
+/* Container for stacking multiple user detail cards */
+.detail-container {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    gap: 1rem; /* Space between cards */
+    padding: 1rem;
+    background-color: #f0f2f5;
+    width: 100%;
+  }
+  .detail-container-row {
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+    gap: 1rem; /* Space between cards */
+    padding: 1rem;
+    background-color: #f0f2f5;
+    width: 100%;
+  }
+  /* Card styling */
+  .detail-card,.detail-card-max-width  {
+    background-color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    width: auto;
+    box-sizing: border-box;
+  }
+  
+  /* Ensure card height is flexible */
+  .detail-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    
+  }
+  .detail-card-max-width {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    box-sizing: border-box; 
+    width: 100%; 
+  }
+
+  .editor-container {
+    width: calc(100% - 2rem);
+    box-sizing: border-box;  
+}
+  
+  /* Heading */
+  .detail-card h2 {
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    color: #333;
+    text-align: center;
+  }
+  
+  /* Row styling */
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    flex-wrap: wrap; /* Allows labels and values to wrap if content is long */
+  }
+  
+  /* Label styling */
+  .detail-label {
+    font-weight: bold;
+    color: #666;
+  }
+  
+  /* Value styling */
+  .detail-value {
+    color: #333;
+    text-align: right;
+    flex-grow: 1;
+  }
+  
+  /* Table inside the user card */
+  .detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+  }
+  
+  .detail-table th, .detail-table td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  /* Responsive design */
+  @media (max-width: 480px) {
+    .detail-card {
+      padding: 1.5rem;
+    }
+  
+    .detail-card h2 {
+      font-size: 1.25rem;
+    }
+  
+    .detail-row {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  
+    .detail-label {
+      margin-bottom: 0.5rem;
+    }
+  
+    .detail-value {
+      text-align: left;
+    }
+  }
+
+
+  .top-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+ }
+ 
+ .list-actions {
+     display: flex;
+     justify-content: space-between;
+     align-items: center;
+     padding-right: 50px;
+     gap: 1rem;
+  }

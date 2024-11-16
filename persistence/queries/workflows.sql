@@ -5,6 +5,7 @@ LIMIT 1;
 
 -- name: FetchAllWorkflows :many
 SELECT * FROM workflows 
+WHERE deleted_at IS NULL
 ORDER BY id;
 
 -- name: SaveWorkflow :one

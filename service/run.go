@@ -4,15 +4,17 @@ import (
 	"context"
 
 	"github.com/kaibling/apiforge/lib/utils"
+	"github.com/kaibling/apiforge/params"
 	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/pkg/config"
 )
 
 type runRepo interface {
 	SaveRun(newModel entity.NewRun) (*entity.Run, error)
-	FetchRun(id string) (*entity.Run, error)
+	FetchRuns(id []string) ([]*entity.Run, error)
 	FetchRunByWorkflow(workflowID string) ([]*entity.Run, error)
 	FetchRunByRequestID(requestID string) (*entity.Run, error)
+	IDQuery(query string) ([]string, error)
 }
 
 type RunService struct {
@@ -25,8 +27,17 @@ func NewRunService(ctx context.Context, u runRepo, cfg config.Configuration) *Ru
 	return &RunService{ctx: ctx, repo: u, cfg: cfg}
 }
 
-func (ts *RunService) FetchRun(id string) (*entity.Run, error) {
-	return ts.repo.FetchRun(id)
+func (ts *RunService) FetchRuns(ids []string) ([]*entity.Run, error) {
+	fetchedRuns, err := ts.repo.FetchRuns(ids)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, run := range fetchedRuns {
+		run.CalculateRuntime()
+	}
+
+	return fetchedRuns, nil
 }
 
 func (ts *RunService) CreateRun(newEntity entity.NewRun, runLogService *RunLogService) error {
@@ -59,4 +70,24 @@ func (ts *RunService) FetchRunByWorkflow(id string) ([]*entity.Run, error) {
 
 func (ts *RunService) FetchRunByRequestID(requestID string) (*entity.Run, error) {
 	return ts.repo.FetchRunByRequestID(requestID)
+}
+
+func (ts *RunService) FetchByPagination(qp params.Pagination) ([]*entity.Run, params.Pagination, error) {
+	p := NewPagination(qp, "runs")
+
+	idQuery := p.GetCursorSQL()
+
+	ids, err := ts.repo.IDQuery(idQuery)
+	if err != nil {
+		return nil, params.Pagination{}, err
+	}
+
+	ids, pag := p.FinishPagination(ids)
+
+	loadedRuns, err := ts.FetchRuns(ids)
+	if err != nil {
+		return nil, params.Pagination{}, err
+	}
+
+	return loadedRuns, pag, nil
 }

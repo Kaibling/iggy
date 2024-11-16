@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -101,7 +102,7 @@ func (r *WorkflowRepo) FetchWorkflows(ids []string, depth int) ([]entity.Workflo
 	rawQuery := `
 	WITH RECURSIVE workflow_hierarchy AS (
 		SELECT 
-			w.id
+			w.id,
 			w.name,
 			w.code,
 			w.object_type,
@@ -116,7 +117,7 @@ func (r *WorkflowRepo) FetchWorkflows(ids []string, depth int) ([]entity.Workflo
 		FROM 
 			workflows w
 		WHERE 
-			w.deleted_at IS NULL AND w.id = ANY($1::text[])
+			w.deleted_at IS NULL AND w.id IN(%s)
 		
 		UNION ALL
 		
@@ -140,12 +141,14 @@ func (r *WorkflowRepo) FetchWorkflows(ids []string, depth int) ([]entity.Workflo
 		JOIN 
 			workflow_hierarchy wh ON wc.workflow_id = wh.id
 		WHERE 
-			wh.depth < $2
+			wh.depth < $1
 	)
 	SELECT * FROM workflow_hierarchy;
 `
+	placeholders := "'" + strings.Join(ids, "','") + "'"
+	query := fmt.Sprintf(rawQuery, placeholders)
 
-	rows, err := r.db.Query(context.Background(), rawQuery, ids, depth)
+	rows, err := r.db.Query(context.Background(), query, depth)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
@@ -189,6 +192,34 @@ func (r *WorkflowRepo) FetchWorkflows(ids []string, depth int) ([]entity.Workflo
 	}
 
 	return v, nil
+}
+
+func (r *WorkflowRepo) IDQuery(idQuery string) ([]string, error) {
+	rows, err := r.db.Query(context.Background(), idQuery)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %w", err)
+	}
+
+	var ids []string
+	// Process the results
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(
+			&id,
+		); err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+
+		ids = append(ids, id)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration error: %w", err)
+	}
+
+	defer rows.Close()
+
+	return ids, nil
 }
 
 func (r *WorkflowRepo) DeleteWorkflow(id string) error {

@@ -232,3 +232,35 @@ func patchWorkflow(w http.ResponseWriter, r *http.Request) {
 
 	e.SetResponse(updatedWorkflow).Finish(w, r, l)
 }
+
+func fetchWorkflows(w http.ResponseWriter, r *http.Request) {
+	e, l, merr := envelope.GetEnvelopeAndLogger(r)
+	if merr != nil {
+		e.SetError(merr).Finish(w, r, l)
+
+		return
+	}
+
+	params, err := bootstrap.ContextParams(r.Context())
+	if err != nil {
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
+
+		return
+	}
+
+	us, err := bootstrap.NewWorkflowService(r.Context())
+	if err != nil {
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
+
+		return
+	}
+
+	workflows, pageData, err := us.FetchByPagination(params)
+	if err != nil {
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
+
+		return
+	}
+
+	e.SetResponse(workflows).SetPagination(pageData).Finish(w, r, l)
+}

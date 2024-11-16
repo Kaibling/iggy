@@ -41,7 +41,7 @@ func InitMetrics() error {
 	}
 
 	// todo throws error if error is checked
-	prometheus.Register(httpDuration)
+	prometheus.Register(httpDuration) //nolint: errcheck
 
 	return nil
 }

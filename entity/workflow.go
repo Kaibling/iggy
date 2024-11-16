@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/kaibling/iggy/apperror"
+	"github.com/kaibling/iggy/pkg/utility"
 )
 
 type Workflow struct {
@@ -37,7 +38,6 @@ func (w NewWorkflow) Validate() *apperror.AppError {
 }
 
 type UpdateWorkflow struct {
-	// ID          *string       `json:"id"`
 	Name        *string       `json:"name"`
 	Code        *string       `json:"code"`
 	BuildIn     *bool         `json:"build_in"`
@@ -64,13 +64,17 @@ type NewRun struct {
 }
 
 type Run struct {
-	ID         string
-	WorkflowID string
-	Error      *string
-	StartTime  time.Time
-	FinishTime time.Time
-	RunTime    string
-	Meta       MetaData
+	ID         string     `json:"id"`
+	Workflow   Identifier `json:"workflow"`
+	Error      *string    `json:"error"`
+	StartTime  time.Time  `json:"start_time"`
+	FinishTime time.Time  `json:"finish_time"`
+	RunTime    string     `json:"run_time"`
+	Meta       MetaData   `json:"meta"`
+}
+
+func (r *Run) CalculateRuntime() {
+	r.RunTime = utility.FormatDuration(r.FinishTime.Sub(r.StartTime))
 }
 
 type NewRunLog struct {
@@ -81,10 +85,10 @@ type NewRunLog struct {
 }
 
 type RunLog struct {
-	ID        string
-	RunID     string
-	Message   string
-	Timestamp time.Time
+	ID        string    `json:"id"`
+	RunID     string    `json:"run_id"`
+	Message   string    `json:"message"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 type Task struct {

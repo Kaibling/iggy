@@ -1,0 +1,45 @@
+/* DropdownWithSearch.css */
+.dropdown-with-search {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .dropdown-with-search input {
+    width: 200px;
+    padding: 8px;
+    box-sizing: border-box;
+  }
+  
+  .dropdown-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    max-height: 160px; /* Set max-height to show only 5 items (approx 32px each) */
+    overflow-y: auto; /* Enable vertical scrolling */
+    background: rgb(255, 255, 255);
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex; /* Enables flexbox layout */
+    flex-direction: column; /* Aligns content vertically */
+    justify-content: flex-start; /* Aligns content to the top-left */
+    text-align: left; 
+  }
+  
+  .dropdown-list li {
+    padding: 8px;
+    cursor: pointer;
+  }
+  
+  .dropdown-list li:hover {
+    background: #aaa4a493;
+  }
+  
+  .no-options {
+    padding: 8px;
+    color: #fffbfb;
+  }

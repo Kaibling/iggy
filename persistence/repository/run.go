@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -13,6 +14,7 @@ import (
 type RunRepo struct {
 	ctx       context.Context
 	q         *sqlcrepo.Queries
+	db        *pgxpool.Pool
 	username  string
 	requestID string
 }
@@ -21,6 +23,7 @@ func NewRunRepo(ctx context.Context, username, requestID string, dbPool *pgxpool
 	return &RunRepo{
 		ctx:       ctx,
 		q:         sqlcrepo.New(dbPool),
+		db:        dbPool,
 		username:  username,
 		requestID: requestID,
 	}
@@ -67,28 +70,39 @@ func (r *RunRepo) SaveRun(newModel entity.NewRun) (*entity.Run, error) {
 		return nil, err
 	}
 
-	return r.FetchRun(newRunID)
+	rr, err := r.FetchRuns([]string{newRunID})
+	if err != nil {
+		return nil, err
+	}
+	// todo if len is not 0
+	return rr[0], nil
 }
 
-func (r *RunRepo) FetchRun(id string) (*entity.Run, error) {
-	rt, err := r.q.FetchRun(r.ctx, id)
+func (r *RunRepo) FetchRuns(ids []string) ([]*entity.Run, error) {
+	ru, err := r.q.FetchRuns(r.ctx, ids)
 	if err != nil {
 		return nil, err
 	}
 
-	return &entity.Run{
-		ID:         rt.ID,
-		WorkflowID: rt.WorkflowID,
-		Error:      &rt.Error.String,
-		StartTime:  rt.StartTime.Time,
-		FinishTime: rt.FinishTime.Time,
-		Meta: entity.MetaData{
-			CreatedAt:  rt.CreatedAt.Time,
-			CreatedBy:  rt.CreatedBy,
-			ModifiedAt: rt.ModifiedAt.Time,
-			ModifiedBy: rt.ModifiedBy,
-		},
-	}, nil
+	runs := []*entity.Run{}
+
+	for _, rt := range ru {
+		runs = append(runs, &entity.Run{
+			ID:         rt.ID,
+			Workflow:   entity.Identifier{ID: rt.WorkflowID, Name: rt.WorkflowName},
+			Error:      &rt.Error.String,
+			StartTime:  rt.StartTime.Time,
+			FinishTime: rt.FinishTime.Time,
+			Meta: entity.MetaData{
+				CreatedAt:  rt.CreatedAt.Time,
+				CreatedBy:  rt.CreatedBy,
+				ModifiedAt: rt.ModifiedAt.Time,
+				ModifiedBy: rt.ModifiedBy,
+			},
+		})
+	}
+
+	return runs, nil
 }
 
 func (r *RunRepo) FetchRunByWorkflow(workflowID string) ([]*entity.Run, error) {
@@ -103,7 +117,7 @@ func (r *RunRepo) FetchRunByWorkflow(workflowID string) ([]*entity.Run, error) {
 		pErr := rt.Error
 		runs = append(runs, &entity.Run{
 			ID:         rt.ID,
-			WorkflowID: rt.WorkflowID,
+			Workflow:   entity.Identifier{ID: rt.WorkflowID, Name: rt.WorkflowName},
 			Error:      &pErr.String,
 			StartTime:  rt.StartTime.Time,
 			FinishTime: rt.FinishTime.Time,
@@ -129,7 +143,7 @@ func (r *RunRepo) FetchRunByRequestID(requestID string) (*entity.Run, error) {
 
 	return &entity.Run{
 		ID:         rt.ID,
-		WorkflowID: rt.WorkflowID,
+		Workflow:   entity.Identifier{ID: rt.WorkflowID, Name: rt.WorkflowName},
 		Error:      &pErr.String,
 		StartTime:  rt.StartTime.Time,
 		FinishTime: rt.FinishTime.Time,
@@ -140,4 +154,32 @@ func (r *RunRepo) FetchRunByRequestID(requestID string) (*entity.Run, error) {
 			ModifiedBy: rt.ModifiedBy,
 		},
 	}, nil
+}
+
+func (r *RunRepo) IDQuery(idQuery string) ([]string, error) {
+	rows, err := r.db.Query(context.Background(), idQuery)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %w", err)
+	}
+
+	var ids []string
+	// Process the results
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(
+			&id,
+		); err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+
+		ids = append(ids, id)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration error: %w", err)
+	}
+
+	defer rows.Close()
+
+	return ids, nil
 }

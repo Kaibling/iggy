@@ -1,0 +1,16 @@
+#root {
+  /* max-width: 1280px; */
+  margin: 0 auto;
+  /* padding: 2rem; */
+  text-align: center;
+}
+
+input, textarea, select {
+  background-color: #fff !important; /* Set background to white */
+  color: #000 !important; /* Set text color to black */
+  border: 1px solid #ccc; /* Optional: Set border color */
+}
+
+input::placeholder, textarea::placeholder {
+  color: #888; /* Placeholder color */
+}

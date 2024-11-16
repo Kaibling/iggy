@@ -2,7 +2,6 @@ package run
 
 import (
 	"net/http"
-	"strings"
 
 	apierror "github.com/kaibling/apiforge/apierror"
 	"github.com/kaibling/apiforge/envelope"
@@ -28,7 +27,7 @@ func fetchRun(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	run, err := us.FetchRun(runID)
+	run, err := us.FetchRuns([]string{runID})
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
@@ -119,21 +118,28 @@ func fetchRuns(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	us, err := bootstrap.NewRunService(r.Context())
+	rs, err := bootstrap.NewRunService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return
 	}
 
-	queriedRequestID, _ := strings.CutPrefix(params.Filter, "request_id=")
-
-	run, err := us.FetchRunByRequestID(queriedRequestID)
+	runs, pageData, err := rs.FetchByPagination(params)
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return
 	}
 
-	e.SetResponse(run).Finish(w, r, l)
+	// queriedRequestID, _ := strings.CutPrefix(params.Filter, "request_id=")
+
+	// run, err := us.FetchRunByRequestID(queriedRequestID)
+	// if err != nil {
+	// 	e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
+
+	// 	return
+	// }
+
+	e.SetResponse(runs).SetPagination(pageData).Finish(w, r, l)
 }

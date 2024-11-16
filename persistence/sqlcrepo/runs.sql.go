@@ -12,7 +12,7 @@ import (
 )
 
 const fetchRun = `-- name: FetchRun :one
-SELECT runs.id, runs.request_id, runs.workflow_id, runs.error, runs.start_time, runs.finish_time, runs.created_at, runs.modified_at, runs.created_by, runs.modified_by,workflows.name FROM runs
+SELECT runs.id, runs.request_id, runs.workflow_id, runs.error, runs.start_time, runs.finish_time, runs.created_at, runs.modified_at, runs.created_by, runs.modified_by,workflows.name as workflow_name FROM runs
 JOIN workflows
 ON workflows.id = runs.workflow_id
 WHERE runs.id = $1
@@ -20,17 +20,17 @@ LIMIT 1
 `
 
 type FetchRunRow struct {
-	ID         string
-	RequestID  pgtype.Text
-	WorkflowID string
-	Error      pgtype.Text
-	StartTime  pgtype.Timestamp
-	FinishTime pgtype.Timestamp
-	CreatedAt  pgtype.Timestamp
-	ModifiedAt pgtype.Timestamp
-	CreatedBy  string
-	ModifiedBy string
-	Name       string
+	ID           string
+	RequestID    pgtype.Text
+	WorkflowID   string
+	Error        pgtype.Text
+	StartTime    pgtype.Timestamp
+	FinishTime   pgtype.Timestamp
+	CreatedAt    pgtype.Timestamp
+	ModifiedAt   pgtype.Timestamp
+	CreatedBy    string
+	ModifiedBy   string
+	WorkflowName string
 }
 
 func (q *Queries) FetchRun(ctx context.Context, id string) (FetchRunRow, error) {
@@ -47,13 +47,13 @@ func (q *Queries) FetchRun(ctx context.Context, id string) (FetchRunRow, error) 
 		&i.ModifiedAt,
 		&i.CreatedBy,
 		&i.ModifiedBy,
-		&i.Name,
+		&i.WorkflowName,
 	)
 	return i, err
 }
 
 const fetchRunByRequestID = `-- name: FetchRunByRequestID :one
-SELECT runs.id, runs.request_id, runs.workflow_id, runs.error, runs.start_time, runs.finish_time, runs.created_at, runs.modified_at, runs.created_by, runs.modified_by,workflows.name FROM runs
+SELECT runs.id, runs.request_id, runs.workflow_id, runs.error, runs.start_time, runs.finish_time, runs.created_at, runs.modified_at, runs.created_by, runs.modified_by,workflows.name as workflow_name FROM runs
 JOIN workflows
 ON workflows.id = runs.workflow_id
 WHERE runs.request_id = $1
@@ -61,17 +61,17 @@ LIMIT 1
 `
 
 type FetchRunByRequestIDRow struct {
-	ID         string
-	RequestID  pgtype.Text
-	WorkflowID string
-	Error      pgtype.Text
-	StartTime  pgtype.Timestamp
-	FinishTime pgtype.Timestamp
-	CreatedAt  pgtype.Timestamp
-	ModifiedAt pgtype.Timestamp
-	CreatedBy  string
-	ModifiedBy string
-	Name       string
+	ID           string
+	RequestID    pgtype.Text
+	WorkflowID   string
+	Error        pgtype.Text
+	StartTime    pgtype.Timestamp
+	FinishTime   pgtype.Timestamp
+	CreatedAt    pgtype.Timestamp
+	ModifiedAt   pgtype.Timestamp
+	CreatedBy    string
+	ModifiedBy   string
+	WorkflowName string
 }
 
 func (q *Queries) FetchRunByRequestID(ctx context.Context, requestID pgtype.Text) (FetchRunByRequestIDRow, error) {
@@ -88,30 +88,30 @@ func (q *Queries) FetchRunByRequestID(ctx context.Context, requestID pgtype.Text
 		&i.ModifiedAt,
 		&i.CreatedBy,
 		&i.ModifiedBy,
-		&i.Name,
+		&i.WorkflowName,
 	)
 	return i, err
 }
 
 const fetchRunByWorkflow = `-- name: FetchRunByWorkflow :many
-SELECT runs.id, runs.request_id, runs.workflow_id, runs.error, runs.start_time, runs.finish_time, runs.created_at, runs.modified_at, runs.created_by, runs.modified_by,workflows.name FROM runs
+SELECT runs.id, runs.request_id, runs.workflow_id, runs.error, runs.start_time, runs.finish_time, runs.created_at, runs.modified_at, runs.created_by, runs.modified_by,workflows.name as workflow_name FROM runs
 JOIN workflows
 ON workflows.id = runs.id
 WHERE runs.workflow_id = $1
 `
 
 type FetchRunByWorkflowRow struct {
-	ID         string
-	RequestID  pgtype.Text
-	WorkflowID string
-	Error      pgtype.Text
-	StartTime  pgtype.Timestamp
-	FinishTime pgtype.Timestamp
-	CreatedAt  pgtype.Timestamp
-	ModifiedAt pgtype.Timestamp
-	CreatedBy  string
-	ModifiedBy string
-	Name       string
+	ID           string
+	RequestID    pgtype.Text
+	WorkflowID   string
+	Error        pgtype.Text
+	StartTime    pgtype.Timestamp
+	FinishTime   pgtype.Timestamp
+	CreatedAt    pgtype.Timestamp
+	ModifiedAt   pgtype.Timestamp
+	CreatedBy    string
+	ModifiedBy   string
+	WorkflowName string
 }
 
 func (q *Queries) FetchRunByWorkflow(ctx context.Context, workflowID string) ([]FetchRunByWorkflowRow, error) {
@@ -134,7 +134,61 @@ func (q *Queries) FetchRunByWorkflow(ctx context.Context, workflowID string) ([]
 			&i.ModifiedAt,
 			&i.CreatedBy,
 			&i.ModifiedBy,
-			&i.Name,
+			&i.WorkflowName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const fetchRuns = `-- name: FetchRuns :many
+SELECT runs.id, runs.request_id, runs.workflow_id, runs.error, runs.start_time, runs.finish_time, runs.created_at, runs.modified_at, runs.created_by, runs.modified_by,workflows.name as workflow_name FROM runs
+JOIN workflows
+ON workflows.id = runs.workflow_id
+WHERE runs.id = ANY($1::text[])
+ORDER BY runs.id
+`
+
+type FetchRunsRow struct {
+	ID           string
+	RequestID    pgtype.Text
+	WorkflowID   string
+	Error        pgtype.Text
+	StartTime    pgtype.Timestamp
+	FinishTime   pgtype.Timestamp
+	CreatedAt    pgtype.Timestamp
+	ModifiedAt   pgtype.Timestamp
+	CreatedBy    string
+	ModifiedBy   string
+	WorkflowName string
+}
+
+func (q *Queries) FetchRuns(ctx context.Context, dollar_1 []string) ([]FetchRunsRow, error) {
+	rows, err := q.db.Query(ctx, fetchRuns, dollar_1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []FetchRunsRow
+	for rows.Next() {
+		var i FetchRunsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.RequestID,
+			&i.WorkflowID,
+			&i.Error,
+			&i.StartTime,
+			&i.FinishTime,
+			&i.CreatedAt,
+			&i.ModifiedAt,
+			&i.CreatedBy,
+			&i.ModifiedBy,
+			&i.WorkflowName,
 		); err != nil {
 			return nil, err
 		}

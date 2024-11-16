@@ -1,15 +1,23 @@
 -- name: FetchRun :one
-SELECT runs.*,workflows.name FROM runs
+SELECT runs.*,workflows.name as workflow_name FROM runs
 JOIN workflows
 ON workflows.id = runs.workflow_id
 WHERE runs.id = $1
 LIMIT 1;
 
 -- name: FetchRunByWorkflow :many
-SELECT runs.*,workflows.name FROM runs
+SELECT runs.*,workflows.name as workflow_name FROM runs
 JOIN workflows
 ON workflows.id = runs.id
 WHERE runs.workflow_id = $1;
+
+
+-- name: FetchRuns :many
+SELECT runs.*,workflows.name as workflow_name FROM runs
+JOIN workflows
+ON workflows.id = runs.workflow_id
+WHERE runs.id = ANY($1::text[])
+ORDER BY runs.id;
 
 
 -- name: SaveRun :one
@@ -21,7 +29,7 @@ INSERT INTO runs (
 RETURNING id;
 
 -- name: FetchRunByRequestID :one
-SELECT runs.*,workflows.name FROM runs
+SELECT runs.*,workflows.name as workflow_name FROM runs
 JOIN workflows
 ON workflows.id = runs.workflow_id
 WHERE runs.request_id = $1

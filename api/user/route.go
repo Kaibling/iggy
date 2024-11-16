@@ -10,8 +10,6 @@ func Route() chi.Router { //nolint: ireturn
 	r := chi.NewRouter()
 	r.Route("/", func(r chi.Router) {
 		r.Use(middleware.Authentication)
-		// r.Use(middleware.Authorization)
-
 		r.Use(apimiddleware.ParsePagination)
 		r.Post("/", userPost)
 		r.Get("/", usersGet)

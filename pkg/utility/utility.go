@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/gob"
 	"encoding/json"
+	"fmt"
+	"time"
 )
 
 func Pretty(data interface{}) string {
@@ -22,7 +24,7 @@ func EncodeToBytes(p interface{}) ([]byte, error) {
 	}
 
 	return buf.Bytes(), nil
-}
+} //nolint: ireturn, nolintlint
 
 func DecodeToStruct[T any](s []byte) (T, error) { //nolint: ireturn, nolintlint
 	var p T
@@ -35,4 +37,19 @@ func DecodeToStruct[T any](s []byte) (T, error) { //nolint: ireturn, nolintlint
 	}
 
 	return p, nil
+}
+
+func FormatDuration(d time.Duration) string {
+	switch {
+	case d < time.Millisecond:
+		return fmt.Sprintf("%dµs", d.Microseconds())
+	case d < time.Second:
+		return fmt.Sprintf("%dms", d.Milliseconds())
+	case d < time.Minute:
+		return fmt.Sprintf("%.1fs", d.Seconds())
+	case d < time.Hour:
+		return fmt.Sprintf("%.1fm", d.Minutes())
+	default:
+		return fmt.Sprintf("%.1fd", d.Hours())
+	}
 }

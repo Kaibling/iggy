@@ -7,6 +7,7 @@ go 1.23.2
 require (
 	github.com/dop251/goja v0.0.0-20241024094426-79f3a7efcdbd
 	github.com/go-chi/chi/v5 v5.1.0
+	github.com/go-chi/cors v1.2.1
 	github.com/golang-migrate/migrate/v4 v4.18.1
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/kaibling/apiforge v0.0.16

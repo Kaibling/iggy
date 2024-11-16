@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/kaibling/apiforge/ctxkeys"
 	"github.com/kaibling/apiforge/handler"
@@ -18,6 +19,8 @@ import (
 	"github.com/kaibling/iggy/migration"
 	"github.com/kaibling/iggy/pkg/config"
 )
+
+const CorsMaxAge = 300
 
 func Start( //nolint:funlen
 	ctx context.Context,
@@ -68,6 +71,15 @@ func Start( //nolint:funlen
 	root.Use(middleware.AddContext(ctxkeys.AppConfigKey, cfg))
 
 	// middleware
+	root.Use(cors.Handler(cors.Options{
+		AllowedOrigins: []string{"*"},
+		// Access-Control-Allow-Origin
+		AllowedMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowedHeaders: []string{"*"},
+		// AllowedHeaders:     []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		AllowCredentials: false,
+		MaxAge:           CorsMaxAge,
+	}))
 	root.Use(middleware.InitEnvelope)
 	root.Use(middleware.SaveBody)
 	root.Use(middleware.LogRequest)

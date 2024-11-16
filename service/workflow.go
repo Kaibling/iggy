@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/kaibling/apiforge/lib/utils"
+	"github.com/kaibling/apiforge/params"
 	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/pkg/config"
 )
@@ -13,7 +14,7 @@ type workflowRepo interface {
 	UpdateWorkflow(id string, updateEntity entity.UpdateWorkflow) (*entity.Workflow, error)
 	// FetchWorkflow(id string) (*entity.Workflow, error)
 	FetchWorkflows(ids []string, depth int) ([]entity.Workflow, error)
-	// FetchAll() ([]*entity.Workflow, error)
+	IDQuery(query string) ([]string, error)
 	DeleteWorkflow(id string) error
 }
 
@@ -73,4 +74,24 @@ func (ws *WorkflowService) Execute(workflowID string, workflowExecutionService *
 	}
 
 	return nil
+}
+
+func (ws *WorkflowService) FetchByPagination(qp params.Pagination) ([]entity.Workflow, params.Pagination, error) {
+	p := NewPagination(qp, "workflows")
+
+	idQuery := p.GetCursorSQL()
+
+	ids, err := ws.repo.IDQuery(idQuery)
+	if err != nil {
+		return nil, params.Pagination{}, err
+	}
+
+	ids, pag := p.FinishPagination(ids)
+
+	loadedWorkflows, err := ws.repo.FetchWorkflows(ids, 1)
+	if err != nil {
+		return nil, params.Pagination{}, err
+	}
+
+	return loadedWorkflows, pag, nil
 }

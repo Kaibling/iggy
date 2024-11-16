@@ -29,6 +29,7 @@ func (q *Queries) DeleteWorkflow(ctx context.Context, arg DeleteWorkflowParams) 
 
 const fetchAllWorkflows = `-- name: FetchAllWorkflows :many
 SELECT id, name, code, object_type, fail_on_error, build_in, created_at, modified_at, created_by, modified_by, deleted_at FROM workflows 
+WHERE deleted_at IS NULL
 ORDER BY id
 `
 
