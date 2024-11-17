@@ -58,6 +58,11 @@ var ErrForbidden = AppError{
 	StatusCode: http.StatusForbidden,
 }
 
+var ErrMissing = AppError{
+	msg:        "not found",
+	StatusCode: http.StatusNotFound,
+}
+
 var ErrMissingJSAdapter = AppError{
 	msg:        "Adapter missing",
 	StatusCode: http.StatusInternalServerError,

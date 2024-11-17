@@ -108,11 +108,6 @@ const RunDetail: React.FC = () => {
                     </div>
 
                     <div className="detail-row">
-                        <span className="detail-label">result:</span>
-                        <span className="detail-value"> {run.result}</span>
-                    </div>
-
-                    <div className="detail-row">
                         <span className="detail-label">Run time:</span>
                         <span className="detail-value">{run.run_time}</span>
                     </div>

@@ -46,6 +46,7 @@ func (r *RunRepo) SaveRun(newModel entity.NewRun) (*entity.Run, error) {
 		},
 		ID:         newModel.ID,
 		WorkflowID: newModel.WorkflowID,
+		UserID:     newModel.UserID,
 		Error:      pgError,
 		StartTime: pgtype.Timestamp{
 			Time:  newModel.StartTime,
@@ -90,6 +91,7 @@ func (r *RunRepo) FetchRuns(ids []string) ([]*entity.Run, error) {
 		runs = append(runs, &entity.Run{
 			ID:         rt.ID,
 			Workflow:   entity.Identifier{ID: rt.WorkflowID, Name: rt.WorkflowName},
+			User:       entity.Identifier{ID: rt.UserID, Name: rt.UserName},
 			Error:      &rt.Error.String,
 			StartTime:  rt.StartTime.Time,
 			FinishTime: rt.FinishTime.Time,
@@ -118,6 +120,7 @@ func (r *RunRepo) FetchRunByWorkflow(workflowID string) ([]*entity.Run, error) {
 		runs = append(runs, &entity.Run{
 			ID:         rt.ID,
 			Workflow:   entity.Identifier{ID: rt.WorkflowID, Name: rt.WorkflowName},
+			User:       entity.Identifier{ID: rt.UserID, Name: rt.UserName},
 			Error:      &pErr.String,
 			StartTime:  rt.StartTime.Time,
 			FinishTime: rt.FinishTime.Time,
@@ -144,6 +147,7 @@ func (r *RunRepo) FetchRunByRequestID(requestID string) (*entity.Run, error) {
 	return &entity.Run{
 		ID:         rt.ID,
 		Workflow:   entity.Identifier{ID: rt.WorkflowID, Name: rt.WorkflowName},
+		User:       entity.Identifier{ID: rt.UserID, Name: rt.UserName},
 		Error:      &pErr.String,
 		StartTime:  rt.StartTime.Time,
 		FinishTime: rt.FinishTime.Time,

@@ -27,15 +27,22 @@ func fetchRun(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	run, err := us.FetchRuns([]string{runID})
+	runs, err := us.FetchRuns([]string{runID})
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return
 	}
 
-	//todo check length
-	e.SetResponse(run[0]).Finish(w, r, l)
+	if len(runs) < 1 {
+		e.SetError(apierror.New(apierror.ErrDataNotFound,
+			apierror.ErrDataNotFound.HTTPStatus())).Finish(w, r, l)
+
+		return
+	}
+
+	// todo check length
+	e.SetResponse(runs[0]).Finish(w, r, l)
 }
 
 func createRun(w http.ResponseWriter, r *http.Request) {

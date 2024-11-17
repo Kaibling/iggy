@@ -11,7 +11,6 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/kaibling/iggy/apperror"
 	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/persistence/sqlcrepo"
 )
@@ -32,39 +31,45 @@ func NewWorkflowRepo(ctx context.Context, username string, dbPool *pgxpool.Pool)
 	}
 }
 
-func (r *WorkflowRepo) SaveWorkflow(newModel entity.NewWorkflow) (*entity.Workflow, error) {
+func (r *WorkflowRepo) CreateWorkflows(newModels []*entity.NewWorkflow) ([]entity.Workflow, error) {
 	maxDepth := 1
+	newWorkflowsIDs := []string{}
 
-	newWorkflowID, err := r.q.SaveWorkflow(r.ctx, sqlcrepo.SaveWorkflowParams{
-		ID:   newModel.ID,
-		Name: newModel.Name,
-		Code: pgtype.Text{
-			String: newModel.Code,
-			Valid:  true,
-		},
-		ObjectType:  string(newModel.ObjectType),
-		BuildIn:     newModel.BuildIn,
-		FailOnError: newModel.FailOnError,
-		CreatedAt: pgtype.Timestamp{
-			Time:  time.Now(),
-			Valid: true,
-		},
-		CreatedBy: r.username,
-		ModifiedAt: pgtype.Timestamp{
-			Time:  time.Now(),
-			Valid: true,
-		},
-		ModifiedBy: r.username,
-	})
+	for _, newModel := range newModels {
+		newWorkflowID, err := r.q.SaveWorkflow(r.ctx, sqlcrepo.SaveWorkflowParams{
+			ID:   newModel.ID,
+			Name: newModel.Name,
+			Code: pgtype.Text{
+				String: newModel.Code,
+				Valid:  true,
+			},
+			ObjectType:  string(newModel.ObjectType),
+			BuildIn:     newModel.BuildIn,
+			FailOnError: newModel.FailOnError,
+			CreatedAt: pgtype.Timestamp{
+				Time:  time.Now(),
+				Valid: true,
+			},
+			CreatedBy: r.username,
+			ModifiedAt: pgtype.Timestamp{
+				Time:  time.Now(),
+				Valid: true,
+			},
+			ModifiedBy: r.username,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		newWorkflowsIDs = append(newWorkflowsIDs, newWorkflowID)
+	}
+
+	wfs, err := r.FetchWorkflows(newWorkflowsIDs, maxDepth)
 	if err != nil {
 		return nil, err
 	}
 
-	if wfs, err := r.FetchWorkflows([]string{newWorkflowID}, maxDepth); err != nil {
-		return nil, err
-	} else { //nolint: revive
-		return &wfs[0], nil
-	}
+	return wfs, nil
 }
 
 func (r *WorkflowRepo) UpdateWorkflow(workflowID string, updateEntity entity.UpdateWorkflow) (*entity.Workflow, error) {
@@ -188,7 +193,7 @@ func (r *WorkflowRepo) FetchWorkflows(ids []string, depth int) ([]entity.Workflo
 
 	v, ok := root["root"]
 	if !ok {
-		return nil, apperror.ErrForbidden
+		return []entity.Workflow{}, nil
 	}
 
 	return v, nil

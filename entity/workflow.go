@@ -57,6 +57,7 @@ const (
 type NewRun struct {
 	ID         string
 	WorkflowID string
+	UserID     string
 	Error      *string
 	StartTime  time.Time
 	FinishTime time.Time
@@ -66,6 +67,7 @@ type NewRun struct {
 type Run struct {
 	ID         string     `json:"id"`
 	Workflow   Identifier `json:"workflow"`
+	User       Identifier `json:"user"`
 	Error      *string    `json:"error"`
 	StartTime  time.Time  `json:"start_time"`
 	FinishTime time.Time  `json:"finish_time"`
@@ -94,6 +96,7 @@ type RunLog struct {
 type Task struct {
 	ID         string
 	WorkflowID string
+	UserID     string
 	RequestID  string
 	// EnqueueTime time.Time
 }

@@ -18,6 +18,7 @@ linters:
     - depguard # disabled, until sub packages can be allowed, withaout listing all of the packages
     - containedctx # TODO change repos
     - gomoddirectives
+    - ireturn
   # Disable specific linter
   # https://golangci-lint.run/usage/linters/#disabled-by-default
   # Enable only fast linters from enabled linters set (first run won't be fast)

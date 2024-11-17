@@ -5,8 +5,13 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"strings"
 	"time"
 )
+
+const HTTPClientTimeout = time.Duration(1) * time.Second
 
 func Pretty(data interface{}) string {
 	a, _ := json.MarshalIndent(data, "", " ") //nolint: errchkjson
@@ -14,7 +19,13 @@ func Pretty(data interface{}) string {
 	return string(a)
 }
 
-func EncodeToBytes(p interface{}) ([]byte, error) {
+func PrintPretty(data interface{}) {
+	a, _ := json.MarshalIndent(data, "", " ") //nolint: errchkjson
+
+	fmt.Println(string(a)) //nolint: forbidigo
+}
+
+func EncodeToBytes(p interface{}) ([]byte, error) { //nolint: ireturn, nolintlint
 	buf := bytes.Buffer{}
 	enc := gob.NewEncoder(&buf)
 
@@ -52,4 +63,48 @@ func FormatDuration(d time.Duration) string {
 	default:
 		return fmt.Sprintf("%.1fd", d.Hours())
 	}
+}
+
+func Fetch(url, method string, payload *bytes.Buffer) ([]byte, error) {
+	c := http.Client{Timeout: HTTPClientTimeout}
+	method = strings.ToLower(method)
+
+	var resp *http.Response
+
+	var err error
+
+	switch method {
+	case "get":
+		resp, err = c.Get(url) //nolint: bodyclose,noctx
+	case "post":
+		resp, err = c.Post(url, "application/json", payload) //nolint: bodyclose,noctx
+	default:
+		return nil, fmt.Errorf("fetch method '%s' not supportd", method) //nolint: err113
+	}
+
+	defer resp.Body.Close()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return io.ReadAll(resp.Body)
+}
+
+func JSONFetch(url, method string, payload *bytes.Buffer) (any, error) {
+	res, err := Fetch(url, method, payload)
+	if err != nil {
+		return nil, err
+	}
+
+	var result interface{}
+
+	err = json.Unmarshal(res, &result)
+	if err != nil {
+		fmt.Println("Error decoding JSON:", err) //nolint: forbidigo
+
+		return nil, err
+	}
+
+	return result, nil
 }

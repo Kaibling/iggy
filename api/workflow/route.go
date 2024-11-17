@@ -13,7 +13,7 @@ func Route() chi.Router { //nolint:nolintlint,ireturn
 		// r.Use(middleware.Authorization)
 		r.Use(apimiddleware.ParsePagination)
 		r.Get("/", fetchWorkflows)
-		r.Post("/", createWorkflow)
+		r.Post("/", createWorkflows)
 		r.Patch("/{id}", patchWorkflow)
 		r.Get("/{id}", fetchWorkflow)
 		r.Delete("/{id}", deleteWorkflow)

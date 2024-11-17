@@ -50,7 +50,6 @@ export interface Run {
     id: string,
     workflow: Identifier;
     error: string;
-    result: string;
     run_time: string;
     start_time: string;
     finish_time: string;

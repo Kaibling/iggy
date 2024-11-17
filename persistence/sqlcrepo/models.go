@@ -12,6 +12,7 @@ type Run struct {
 	ID         string
 	RequestID  pgtype.Text
 	WorkflowID string
+	UserID     string
 	Error      pgtype.Text
 	StartTime  pgtype.Timestamp
 	FinishTime pgtype.Timestamp

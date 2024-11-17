@@ -41,7 +41,7 @@ func fetchWorkflow(w http.ResponseWriter, r *http.Request) {
 	e.SetResponse(workflow).Finish(w, r, l)
 }
 
-func createWorkflow(w http.ResponseWriter, r *http.Request) {
+func createWorkflows(w http.ResponseWriter, r *http.Request) {
 	e, l, merr := envelope.GetEnvelopeAndLogger(r)
 	if merr != nil {
 		e.SetError(merr).Finish(w, r, l)
@@ -49,21 +49,23 @@ func createWorkflow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var postWorkflow entity.NewWorkflow
-	if err := route.ReadPostData(r, &postWorkflow); err != nil {
+	var postWorkflows []*entity.NewWorkflow
+	if err := route.ReadPostData(r, &postWorkflows); err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return
 	}
 
-	if err := postWorkflow.Validate(); err != nil {
-		e.SetError(err).Finish(w, r, l)
+	for _, wf := range postWorkflows {
+		if err := wf.Validate(); err != nil {
+			e.SetError(err).Finish(w, r, l)
 
-		return
+			return
+		}
+
+		wf.ID = ""
+		wf.BuildIn = false
 	}
-
-	postWorkflow.ID = ""
-	postWorkflow.BuildIn = false
 
 	us, err := bootstrap.NewWorkflowService(r.Context())
 	if err != nil {
@@ -72,14 +74,14 @@ func createWorkflow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newWorkflow, err := us.CreateWorkflow(postWorkflow)
+	newWorkflows, err := us.CreateWorkflows(postWorkflows)
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return
 	}
 
-	e.SetResponse(newWorkflow).Finish(w, r, l)
+	e.SetResponse(newWorkflows).Finish(w, r, l)
 }
 
 func deleteWorkflow(w http.ResponseWriter, r *http.Request) {
@@ -153,6 +155,9 @@ func executeWorkflow(w http.ResponseWriter, r *http.Request) { //nolint: funlen
 	requestID, err := bootstrap.ContextRequestID(r.Context())
 	errs.Add(err)
 
+	userID, err := bootstrap.ContextUserID(r.Context())
+	errs.Add(err)
+
 	cfg, db, username, err := bootstrap.ContextDefaultData(r.Context())
 	errs.Add(err)
 
@@ -182,6 +187,7 @@ func executeWorkflow(w http.ResponseWriter, r *http.Request) { //nolint: funlen
 	task, err := utility.EncodeToBytes(entity.Task{
 		WorkflowID: workflowID,
 		RequestID:  requestID,
+		UserID:     userID,
 	})
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)

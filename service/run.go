@@ -18,13 +18,14 @@ type runRepo interface {
 }
 
 type RunService struct {
-	ctx  context.Context
-	repo runRepo
-	cfg  config.Configuration
+	ctx    context.Context
+	repo   runRepo
+	cfg    config.Configuration
+	userID string
 }
 
-func NewRunService(ctx context.Context, u runRepo, cfg config.Configuration) *RunService {
-	return &RunService{ctx: ctx, repo: u, cfg: cfg}
+func NewRunService(ctx context.Context, repo runRepo, userID string, cfg config.Configuration) *RunService {
+	return &RunService{ctx, repo, cfg, userID}
 }
 
 func (ts *RunService) FetchRuns(ids []string) ([]*entity.Run, error) {
@@ -44,6 +45,8 @@ func (ts *RunService) CreateRun(newEntity entity.NewRun, runLogService *RunLogSe
 	if newEntity.ID == "" {
 		newEntity.ID = utils.NewULID().String()
 	}
+
+	newEntity.UserID = ts.userID
 
 	_, err := ts.repo.SaveRun(newEntity)
 	if err != nil {

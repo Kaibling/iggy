@@ -115,15 +115,26 @@ func NewRunService(ctx context.Context) (*service.RunService, error) {
 		return nil, err
 	}
 
+	userID, ok := ctxkeys.GetValue(ctx, ctxkeys.UserIDKey).(string)
+	if !ok {
+		return nil, err
+	}
+
 	runRepo := repo.NewRunRepo(ctx, username, requestID, dbPool)
 
-	return service.NewRunService(ctx, runRepo, cfg), nil
+	return service.NewRunService(ctx, runRepo, userID, cfg), nil
 }
 
-func NewRunServiceV2(ctx context.Context, cfg config.Configuration, dbPool *pgxpool.Pool, username string, requestID string) (*service.RunService, error) { //nolint: lll
+func NewRunServiceV2(ctx context.Context,
+	cfg config.Configuration,
+	dbPool *pgxpool.Pool,
+	username,
+	userID string,
+	requestID string,
+) (*service.RunService, error) { //nolint: lll,nolintlint
 	runRepo := repo.NewRunRepo(ctx, username, requestID, dbPool)
 
-	return service.NewRunService(ctx, runRepo, cfg), nil
+	return service.NewRunService(ctx, runRepo, userID, cfg), nil
 }
 
 func NewRunLogService(ctx context.Context) (*service.RunLogService, error) {
@@ -192,13 +203,22 @@ func ContextRequestID(ctx context.Context) (string, error) {
 	return requestID, nil
 }
 
+func ContextUserID(ctx context.Context) (string, error) {
+	userID, ok := ctxkeys.GetValue(ctx, ctxkeys.UserIDKey).(string)
+	if !ok {
+		return "", apperror.ErrNewMissingContext("userID")
+	}
+
+	return userID, nil
+}
+
 func WorkerExecution(ctx context.Context, brokerConfig broker.SubscriberConfig, task entity.Task) error {
 	wfs, err := NewWorkflowServiceV2(ctx, brokerConfig.Config, brokerConfig.DBPool, brokerConfig.Username)
 	if err != nil {
 		return err
 	}
 
-	rs, err := NewRunServiceV2(ctx, brokerConfig.Config, brokerConfig.DBPool, brokerConfig.Username, task.RequestID)
+	rs, err := NewRunServiceV2(ctx, brokerConfig.Config, brokerConfig.DBPool, brokerConfig.Username, task.UserID, task.RequestID) //nolint: lll
 	if err != nil {
 		return err
 	}

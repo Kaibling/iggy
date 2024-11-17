@@ -10,7 +10,7 @@ import (
 )
 
 type workflowRepo interface {
-	SaveWorkflow(newModel entity.NewWorkflow) (*entity.Workflow, error)
+	CreateWorkflows(newModel []*entity.NewWorkflow) ([]entity.Workflow, error)
 	UpdateWorkflow(id string, updateEntity entity.UpdateWorkflow) (*entity.Workflow, error)
 	// FetchWorkflow(id string) (*entity.Workflow, error)
 	FetchWorkflows(ids []string, depth int) ([]entity.Workflow, error)
@@ -37,12 +37,14 @@ func (ws *WorkflowService) FetchWorkflows(ids []string) (*entity.Workflow, error
 	}
 }
 
-func (ws *WorkflowService) CreateWorkflow(u entity.NewWorkflow) (*entity.Workflow, error) {
-	if u.ID == "" {
-		u.ID = utils.NewULID().String()
+func (ws *WorkflowService) CreateWorkflows(newWorkflows []*entity.NewWorkflow) ([]entity.Workflow, error) {
+	for _, wf := range newWorkflows {
+		if wf.ID == "" {
+			wf.ID = utils.NewULID().String()
+		}
 	}
 
-	return ws.repo.SaveWorkflow(u)
+	return ws.repo.CreateWorkflows(newWorkflows)
 }
 
 func (ws *WorkflowService) Update(id string, updateEntity entity.UpdateWorkflow) (*entity.Workflow, error) {
