@@ -28,13 +28,10 @@ func NewWorkflowService(ctx context.Context, u workflowRepo, cfg config.Configur
 	return &WorkflowService{ctx: ctx, repo: u, cfg: cfg}
 }
 
-func (ws *WorkflowService) FetchWorkflows(ids []string) (*entity.Workflow, error) {
+func (ws *WorkflowService) FetchWorkflows(ids []string) ([]entity.Workflow, error) {
 	maxDepth := 10
-	if workflows, err := ws.repo.FetchWorkflows(ids, maxDepth); err != nil {
-		return nil, err
-	} else { //nolint: revive
-		return &workflows[0], nil
-	}
+	return ws.repo.FetchWorkflows(ids, maxDepth)
+
 }
 
 func (ws *WorkflowService) CreateWorkflows(newWorkflows []*entity.NewWorkflow) ([]entity.Workflow, error) {
@@ -63,7 +60,7 @@ func (ws *WorkflowService) Execute(workflowID string, workflowExecutionService *
 	}
 
 	// execute
-	executedRuns, err := workflowExecutionService.Execute(*wf)
+	executedRuns, err := workflowExecutionService.Execute(wf[0])
 	if err != nil {
 		return err
 	}

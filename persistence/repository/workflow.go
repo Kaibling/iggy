@@ -64,12 +64,7 @@ func (r *WorkflowRepo) CreateWorkflows(newModels []*entity.NewWorkflow) ([]entit
 		newWorkflowsIDs = append(newWorkflowsIDs, newWorkflowID)
 	}
 
-	wfs, err := r.FetchWorkflows(newWorkflowsIDs, maxDepth)
-	if err != nil {
-		return nil, err
-	}
-
-	return wfs, nil
+	return r.FetchWorkflows(newWorkflowsIDs, maxDepth)
 }
 
 func (r *WorkflowRepo) UpdateWorkflow(workflowID string, updateEntity entity.UpdateWorkflow) (*entity.Workflow, error) {

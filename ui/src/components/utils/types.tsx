@@ -44,8 +44,6 @@ export interface Identifier {
     name: string;
 }
 
-
-
 export interface Run {
     id: string,
     workflow: Identifier;
@@ -61,4 +59,10 @@ export interface RunLog {
     run_id: string;
     message: string;
     timestamp: string;
+}
+
+export interface DynamicTable {
+    id: string,
+    table_name: string;
+    meta: Meta;
 }

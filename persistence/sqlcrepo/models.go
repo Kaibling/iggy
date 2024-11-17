@@ -8,6 +8,26 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type DynamicTable struct {
+	ID         string
+	TableName  string
+	CreatedAt  pgtype.Timestamp
+	ModifiedAt pgtype.Timestamp
+	CreatedBy  string
+	ModifiedBy string
+}
+
+type DynamicTableVariable struct {
+	ID             string
+	Name           string
+	VariableType   string
+	DynamicTableID string
+	CreatedAt      pgtype.Timestamp
+	ModifiedAt     pgtype.Timestamp
+	CreatedBy      string
+	ModifiedBy     string
+}
+
 type Run struct {
 	ID         string
 	RequestID  pgtype.Text

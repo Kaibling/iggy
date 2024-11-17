@@ -31,14 +31,21 @@ func fetchWorkflow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	workflow, err := us.FetchWorkflows([]string{workflowID})
+	workflows, err := us.FetchWorkflows([]string{workflowID})
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return
 	}
 
-	e.SetResponse(workflow).Finish(w, r, l)
+	if len(workflows) < 1 {
+		e.SetError(apierror.New(apierror.ErrDataNotFound,
+			apierror.ErrDataNotFound.HTTPStatus())).Finish(w, r, l)
+
+		return
+	}
+
+	e.SetResponse(workflows[0]).Finish(w, r, l)
 }
 
 func createWorkflows(w http.ResponseWriter, r *http.Request) {
@@ -56,6 +63,7 @@ func createWorkflows(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// todo validate should be busness logic, not router logic
 	for _, wf := range postWorkflows {
 		if err := wf.Validate(); err != nil {
 			e.SetError(err).Finish(w, r, l)

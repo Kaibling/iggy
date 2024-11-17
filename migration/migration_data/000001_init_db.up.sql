@@ -80,6 +80,31 @@ CREATE TABLE
     FOREIGN KEY (run_id) REFERENCES runs (id) ON DELETE CASCADE
   );
 
+CREATE TABLE
+    "dynamic_tables" (
+        id TEXT,
+        table_name TEXT UNIQUE NOT NULL,
+        created_at TIMESTAMP NOT NULL,
+        modified_at TIMESTAMP NOT NULL,
+        created_by TEXT NOT NULL,
+        modified_by TEXT NOT NULL,
+        PRIMARY KEY (id)
+);
+
+CREATE TABLE
+    "dynamic_table_variables" (
+        id TEXT,
+        name TEXT NOT NULL,
+        variable_type TEXT NOT NULL,
+        dynamic_table_id TEXT NOT NULL,
+        created_at TIMESTAMP NOT NULL,
+        modified_at TIMESTAMP NOT NULL,
+        created_by TEXT NOT NULL,
+        modified_by TEXT NOT NULL,
+        PRIMARY KEY (id),
+        FOREIGN KEY (dynamic_table_id) REFERENCES dynamic_tables (id) ON DELETE CASCADE
+);
+
 CREATE UNIQUE INDEX workflows_name_deleted_at_unique ON workflows (name)
 WHERE
   deleted_at IS NULL;

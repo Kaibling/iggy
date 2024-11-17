@@ -9,9 +9,12 @@ import js_img from '../../assets/js.svg'
 import os_img from '../../assets/bash.svg'
 import { formatDate } from './api.tsx'
 interface Date {
+  [key: string]: any;
+  meta: meta;
+}
+interface meta {
   created_at: string;
   modified_at: string;
-  [key: string]: any;
 }
 
 

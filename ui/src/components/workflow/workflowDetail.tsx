@@ -200,19 +200,19 @@ const WorkflowDetail: React.FC = () => {
 
                         <div className="detail-row">
                             <span className="detail-label">Created at:</span>
-                            <span className="detail-value">{workflow.created_at}</span>
+                            <span className="detail-value">{workflow.meta.created_at}</span>
                         </div>
                         <div className="detail-row">
                             <span className="detail-label">Created by:</span>
-                            <span className="detail-value">{workflow.created_by}</span>
+                            <span className="detail-value">{workflow.meta.created_by}</span>
                         </div>
                         <div className="detail-row">
                             <span className="detail-label">Updated_at:</span>
-                            <span className="detail-value">{workflow.modified_at}</span>
+                            <span className="detail-value">{workflow.meta.modified_at}</span>
                         </div>
                         <div className="detail-row">
                             <span className="detail-label">Updated_by:</span>
-                            <span className="detail-value">{workflow.modified_by}</span>
+                            <span className="detail-value">{workflow.meta.modified_by}</span>
                         </div>
                     </form>
                 </div>

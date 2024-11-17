@@ -125,6 +125,17 @@ func NewRunService(ctx context.Context) (*service.RunService, error) {
 	return service.NewRunService(ctx, runRepo, userID, cfg), nil
 }
 
+func NewDynTabService(ctx context.Context) (*service.DynTabService, error) {
+	cfg, dbPool, username, err := ContextDefaultData(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	dynTabRepo := repo.NewDynTabRepo(ctx, username, dbPool)
+
+	return service.NewDynTabService(ctx, dynTabRepo, cfg), nil
+}
+
 func NewRunServiceV2(ctx context.Context,
 	cfg config.Configuration,
 	dbPool *pgxpool.Pool,
