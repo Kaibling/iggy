@@ -55,14 +55,33 @@ export interface Run {
 }
 
 export interface RunLog {
-    id: string,
+    id: string;
     run_id: string;
     message: string;
     timestamp: string;
 }
 
 export interface DynamicTable {
-    id: string,
-    table_name: string;
+    id: string;
+    name: string;
     meta: Meta;
+}
+
+
+export interface DynamicTableVariable {
+    id: string;
+    name: string;
+    variable_type: string;
+    meta: Meta;
+}
+
+
+export interface NewDynamicTable {
+    name: string;
+}
+
+export interface NewDynamicTableVariable {
+    name: string;
+    variable_type: string;
+    dynamic_table_id: string;
 }

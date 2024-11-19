@@ -6,6 +6,10 @@ import WorkflowDetail from './components/workflow/workflowDetail';
 import Runlist from './components/run/runlist';
 import RunDetail from './components/run/runDetail';
 import DynamicTableList from './components/dynamic_table/list';
+import DynamicTableDetail from './components/dynamic_table/detail';
+import DynamicTableNew from './components/dynamic_table/new';
+
+
 import './App.css'
 
 
@@ -25,7 +29,8 @@ function App() {
         <Route path="/runs/:id" element={<RunDetail />} />
 
         <Route path="/dynamic-tables" element={<DynamicTableList />} />
-        <Route path="/dynamic-tables/:id" element={<WorkflowsList />} />
+        <Route path="/dynamic-tables/new" element={<DynamicTableNew />} />
+        <Route path="/dynamic-tables/:id" element={<DynamicTableDetail />} />
         <Route path="*" element={<Navigate to="/workflows" />} />
       </Routes>
       </div>

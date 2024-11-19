@@ -48,6 +48,9 @@ const Navbar = () => {
           <Link to="/runs">Runs</Link>
         </li>
         <li>
+          <Link to="/dynamic-tables">DynTabs</Link>
+        </li>
+        <li>
           <Link to="/users">Users</Link>
         </li>
         <li>

@@ -15,12 +15,13 @@ WHERE dynamic_tables.id = $1
 ORDER BY dynamic_table_variables.id;
 
 
--- name: CreateDynamicTableVariable :exec
+-- name: CreateDynamicTableVariable :one
 INSERT INTO dynamic_table_variables (
   id, name, variable_type, dynamic_table_id,  created_at, created_by, modified_at, modified_by
 ) VALUES (
   $1, $2, $3, $4, $5, $6, $7, $8
-);
+)
+RETURNING id;
 
 -- name: DeleteDynamicTableVariables :exec
 DELETE

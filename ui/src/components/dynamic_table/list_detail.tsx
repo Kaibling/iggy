@@ -7,7 +7,7 @@ const DynamicTableCard: React.FC<{ dynamicTable: DynamicTable }> = ({ dynamicTab
   return (
     <>
       <tr>
-        <td>{dynamicTable.table_name}</td>
+      <td><a href={`/dynamic-tables/${dynamicTable.id}`}>{dynamicTable.name}</a></td>
         <td>{formatDate(dynamicTable.meta.created_at)}</td>
         <td>{dynamicTable.meta.created_by}</td>
         <td>{formatDate(dynamicTable.meta.modified_at)}</td>

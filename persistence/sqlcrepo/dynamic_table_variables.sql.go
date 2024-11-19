@@ -11,12 +11,13 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createDynamicTableVariable = `-- name: CreateDynamicTableVariable :exec
+const createDynamicTableVariable = `-- name: CreateDynamicTableVariable :one
 INSERT INTO dynamic_table_variables (
   id, name, variable_type, dynamic_table_id,  created_at, created_by, modified_at, modified_by
 ) VALUES (
   $1, $2, $3, $4, $5, $6, $7, $8
 )
+RETURNING id
 `
 
 type CreateDynamicTableVariableParams struct {
@@ -30,8 +31,8 @@ type CreateDynamicTableVariableParams struct {
 	ModifiedBy     string
 }
 
-func (q *Queries) CreateDynamicTableVariable(ctx context.Context, arg CreateDynamicTableVariableParams) error {
-	_, err := q.db.Exec(ctx, createDynamicTableVariable,
+func (q *Queries) CreateDynamicTableVariable(ctx context.Context, arg CreateDynamicTableVariableParams) (string, error) {
+	row := q.db.QueryRow(ctx, createDynamicTableVariable,
 		arg.ID,
 		arg.Name,
 		arg.VariableType,
@@ -41,7 +42,9 @@ func (q *Queries) CreateDynamicTableVariable(ctx context.Context, arg CreateDyna
 		arg.ModifiedAt,
 		arg.ModifiedBy,
 	)
-	return err
+	var id string
+	err := row.Scan(&id)
+	return id, err
 }
 
 const deleteDynamicTableVariables = `-- name: DeleteDynamicTableVariables :exec

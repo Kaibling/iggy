@@ -137,7 +137,8 @@ func fetchDynTabVars(w http.ResponseWriter, r *http.Request) {
 }
 
 func addDynTabVars(w http.ResponseWriter, r *http.Request) {
-	dynTabID := route.ReadURLParam("id", r)
+	// todo improve api response
+	//dynTabID := route.ReadURLParam("id", r)
 
 	e, l, merr := envelope.GetEnvelopeAndLogger(r)
 	if merr != nil {
@@ -160,7 +161,7 @@ func addDynTabVars(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := dts.AddVars(dynTabID, postDynTabVar); err != nil {
+	if err := dts.AddVars(postDynTabVar); err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return

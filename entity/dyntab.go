@@ -1,10 +1,10 @@
 package entity
 
 type DynamicTable struct {
-	ID        string                 `json:"id"`
-	Name      string                 `json:"name"`
-	Variables []DynamicTableVariable `json:"variables"`
-	Meta      MetaData               `json:"meta"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	// Variables []DynamicTableVariable `json:"variables"`
+	Meta MetaData `json:"meta"`
 }
 
 type DynamicTableVariable struct {

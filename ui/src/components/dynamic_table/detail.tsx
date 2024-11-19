@@ -1,34 +1,39 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { getApiData } from '../utils/api.tsx';
-import { formatDate } from '../utils/api.tsx'
-import { Run, DynamicTable } from '../utils/types.tsx'
+import { DynamicTableVariable, DynamicTable } from '../utils/types.tsx'
 import '../detail.css'
 import { NotifyContainer, showError } from '../utils/notify.tsx';
+import Modal from '../utils/modal.tsx';
+import FormAddDynamicTable from './formAdddyntab.tsx';
+import { formatDate } from '../utils/api'
 
 
 
 
-// const DynamicTableCard: React.FC<{ runLog: DynamicTable }> = ({ runLog }) => {
-//     return (
-//         <>
-//             <tr>
-//                 {/* <td>{runLog.id}</td> */}
-//                 <td>{formatDate(runLog.timestamp)}</td>
-//                 <td>{runLog.message}</td>
+const VariableCard: React.FC<{ variable: DynamicTableVariable }> = ({ variable }) => {
+    return (
+        <>
+            <tr>
+                <td>{variable.name}</td>
+                <td>{variable.variable_type}</td>
+                    <td>{formatDate(variable.meta.created_at)}</td>
+                    <td>{variable.meta.created_by}</td>
+                    <td>{formatDate(variable.meta.modified_at)}</td>
+                    <td>{variable.meta.modified_by}</td>
 
-//             </tr>
-//         </>
-//     );
-// };
+            </tr>
+        </>
+    );
+};
 
 const RunDetail: React.FC = () => {
     const { id } = useParams<{ id: string | undefined }>();
-    // const [run, setRun] = useState<Run | null>(null);
+    const [vars, setVars] = useState<DynamicTableVariable[] | null>(null);
     const [dynamicTable, setDynamicTable] = useState<DynamicTable | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const fetchData = async () => {
         try {
@@ -43,14 +48,14 @@ const RunDetail: React.FC = () => {
             }
             setDynamicTable(dynamicTableResponse.response);
 
-            // const logsResponse = await getApiData("runs/" + id + "/logs");
-            // if (logsResponse.error) {
-            //     showError(String(logsResponse.error));
-            //     return;
-            // }
-            // setLogs(logsResponse.response);
+            const varsResponse = await getApiData("dynamic-tables/" + id + "/variables");
+            if (varsResponse.error) {
+                showError(String(varsResponse.error));
+                return;
+            }
+            setVars(varsResponse.response);
 
-            document.title = dynamicTableResponse.response?.id + " - iggy" || "Workflow - iggy";
+            document.title = dynamicTableResponse.response?.id + " - iggy" || "Dynamic Tables - iggy";
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);
@@ -66,6 +71,14 @@ const RunDetail: React.FC = () => {
         fetchData();
     }, [id]);
 
+    const handleOpenModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        fetchData();
+    };
 
     if (loading) {
         return <div>Loading...</div>;
@@ -83,8 +96,17 @@ const RunDetail: React.FC = () => {
         // <div className="detail-container">
         <div>
             <NotifyContainer />
+
+            <Modal show={isModalOpen} onClose={handleCloseModal}>
+                <FormAddDynamicTable onClose={handleCloseModal} dyn_tab_id={id} />
+            </Modal>
+
             <div className='top-banner' >
-                <h2 >{dynamicTable.table_name}</h2>
+                <h1 >{dynamicTable.name}</h1>
+                <div className='list-actions'>
+
+                    <button form='wf_form' type="submit">Update</button>
+                </div>
             </div>
 
             <div className="detail-container-row">
@@ -99,11 +121,11 @@ const RunDetail: React.FC = () => {
 
                     <div className="detail-row">
                         <span className="detail-label">Name:</span>
-                        <span className="detail-value">{dynamicTable.table_name}</span>
+                        <span className="detail-value">{dynamicTable.name}</span>
                     </div>
                     <div className="detail-row">
                         <span className="detail-label">Created at:</span>
-                        <span className="detail-value">{dynamicTable.meta.created_at}</span>
+                        <span className="detail-value">{formatDate(dynamicTable.meta.created_at)}</span>
                     </div>
                     <div className="detail-row">
                         <span className="detail-label">Created by:</span>
@@ -111,7 +133,7 @@ const RunDetail: React.FC = () => {
                     </div>
                     <div className="detail-row">
                         <span className="detail-label">Updated_at:</span>
-                        <span className="detail-value">{dynamicTable.meta.modified_at}</span>
+                        <span className="detail-value">{formatDate(dynamicTable.meta.modified_at)}</span>
                     </div>
                     <div className="detail-row">
                         <span className="detail-label">Updated_by:</span>
@@ -120,19 +142,29 @@ const RunDetail: React.FC = () => {
                 </div>
 
             </div>
-            {/* <div className="detail-container-row">
+            <div className="detail-container-row">
                 <div className="detail-card-max-width">
-                    <h2 >Logs</h2>
+                    <h2 >Schema</h2>
+                   
                     <table>
+                        <thead>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Created At</th>
+                            <th>Created By</th>
+                            <th>Modified At</th>
+                            <th>Modified By</th>
+                        </thead>
                         <tbody>
-                            {dynamicTable?.map((log: DynamicTable) => (
-                                <DynamicTableCard key={log.id} runLog={log} />
+                            {vars?.map((variable: DynamicTableVariable) => (
+                                <VariableCard key={variable.id} variable={variable} />
                             ))}
                         </tbody>
 
                     </table>
+                    <button onClick={handleOpenModal}>Add Field</button>
                 </div>
-            </div> */}
+            </div>
         </div>
     );
 };
