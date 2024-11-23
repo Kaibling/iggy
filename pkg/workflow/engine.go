@@ -18,13 +18,15 @@ type Result struct {
 	SharedData map[string]any
 }
 
-type Engine struct{}
-
-func NewEngine() Engine {
-	return Engine{}
+type Engine struct {
+	objSaver adapter.ObjectSaver
 }
 
-func (e Engine) Execute(workflow entity.Workflow) ([]entity.NewRun, error) {
+func NewEngine(objSaver adapter.ObjectSaver) Engine {
+	return Engine{objSaver}
+}
+
+func (e Engine) Execute(workflow entity.Workflow) []entity.NewRun {
 	wf := FromWorkflowEntity(workflow)
 	sharedData := map[string]any{}
 	result := e.executeWorkflow(wf, sharedData)
@@ -34,7 +36,7 @@ func (e Engine) Execute(workflow entity.Workflow) ([]entity.NewRun, error) {
 		runs = append(runs, r.ToNewEntity())
 	}
 
-	return runs, result.Error
+	return runs
 }
 
 func (e Engine) executeWorkflow(w Workflow, sharedData map[string]any) Result {
@@ -101,7 +103,7 @@ func (e Engine) executeAdapter(w Workflow, sharedData map[string]any) Result {
 func (e Engine) getAdapter(wft Type) (Adapter, error) { //nolint: ireturn
 	switch wft {
 	case Javascript:
-		return adapter.NewJavascriptAdapter(), nil
+		return adapter.NewJavascriptAdapter(e.objSaver), nil
 	case External:
 		panic("not implemented")
 	case Folder:

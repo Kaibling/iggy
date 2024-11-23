@@ -34,6 +34,7 @@ func (l *Loopback) Subscribe(ctx context.Context, _ string) error {
 			}
 
 			l.l.AddAnyField("request_id", t.RequestID)
+			l.cfg.Log = l.l
 
 			if err := bootstrap.WorkerExecution(ctx, l.cfg, t); err != nil {
 				l.l.Error(err)

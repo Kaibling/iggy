@@ -22,8 +22,11 @@ func Run(withWorker bool, withAPI bool, version, buildTime string) error { //nol
 	}
 
 	logger := apiservice.BuildLogger(apiservice.LogConfig{
-		LogDriver: cfg.App.Logger,
-		LogLevel:  "debug",
+		LogDriver:    cfg.App.Logger,
+		LogLevel:     "debug",
+		RequestBody:  false,
+		ResponseBody: false,
+		JSON:         false,
 	})
 	logger.AddStringField("scope", "startup")
 	logger.Info("version: " + version)

@@ -14,10 +14,10 @@ type WorkflowEngineService struct {
 	cfg  config.Configuration
 }
 
-func NewWorkflowEngineService(ctx context.Context, cfg config.Configuration) *WorkflowEngineService {
-	return &WorkflowEngineService{ctx: ctx, repo: workflow.NewEngine(), cfg: cfg}
+func NewWorkflowEngineService(ctx context.Context, cfg config.Configuration, objService *DynDataService) *WorkflowEngineService { //nolint:lll
+	return &WorkflowEngineService{ctx: ctx, repo: workflow.NewEngine(objService), cfg: cfg}
 }
 
-func (ts *WorkflowEngineService) Execute(w entity.Workflow) ([]entity.NewRun, error) {
+func (ts *WorkflowEngineService) Execute(w entity.Workflow) []entity.NewRun {
 	return ts.repo.Execute(w)
 }

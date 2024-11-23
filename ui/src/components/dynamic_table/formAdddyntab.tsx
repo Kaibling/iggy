@@ -1,6 +1,6 @@
 import React, { useState, ChangeEvent } from 'react';
 import { sendApiData } from '../utils/api'
-import { NewDynamicTableVariable } from '../utils/types';
+import { NewDynamicSchema } from '../utils/types';
 import { NotifyContainer, showError } from '../utils/notify';
 
 interface Form {
@@ -9,7 +9,7 @@ interface Form {
 }
 
 const FormAddDynamicTable: React.FC<Form> = ({ onClose, dyn_tab_id }) => {
-  const [formData, setFormData] = useState<NewDynamicTableVariable>({
+  const [formData, setFormData] = useState<NewDynamicSchema>({
     name: "",
     variable_type: "",
     dynamic_table_id: "",
@@ -18,7 +18,7 @@ const FormAddDynamicTable: React.FC<Form> = ({ onClose, dyn_tab_id }) => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     formData.dynamic_table_id = dyn_tab_id!;
-    const error = await sendApiData("dynamic-tables/" + dyn_tab_id + "/variables", [formData]);
+    const error = await sendApiData("dynamic-tables/" + dyn_tab_id + "/fields", [formData]);
     if (error !== false) {
       showError(error.error);
     } else {

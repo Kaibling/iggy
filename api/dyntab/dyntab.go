@@ -1,4 +1,4 @@
-package dynTab
+package dyntab
 
 import (
 	"net/http"
@@ -67,7 +67,14 @@ func createDynTabs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fetchedDynTabs, err := dts.CreateDynamicTables(postDynTab)
+	dss, err := bootstrap.NewDynSchemaService(r.Context())
+	if err != nil {
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
+
+		return
+	}
+
+	fetchedDynTabs, err := dts.CreateDynamicTables(postDynTab, dss)
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
@@ -109,7 +116,7 @@ func fetchDynTabs(w http.ResponseWriter, r *http.Request) {
 	e.SetResponse(fetchedDynTabs).SetPagination(pageData).Finish(w, r, l)
 }
 
-func fetchDynTabVars(w http.ResponseWriter, r *http.Request) {
+func fetchDynFields(w http.ResponseWriter, r *http.Request) {
 	dynTabID := route.ReadURLParam("id", r)
 
 	e, l, merr := envelope.GetEnvelopeAndLogger(r)
@@ -119,7 +126,7 @@ func fetchDynTabVars(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dts, err := bootstrap.NewDynTabService(r.Context())
+	dts, err := bootstrap.NewDynFieldService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
@@ -136,10 +143,8 @@ func fetchDynTabVars(w http.ResponseWriter, r *http.Request) {
 	e.SetResponse(fetchedDynTabs).Finish(w, r, l)
 }
 
-func addDynTabVars(w http.ResponseWriter, r *http.Request) {
+func addDynFields(w http.ResponseWriter, r *http.Request) {
 	// todo improve api response
-	//dynTabID := route.ReadURLParam("id", r)
-
 	e, l, merr := envelope.GetEnvelopeAndLogger(r)
 	if merr != nil {
 		e.SetError(merr).Finish(w, r, l)
@@ -147,21 +152,21 @@ func addDynTabVars(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var postDynTabVar []entity.NewDynamicTableVariable
+	var postDynTabVar []entity.NewDynamicField
 	if err := route.ReadPostData(r, &postDynTabVar); err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return
 	}
 
-	dts, err := bootstrap.NewDynTabService(r.Context())
+	dfs, err := bootstrap.NewDynFieldService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return
 	}
 
-	if err := dts.AddVars(postDynTabVar); err != nil {
+	if err := dfs.AddFields(postDynTabVar); err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return
@@ -170,12 +175,20 @@ func addDynTabVars(w http.ResponseWriter, r *http.Request) {
 	e.SetSuccess().Finish(w, r, l)
 }
 
-func deleteDynTabVar(w http.ResponseWriter, r *http.Request) {
-	dynTabVarID := route.ReadURLParam("variable_id", r)
+func deleteDynFields(w http.ResponseWriter, r *http.Request) {
+	dynTabID := route.ReadURLParam("id", r)
+	dynFieldID := route.ReadURLParam("field_id", r)
 
 	e, l, merr := envelope.GetEnvelopeAndLogger(r)
 	if merr != nil {
 		e.SetError(merr).Finish(w, r, l)
+
+		return
+	}
+
+	dfs, err := bootstrap.NewDynFieldService(r.Context())
+	if err != nil {
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return
 	}
@@ -186,8 +199,14 @@ func deleteDynTabVar(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+	tab, err := dts.FetchDynamicTables([]string{dynTabID})
+	if err != nil {
+		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
-	if err := dts.RemoveVars([]string{dynTabVarID}); err != nil {
+		return
+	}
+
+	if err := dfs.RemoveVars(tab[0].Name, []string{dynFieldID}); err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return

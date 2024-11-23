@@ -1,35 +1,44 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { getApiData } from '../utils/api.tsx';
-import { DynamicTableVariable, DynamicTable } from '../utils/types.tsx'
+import { DynamicField, DynamicTable } from '../utils/types.tsx'
 import '../detail.css'
 import { NotifyContainer, showError } from '../utils/notify.tsx';
 import Modal from '../utils/modal.tsx';
 import FormAddDynamicTable from './formAdddyntab.tsx';
 import { formatDate } from '../utils/api'
+import deleteImage from '../../assets/trash.svg';
+import { sendApi } from '../utils/api.tsx'
 
 
 
-
-const VariableCard: React.FC<{ variable: DynamicTableVariable }> = ({ variable }) => {
+const VariableCard: React.FC<{ variable: DynamicField, onDelete: (table_id:string,id: string) => void }> = ({ variable, onDelete }) => {
     return (
         <>
             <tr>
                 <td>{variable.name}</td>
                 <td>{variable.variable_type}</td>
-                    <td>{formatDate(variable.meta.created_at)}</td>
-                    <td>{variable.meta.created_by}</td>
-                    <td>{formatDate(variable.meta.modified_at)}</td>
-                    <td>{variable.meta.modified_by}</td>
-
+                <td>{formatDate(variable.meta.created_at)}</td>
+                <td>{variable.meta.created_by}</td>
+                <td>{formatDate(variable.meta.modified_at)}</td>
+                <td>{variable.meta.modified_by}</td>
+                <td>
+                    <button onClick={() => onDelete(variable.dynamic_table.id,variable.id)} style={{ border: 'none', background: 'none' }}>
+                        <img
+                            src={deleteImage}
+                            alt="delete"
+                            title={'delete field'}
+                            style={{ width: '25px', height: '25px' }} />
+                    </button></td>
             </tr>
+
         </>
     );
 };
 
 const RunDetail: React.FC = () => {
     const { id } = useParams<{ id: string | undefined }>();
-    const [vars, setVars] = useState<DynamicTableVariable[] | null>(null);
+    const [vars, setVars] = useState<DynamicField[] | null>(null);
     const [dynamicTable, setDynamicTable] = useState<DynamicTable | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -48,7 +57,8 @@ const RunDetail: React.FC = () => {
             }
             setDynamicTable(dynamicTableResponse.response);
 
-            const varsResponse = await getApiData("dynamic-tables/" + id + "/variables");
+            const varsResponse = await getApiData("dynamic-tables/" + id + "/fields");
+            console.log(varsResponse)
             if (varsResponse.error) {
                 showError(String(varsResponse.error));
                 return;
@@ -70,6 +80,12 @@ const RunDetail: React.FC = () => {
     useEffect(() => {
         fetchData();
     }, [id]);
+
+    const handleDeleteClick = async (table_id: String ,id: String) => {
+        console.log(`delete clicked for table ${table_id} and  ${id}`);
+        await sendApi(`dynamic-tables/${table_id}/fields/${id}`, "DELETE", "");
+        fetchData();
+    };
 
     const handleOpenModal = () => {
         setIsModalOpen(true);
@@ -145,7 +161,7 @@ const RunDetail: React.FC = () => {
             <div className="detail-container-row">
                 <div className="detail-card-max-width">
                     <h2 >Schema</h2>
-                   
+
                     <table>
                         <thead>
                             <th>Name</th>
@@ -154,15 +170,16 @@ const RunDetail: React.FC = () => {
                             <th>Created By</th>
                             <th>Modified At</th>
                             <th>Modified By</th>
+                            <th>Actions</th>
                         </thead>
                         <tbody>
-                            {vars?.map((variable: DynamicTableVariable) => (
-                                <VariableCard key={variable.id} variable={variable} />
+                            {vars?.map((variable: DynamicField) => (
+                                <VariableCard key={variable.id} variable={variable} onDelete={handleDeleteClick} />
                             ))}
                         </tbody>
 
                     </table>
-                    <button onClick={handleOpenModal}>Add Field</button>
+                    <button onClick={handleOpenModal}>add Field</button>
                 </div>
             </div>
         </div>

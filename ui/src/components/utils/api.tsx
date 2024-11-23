@@ -113,32 +113,32 @@ export const sendApi = async (url:string,method:string,postdata:any) => {
 
 
 
-export const sendApi2 = async (url:string,method:string,postdata:any) => {
-    const apiUrl = import.meta.env.VITE_API_URL + "/"+ url;
-    const token = localStorage.getItem("iggy_token");
-    try {
-        const response = await fetch(apiUrl, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + token,
-            },
-            body: JSON.stringify(postdata),
-        });
+// export const sendApi2 = async (url:string,method:string,postdata:any) => {
+//     const apiUrl = import.meta.env.VITE_API_URL + "/"+ url;
+//     const token = localStorage.getItem("iggy_token");
+//     try {
+//         const response = await fetch(apiUrl, {
+//             method: method,
+//             headers: {
+//                 'Content-Type': 'application/json',
+//                 'Authorization': 'Bearer ' + token,
+//             },
+//             body: JSON.stringify(postdata),
+//         });
 
-        if (response.ok) {
-            const result = await response.json();
-            if (result.success) {
-                return false
-            } else {
-                return { error: `Status: ${result.success} ${result.data}` };
-            }
-        } 
-        else {
-            return { error: `Error: ${response.status} ${response.statusText}` };
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        return { error: (error as Error).message };
-    }
-}
+//         if (response.ok) {
+//             const result = await response.json();
+//             if (result.success) {
+//                 return false
+//             } else {
+//                 return { error: `Status: ${result.success} ${result.data}` };
+//             }
+//         } 
+//         else {
+//             return { error: `Error: ${response.status} ${response.statusText}` };
+//         }
+//     } catch (error) {
+//         console.error('Error:', error);
+//         return { error: (error as Error).message };
+//     }
+// }

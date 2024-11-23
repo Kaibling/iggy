@@ -9,12 +9,17 @@ import (
 	"github.com/kaibling/iggy/pkg/utility"
 )
 
-type Javascript struct {
-	logs []entity.NewRunLog
+type ObjectSaver interface {
+	CreateObject(obj map[string]any, dynTabName string) error
 }
 
-func NewJavascriptAdapter() *Javascript {
-	return &Javascript{logs: []entity.NewRunLog{}}
+type Javascript struct {
+	logs    []entity.NewRunLog
+	objSave ObjectSaver
+}
+
+func NewJavascriptAdapter(objSave ObjectSaver) *Javascript {
+	return &Javascript{logs: []entity.NewRunLog{}, objSave: objSave}
 }
 
 func (j *Javascript) Execute(code string, sharedData map[string]any) ExecutionResult {
@@ -25,7 +30,7 @@ func (j *Javascript) Execute(code string, sharedData map[string]any) ExecutionRe
 		"log":         j.log,
 		"log_obj":     j.logObject,
 		"fetch":       utility.JSONFetch,
-		// "save": ,
+		"save":        j.objSave.CreateObject,
 	}
 
 	if err := setVariables(vm, vars); err != nil {
@@ -34,6 +39,8 @@ func (j *Javascript) Execute(code string, sharedData map[string]any) ExecutionRe
 
 	result, err := vm.RunString(code)
 	if err != nil {
+		j.log(err.Error())
+
 		return ExecutionResult{err, sharedData, j.logs}
 	}
 

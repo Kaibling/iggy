@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createDynamicTableVariable = `-- name: CreateDynamicTableVariable :one
+const createDynamicField = `-- name: CreateDynamicField :one
 INSERT INTO dynamic_table_variables (
   id, name, variable_type, dynamic_table_id,  created_at, created_by, modified_at, modified_by
 ) VALUES (
@@ -20,7 +20,7 @@ INSERT INTO dynamic_table_variables (
 RETURNING id
 `
 
-type CreateDynamicTableVariableParams struct {
+type CreateDynamicFieldParams struct {
 	ID             string
 	Name           string
 	VariableType   string
@@ -31,8 +31,8 @@ type CreateDynamicTableVariableParams struct {
 	ModifiedBy     string
 }
 
-func (q *Queries) CreateDynamicTableVariable(ctx context.Context, arg CreateDynamicTableVariableParams) (string, error) {
-	row := q.db.QueryRow(ctx, createDynamicTableVariable,
+func (q *Queries) CreateDynamicField(ctx context.Context, arg CreateDynamicFieldParams) (string, error) {
+	row := q.db.QueryRow(ctx, createDynamicField,
 		arg.ID,
 		arg.Name,
 		arg.VariableType,
@@ -47,18 +47,18 @@ func (q *Queries) CreateDynamicTableVariable(ctx context.Context, arg CreateDyna
 	return id, err
 }
 
-const deleteDynamicTableVariables = `-- name: DeleteDynamicTableVariables :exec
+const deleteDynamicFields = `-- name: DeleteDynamicFields :exec
 DELETE
 FROM dynamic_table_variables
 WHERE id = ANY($1::text[])
 `
 
-func (q *Queries) DeleteDynamicTableVariables(ctx context.Context, dollar_1 []string) error {
-	_, err := q.db.Exec(ctx, deleteDynamicTableVariables, dollar_1)
+func (q *Queries) DeleteDynamicFields(ctx context.Context, dollar_1 []string) error {
+	_, err := q.db.Exec(ctx, deleteDynamicFields, dollar_1)
 	return err
 }
 
-const fetchDynamicTableVariables = `-- name: FetchDynamicTableVariables :many
+const fetchDynamicFields = `-- name: FetchDynamicFields :many
 SELECT dynamic_table_variables.id, dynamic_table_variables.name, dynamic_table_variables.variable_type, dynamic_table_variables.dynamic_table_id, dynamic_table_variables.created_at, dynamic_table_variables.modified_at, dynamic_table_variables.created_by, dynamic_table_variables.modified_by,dynamic_tables.table_name as dynamic_table_name
 FROM dynamic_table_variables
 JOIN dynamic_tables
@@ -67,7 +67,7 @@ WHERE dynamic_table_variables.id = ANY($1::text[])
 ORDER BY dynamic_table_variables.id
 `
 
-type FetchDynamicTableVariablesRow struct {
+type FetchDynamicFieldsRow struct {
 	ID               string
 	Name             string
 	VariableType     string
@@ -79,15 +79,15 @@ type FetchDynamicTableVariablesRow struct {
 	DynamicTableName string
 }
 
-func (q *Queries) FetchDynamicTableVariables(ctx context.Context, dollar_1 []string) ([]FetchDynamicTableVariablesRow, error) {
-	rows, err := q.db.Query(ctx, fetchDynamicTableVariables, dollar_1)
+func (q *Queries) FetchDynamicFields(ctx context.Context, dollar_1 []string) ([]FetchDynamicFieldsRow, error) {
+	rows, err := q.db.Query(ctx, fetchDynamicFields, dollar_1)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []FetchDynamicTableVariablesRow
+	var items []FetchDynamicFieldsRow
 	for rows.Next() {
-		var i FetchDynamicTableVariablesRow
+		var i FetchDynamicFieldsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
@@ -109,7 +109,7 @@ func (q *Queries) FetchDynamicTableVariables(ctx context.Context, dollar_1 []str
 	return items, nil
 }
 
-const fetchDynamicTableVariablesByDynamicTable = `-- name: FetchDynamicTableVariablesByDynamicTable :many
+const fetchDynamicFieldsByDynamicTable = `-- name: FetchDynamicFieldsByDynamicTable :many
 SELECT dynamic_table_variables.id, dynamic_table_variables.name, dynamic_table_variables.variable_type, dynamic_table_variables.dynamic_table_id, dynamic_table_variables.created_at, dynamic_table_variables.modified_at, dynamic_table_variables.created_by, dynamic_table_variables.modified_by,dynamic_tables.table_name as dynamic_table_name
 FROM dynamic_table_variables
 JOIN dynamic_tables
@@ -118,7 +118,7 @@ WHERE dynamic_tables.id = $1
 ORDER BY dynamic_table_variables.id
 `
 
-type FetchDynamicTableVariablesByDynamicTableRow struct {
+type FetchDynamicFieldsByDynamicTableRow struct {
 	ID               string
 	Name             string
 	VariableType     string
@@ -130,15 +130,66 @@ type FetchDynamicTableVariablesByDynamicTableRow struct {
 	DynamicTableName string
 }
 
-func (q *Queries) FetchDynamicTableVariablesByDynamicTable(ctx context.Context, id string) ([]FetchDynamicTableVariablesByDynamicTableRow, error) {
-	rows, err := q.db.Query(ctx, fetchDynamicTableVariablesByDynamicTable, id)
+func (q *Queries) FetchDynamicFieldsByDynamicTable(ctx context.Context, id string) ([]FetchDynamicFieldsByDynamicTableRow, error) {
+	rows, err := q.db.Query(ctx, fetchDynamicFieldsByDynamicTable, id)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []FetchDynamicTableVariablesByDynamicTableRow
+	var items []FetchDynamicFieldsByDynamicTableRow
 	for rows.Next() {
-		var i FetchDynamicTableVariablesByDynamicTableRow
+		var i FetchDynamicFieldsByDynamicTableRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.VariableType,
+			&i.DynamicTableID,
+			&i.CreatedAt,
+			&i.ModifiedAt,
+			&i.CreatedBy,
+			&i.ModifiedBy,
+			&i.DynamicTableName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const fetchDynamicFieldsByDynamicTableName = `-- name: FetchDynamicFieldsByDynamicTableName :many
+SELECT dynamic_table_variables.id, dynamic_table_variables.name, dynamic_table_variables.variable_type, dynamic_table_variables.dynamic_table_id, dynamic_table_variables.created_at, dynamic_table_variables.modified_at, dynamic_table_variables.created_by, dynamic_table_variables.modified_by,dynamic_tables.table_name as dynamic_table_name
+FROM dynamic_table_variables
+JOIN dynamic_tables
+ON dynamic_tables.id = dynamic_table_variables.dynamic_table_id
+WHERE dynamic_tables.table_name = $1
+ORDER BY dynamic_table_variables.id
+`
+
+type FetchDynamicFieldsByDynamicTableNameRow struct {
+	ID               string
+	Name             string
+	VariableType     string
+	DynamicTableID   string
+	CreatedAt        pgtype.Timestamp
+	ModifiedAt       pgtype.Timestamp
+	CreatedBy        string
+	ModifiedBy       string
+	DynamicTableName string
+}
+
+func (q *Queries) FetchDynamicFieldsByDynamicTableName(ctx context.Context, tableName string) ([]FetchDynamicFieldsByDynamicTableNameRow, error) {
+	rows, err := q.db.Query(ctx, fetchDynamicFieldsByDynamicTableName, tableName)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []FetchDynamicFieldsByDynamicTableNameRow
+	for rows.Next() {
+		var i FetchDynamicFieldsByDynamicTableNameRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,

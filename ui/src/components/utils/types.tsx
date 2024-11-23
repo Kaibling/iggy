@@ -68,9 +68,10 @@ export interface DynamicTable {
 }
 
 
-export interface DynamicTableVariable {
+export interface DynamicField {
     id: string;
     name: string;
+    dynamic_table: Identifier;
     variable_type: string;
     meta: Meta;
 }
@@ -80,7 +81,7 @@ export interface NewDynamicTable {
     name: string;
 }
 
-export interface NewDynamicTableVariable {
+export interface NewDynamicSchema {
     name: string;
     variable_type: string;
     dynamic_table_id: string;

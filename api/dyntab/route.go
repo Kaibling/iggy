@@ -1,4 +1,4 @@
-package dynTab
+package dyntab
 
 import (
 	"github.com/go-chi/chi/v5"
@@ -16,10 +16,10 @@ func Route() chi.Router { //nolint:nolintlint,ireturn
 		r.Get("/", fetchDynTabs)
 		r.Get("/{id}", fetchDynTab)
 
-		r.Get("/{id}/variables", fetchDynTabVars)
-		r.Post("/{id}/variables", addDynTabVars)
-		//r.Patch("/{id}/variables/{variable_id}", fetchDynTabVar)   // update variable of id table
-		r.Delete("/{id}/variables/{variable_id}", deleteDynTabVar) // delete variable to id table
+		r.Get("/{id}/fields", fetchDynFields)
+		r.Post("/{id}/fields", addDynFields)
+		// r.Patch("/{id}/variables/{variable_id}", fetchDynTabVar)   // update variable of id table
+		r.Delete("/{id}/fields/{field_id}", deleteDynFields) // delete variable to id table
 	})
 
 	return r

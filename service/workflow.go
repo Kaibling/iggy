@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"github.com/kaibling/apiforge/lib/utils"
+	"github.com/kaibling/apiforge/logging"
 	"github.com/kaibling/apiforge/params"
 	"github.com/kaibling/iggy/entity"
-	"github.com/kaibling/iggy/pkg/config"
 )
 
 type workflowRepo interface {
@@ -19,19 +19,19 @@ type workflowRepo interface {
 }
 
 type WorkflowService struct {
-	ctx  context.Context
-	repo workflowRepo
-	cfg  config.Configuration
+	ctx    context.Context
+	repo   workflowRepo
+	logger logging.Writer
 }
 
-func NewWorkflowService(ctx context.Context, u workflowRepo, cfg config.Configuration) *WorkflowService {
-	return &WorkflowService{ctx: ctx, repo: u, cfg: cfg}
+func NewWorkflowService(ctx context.Context, u workflowRepo, logger logging.Writer) *WorkflowService { //nolint:lll, nolintlint
+	return &WorkflowService{ctx: ctx, repo: u, logger: logger.NewScope("workflow_service")}
 }
 
 func (ws *WorkflowService) FetchWorkflows(ids []string) ([]entity.Workflow, error) {
 	maxDepth := 10
-	return ws.repo.FetchWorkflows(ids, maxDepth)
 
+	return ws.repo.FetchWorkflows(ids, maxDepth)
 }
 
 func (ws *WorkflowService) CreateWorkflows(newWorkflows []*entity.NewWorkflow) ([]entity.Workflow, error) {
@@ -60,10 +60,7 @@ func (ws *WorkflowService) Execute(workflowID string, workflowExecutionService *
 	}
 
 	// execute
-	executedRuns, err := workflowExecutionService.Execute(wf[0])
-	if err != nil {
-		return err
-	}
+	executedRuns := workflowExecutionService.Execute(wf[0])
 
 	// save runs
 	for _, newRun := range executedRuns {

@@ -15,13 +15,7 @@ type dynTabRepo interface {
 	FetchDynamicTables(ids []string) ([]entity.DynamicTable, error)
 	CreateDynamicTables(newModels []entity.NewDynamicTable) ([]entity.DynamicTable, error)
 	IDQuery(query string) ([]string, error)
-	AddDynTabVars(newVars []entity.NewDynamicTableVariable) ([]entity.DynamicTableVariable, error)
-	RemoveDynTabVars(varIDs []string) error
-	FetchVarsByIDs(varIDs []string) ([]entity.DynamicTableVariable, error)
-	FetchVarsByTab(dynTabID string) ([]entity.DynamicTableVariable, error)
-
-	CreateTable(suffix string, dynTab entity.DynamicTable, vars []entity.DynamicTableVariable) error
-	AddSchemaField(suffix string, vars []entity.DynamicTableVariable) error
+	//AddDynSchema(newVars []entity.NewDynamicSchema) ([]entity.DynamicField, error)
 }
 
 type DynTabService struct {
@@ -38,7 +32,7 @@ func (rls *DynTabService) FetchDynamicTables(ids []string) ([]entity.DynamicTabl
 	return rls.repo.FetchDynamicTables(ids)
 }
 
-func (rls *DynTabService) CreateDynamicTables(newEntities []entity.NewDynamicTable) ([]entity.DynamicTable, error) {
+func (rls *DynTabService) CreateDynamicTables(newEntities []entity.NewDynamicTable, dss *DynSchemaService) ([]entity.DynamicTable, error) {
 	for i := range newEntities {
 		newEntities[i].ID = utils.NewULID().String()
 	}
@@ -49,8 +43,11 @@ func (rls *DynTabService) CreateDynamicTables(newEntities []entity.NewDynamicTab
 	}
 
 	for _, ndt := range ndts {
-		rls.repo.CreateTable(suffix, ndt, []entity.DynamicTableVariable{})
+		if err := dss.CreateSchemaTable(suffix, ndt, []entity.DynamicField{}); err != nil {
+			return nil, err
+		}
 	}
+
 	return ndts, nil
 }
 
@@ -74,23 +71,102 @@ func (rls *DynTabService) FetchByPagination(qp params.Pagination) ([]entity.Dyna
 	return loadedRuns, pag, nil
 }
 
-func (rls *DynTabService) AddVars(newVars []entity.NewDynamicTableVariable) error {
-	for i := range newVars {
-		newVars[i].ID = utils.NewULID().String()
-	}
+// func (rls *DynTabService) FetchDynFields(dynTabID string) ([]entity.DynamicField, error) {
+// 	return rls.repo.FetchVarsByTab(dynTabID)
+// }
 
-	newVariables, err := rls.repo.AddDynTabVars(newVars)
-	if err != nil {
-		return err
-	}
+// func (rls *DynTabService) FetchDynFieldsByTabName(dynTabName string) ([]entity.DynamicField, error) {
+// 	return rls.repo.FetchVarsByDynSchemaName(dynTabName)
+// }
 
-	return rls.repo.AddSchemaField(suffix, newVariables)
-}
+// func (rls *DynTabService) AddVars(newVars []entity.NewDynamicSchema) error {
+// 	for i := range newVars {
+// 		newVars[i].ID = utils.NewULID().String()
+// 	}
 
-func (rls *DynTabService) RemoveVars(varIDs []string) error {
-	return rls.repo.RemoveDynTabVars(varIDs)
-}
+// 	newVariables, err := rls.repo.AddDynSchema(newVars)
+// 	if err != nil {
+// 		return err
+// 	}
 
-func (rls *DynTabService) FetchVars(dynTabID string) ([]entity.DynamicTableVariable, error) {
-	return rls.repo.FetchVarsByTab(dynTabID)
-}
+// 	return rls.repo.AddSchemaField(suffix, newVariables)
+// }
+
+// func (rls *DynTabService) RemoveVars(varIDs []string) error {
+// 	return rls.repo.RemoveDynSchema(varIDs)
+// }
+
+// func (rls *DynTabService) FetchVars(dynTabID string) ([]entity.DynamicField, error) {
+// 	return rls.repo.FetchVarsByTab(dynTabID)
+// }
+
+// func (rls *DynTabService) CreateObject(obj map[string]any, dynTabName string) error {
+// 	// get columns of dynTab
+// 	vars, err := rls.repo.FetchVarsByDynTabName(dynTabName)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	// build insert statement
+// 	query, err := dynTabObjectInsertSQL(obj, dynTabName, vars)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	return rls.repo.Query(query)
+// }
+
+// func dynTabObjectInsertSQL(obj map[string]any, dynTabName string, vars []entity.DynamicField) (string, error) {
+// 	if err := validateObj(obj, vars); err != nil {
+// 		return "", err
+// 	}
+
+// 	types := map[string]string{}
+// 	for _, v := range vars {
+// 		types[v.Name] = v.VariableType
+// 	}
+
+// 	columns := []string{}
+// 	values := []string{}
+
+// 	for k, v := range obj {
+// 		columns = append(columns, k)
+
+// 		if types[k] == "text" {
+// 			values = append(values, fmt.Sprintf(`'%s'`, v))
+// 		} else {
+// 			values = append(values, fmt.Sprintf("%s", v))
+// 		}
+// 	}
+
+// 	columnStr := strings.Join(columns, `","`)
+// 	valuesStr := strings.Join(values, ",")
+
+// 	q := fmt.Sprintf(`INSERT INTO "%s" (
+// 		"%s"
+// 	  ) VALUES (
+// 		%s
+// 	  );`, rawDynTabName(dynTabName), columnStr, valuesStr)
+
+// 	return q, nil
+// }
+
+// func validateObj(obj map[string]any, vars []entity.DynamicField) error {
+// 	missing := []string{}
+
+// 	for _, v := range vars {
+// 		if _, ok := obj[v.Name]; !ok {
+// 			missing = append(missing, v.Name)
+// 		}
+// 	}
+
+// 	if len(missing) == 0 {
+// 		return nil
+// 	}
+
+// 	return errors.New(strings.Join(missing, " ,")) //nolint: err113
+// }
+
+// func rawDynTabName(dynTabName string) string {
+// 	return suffix + "_" + dynTabName
+// }

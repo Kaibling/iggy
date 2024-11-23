@@ -80,7 +80,7 @@ func validateTokenAndUser(ctx context.Context, token string) (*entity.User, apie
 	errs.Add(err)
 
 	if errs.HasError() {
-		return nil, apierror.NewMulti(apierror.ErrContextMissing, errs.GetErrors())
+		return nil, apierror.NewMulti(apierror.ErrContextMissing, errs.GetStrErrors())
 	}
 
 	// todo set token last used

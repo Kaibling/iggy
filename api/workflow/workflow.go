@@ -63,7 +63,7 @@ func createWorkflows(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// todo validate should be busness logic, not router logic
+	// todo validate should be business logic, not router logic
 	for _, wf := range postWorkflows {
 		if err := wf.Validate(); err != nil {
 			e.SetError(err).Finish(w, r, l)
@@ -166,11 +166,11 @@ func executeWorkflow(w http.ResponseWriter, r *http.Request) { //nolint: funlen
 	userID, err := bootstrap.ContextUserID(r.Context())
 	errs.Add(err)
 
-	cfg, db, username, err := bootstrap.ContextDefaultData(r.Context())
+	cfg, db, _, username, err := bootstrap.ContextDefaultData(r.Context())
 	errs.Add(err)
 
 	if errs.HasError() {
-		e.SetError(apierror.NewMulti(apierror.ErrContextMissing, errs.GetErrors())).Finish(w, r, l)
+		e.SetError(apierror.NewMulti(apierror.ErrContextMissing, errs.GetStrErrors())).Finish(w, r, l)
 
 		return
 	}
