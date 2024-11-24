@@ -182,7 +182,7 @@ func executeWorkflow(w http.ResponseWriter, r *http.Request) { //nolint: funlen
 	}
 
 	// build adapter
-	pub, err := bootstrap_broker.NewPublisher(subConfig, "loopback", logger)
+	pub, err := bootstrap_broker.NewPublisher(subConfig, logger)
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
@@ -204,7 +204,7 @@ func executeWorkflow(w http.ResponseWriter, r *http.Request) { //nolint: funlen
 	}
 
 	// send task
-	if err := pub.Publish(context.TODO(), "TODO", task); err != nil { //nolint: contextcheck
+	if err := pub.Publish(context.TODO(), cfg.Broker.Channel, task); err != nil { //nolint: contextcheck
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return

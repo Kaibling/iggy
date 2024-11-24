@@ -36,8 +36,11 @@ type DBConfig struct {
 	DBDialect  string
 }
 type BrokerConfig struct {
-	Channel string
-	Broker  string
+	Channel          string
+	BrokerName       string
+	ConnectionString string
+	Username         string
+	Password         string
 }
 
 func Load() (Configuration, error) {
@@ -71,8 +74,11 @@ func Load() (Configuration, error) {
 			DBDialect:  getEnv("DB_DIALECT", "postgres"),
 		},
 		Broker: BrokerConfig{
-			Channel: getEnv("BROKER_CHANNEL", "iggy"),
-			Broker:  getEnv("BROKER_BROKER", "loopback"),
+			Channel:          getEnv("BROKER_CHANNEL", "iggy"),
+			BrokerName:       getEnv("BROKER_NAME", "nats"),
+			ConnectionString: getEnv("BROKER_CONNECTION_STRING", "nats://127.0.0.1:4222"),
+			Username:         getEnv("BROKER_USERNAME", ""),
+			Password:         getEnv("BROKER_PASSWORD", ""),
 		},
 	}, nil
 }

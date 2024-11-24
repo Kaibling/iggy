@@ -12,6 +12,7 @@ import (
 	"github.com/kaibling/iggy/bootstrap/api"
 	bootstrap_broker "github.com/kaibling/iggy/bootstrap/broker"
 	"github.com/kaibling/iggy/persistence/psql"
+	broker_server "github.com/kaibling/iggy/pkg/broker"
 	"github.com/kaibling/iggy/pkg/config"
 )
 
@@ -51,16 +52,28 @@ func Run(withWorker bool, withAPI bool, version, buildTime string) error { //nol
 	}
 
 	if withWorker {
+		// start broker server
+		broker_server.StartServer(logger)
+		time.Sleep(100 * time.Millisecond)
+
+		// start broker client
 		var worker broker.Subscriber
 
-		worker, err = bootstrap_broker.NewSubscriber(workerConfig, "loopback", logger)
+		worker, err = bootstrap_broker.NewSubscriber(workerConfig, logger)
 		if err != nil {
 			logger.Error(err)
 		}
 
-		// hopefully not blocking
-		go worker.Subscribe(ctx, cfg.Broker.Channel) //nolint: errcheck
-		logger.Info("worker started")
+		go func() {
+			// todo in a loop to retry
+			if err := worker.Subscribe(ctx, cfg.Broker.Channel); //nolint: errcheck
+			err != nil {
+				logger.Error(err)
+			} else {
+				logger.Info("worker started")
+			}
+
+		}()
 	}
 
 	if withAPI {

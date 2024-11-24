@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-const HTTPClientTimeout = time.Duration(1) * time.Second
+const HTTPClientTimeout = time.Duration(3) * time.Second
 
 func Pretty(data interface{}) string {
 	a, _ := json.MarshalIndent(data, "", " ") //nolint: errchkjson
@@ -82,11 +82,11 @@ func Fetch(url, method string, payload *bytes.Buffer) ([]byte, error) {
 		return nil, fmt.Errorf("fetch method '%s' not supportd", method) //nolint: err113
 	}
 
-	defer resp.Body.Close()
-
 	if err != nil {
 		return nil, err
 	}
+
+	defer resp.Body.Close()
 
 	return io.ReadAll(resp.Body)
 }
