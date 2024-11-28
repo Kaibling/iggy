@@ -5,6 +5,7 @@ services:
    build: .
    volumes:
     - "../.:/iggy"
+    - "../../iggy-extensions:/iggy-extensions"
     - "../../apiForge:/apiforge"
    working_dir: "/iggy"
    command: "tail -f /dev/null"
@@ -12,9 +13,18 @@ services:
       - "host.local:host-gateway"
    ports:
       - 8082:8082
+      - 4222:4222
   db:
    image: docker.io/library/postgres:16
    volumes:
     - ${PWD}/pgdata:/var/lib/postgresql/data
    env_file:
       - ../.env
+
+  nui:
+   image: ghcr.io/nats-nui/nui:latest
+   container_name: nui
+   ports:
+      - 31311:31311
+   
+

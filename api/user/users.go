@@ -25,7 +25,7 @@ func usersGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	us, err := bootstrap.NewUserService(r.Context())
+	us, err := bootstrap.BuildRouteUserService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
@@ -52,7 +52,7 @@ func userGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	us, err := bootstrap.NewUserService(r.Context())
+	us, err := bootstrap.BuildRouteUserService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
@@ -86,7 +86,7 @@ func userPost(w http.ResponseWriter, r *http.Request) {
 
 	postUser.ID = ""
 
-	us, err := bootstrap.NewUserService(r.Context())
+	us, err := bootstrap.BuildRouteUserService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
@@ -113,7 +113,7 @@ func userDel(w http.ResponseWriter, r *http.Request) {
 
 	userID := route.ReadURLParam("id", r)
 
-	us, err := bootstrap.NewUserService(r.Context())
+	us, err := bootstrap.BuildRouteUserService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
@@ -139,7 +139,7 @@ func getUserToken(w http.ResponseWriter, r *http.Request) {
 
 	userID := route.ReadURLParam("id", r)
 
-	ts, err := bootstrap.NewTokenService(r.Context())
+	ts, err := bootstrap.BuildRouteTokenService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 

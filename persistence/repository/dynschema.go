@@ -121,7 +121,6 @@ func (r *DynSchemaRepo) RemoveFieldsFromSchema(suffix, dynTabName string, vars [
 
 	q := fmt.Sprintf("ALTER TABLE %s_%s DROP COLUMN  %s;", suffix, dynTabName, strings.Join(addVars, ","))
 
-	fmt.Println(q)
 	// todo sql errors are always null
 	rows, err := r.db.Query(context.Background(), q)
 	if err != nil {

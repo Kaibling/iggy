@@ -20,7 +20,7 @@ func fetchDynTab(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dts, err := bootstrap.NewDynTabService(r.Context())
+	dts, err := bootstrap.BuildRouteDynTabService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
@@ -60,14 +60,14 @@ func createDynTabs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dts, err := bootstrap.NewDynTabService(r.Context())
+	dts, err := bootstrap.BuildRouteDynTabService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return
 	}
 
-	dss, err := bootstrap.NewDynSchemaService(r.Context())
+	dss, err := bootstrap.BuildRouteDynSchemaService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
@@ -99,7 +99,7 @@ func fetchDynTabs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	us, err := bootstrap.NewDynTabService(r.Context())
+	us, err := bootstrap.BuildRouteDynTabService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
@@ -126,7 +126,7 @@ func fetchDynFields(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dts, err := bootstrap.NewDynFieldService(r.Context())
+	dts, err := bootstrap.BuildRouteDynFieldService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
@@ -159,7 +159,7 @@ func addDynFields(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dfs, err := bootstrap.NewDynFieldService(r.Context())
+	dfs, err := bootstrap.BuildRouteDynFieldService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
@@ -186,19 +186,20 @@ func deleteDynFields(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dfs, err := bootstrap.NewDynFieldService(r.Context())
+	dfs, err := bootstrap.BuildRouteDynFieldService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return
 	}
 
-	dts, err := bootstrap.NewDynTabService(r.Context())
+	dts, err := bootstrap.BuildRouteDynTabService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return
 	}
+
 	tab, err := dts.FetchDynamicTables([]string{dynTabID})
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)

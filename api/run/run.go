@@ -20,7 +20,7 @@ func fetchRun(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	us, err := bootstrap.NewRunService(r.Context())
+	us, err := bootstrap.BuildRouteRunService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
@@ -60,14 +60,14 @@ func createRun(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	us, err := bootstrap.NewRunService(r.Context())
+	us, err := bootstrap.BuildRouteRunService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
 		return
 	}
 
-	rs, err := bootstrap.NewRunLogService(r.Context())
+	rs, err := bootstrap.BuildRouteRunLogService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
@@ -94,7 +94,7 @@ func fetchRunLogsByRun(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	us, err := bootstrap.NewRunLogService(r.Context())
+	us, err := bootstrap.BuildRouteRunLogService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
@@ -126,7 +126,7 @@ func fetchRuns(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rs, err := bootstrap.NewRunService(r.Context())
+	rs, err := bootstrap.BuildRouteRunService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 

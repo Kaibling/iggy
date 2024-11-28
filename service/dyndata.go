@@ -22,7 +22,7 @@ type DynDataService struct {
 	cfg           config.Configuration
 }
 
-func NewDynDataService(ctx context.Context, repo dynDataRepo, schemaService *DynSchemaService, fieldService *DynFieldService, cfg config.Configuration) *DynDataService {
+func NewDynDataService(ctx context.Context, repo dynDataRepo, schemaService *DynSchemaService, fieldService *DynFieldService, cfg config.Configuration) *DynDataService { //nolint:lll
 	return &DynDataService{ctx, repo, schemaService, fieldService, cfg}
 }
 
@@ -36,10 +36,9 @@ func (rls *DynDataService) CreateObject(obj map[string]any, dynTabName string) e
 	// build insert statement
 	query, err := dynTabObjectInsertSQL(obj, dynTabName, vars)
 	if err != nil {
-		fmt.Println(err.Error())
 		return err
 	}
-	fmt.Println(query)
+
 	return rls.repo.Query(query)
 }
 

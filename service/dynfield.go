@@ -24,7 +24,7 @@ type DynFieldService struct {
 	cfg           config.Configuration
 }
 
-func NewDynFieldService(ctx context.Context, dfs dynFieldRepo, dss *DynSchemaService, cfg config.Configuration) *DynFieldService {
+func NewDynFieldService(ctx context.Context, dfs dynFieldRepo, dss *DynSchemaService, cfg config.Configuration) *DynFieldService { //nolint:lll
 	return &DynFieldService{ctx: ctx, repo: dfs, cfg: cfg, schemaService: dss}
 }
 
@@ -66,7 +66,3 @@ func (rls *DynFieldService) FetchFieldsByIDs(fieldIDs []string) ([]entity.Dynami
 func (rls *DynFieldService) FetchVarsByName(dynTabName string) ([]entity.DynamicField, error) {
 	return rls.repo.FetchVarsByDynFieldName(dynTabName)
 }
-
-// func (rls *DynFieldService) CreateFieldTable(suffix string, dynTab entity.DynamicTable, vars []entity.DynamicField) error {
-// 	return rls.repo.CreateTable(suffix, dynTab, vars)
-// }

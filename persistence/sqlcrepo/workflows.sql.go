@@ -65,6 +65,34 @@ func (q *Queries) FetchAllWorkflows(ctx context.Context) ([]Workflow, error) {
 	return items, nil
 }
 
+const fetchToBackup = `-- name: FetchToBackup :many
+SELECT id FROM 
+workflows 
+WHERE
+deleted_at IS NULL AND build_in = false
+ORDER BY id
+`
+
+func (q *Queries) FetchToBackup(ctx context.Context) ([]string, error) {
+	rows, err := q.db.Query(ctx, fetchToBackup)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		items = append(items, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const fetchWorkflow = `-- name: FetchWorkflow :one
 SELECT id, name, code, object_type, fail_on_error, build_in, created_at, modified_at, created_by, modified_by, deleted_at FROM workflows
 WHERE id = $1 AND deleted_at IS NULL

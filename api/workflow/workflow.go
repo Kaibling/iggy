@@ -7,11 +7,11 @@ import (
 	apierror "github.com/kaibling/apiforge/apierror"
 	"github.com/kaibling/apiforge/envelope"
 	"github.com/kaibling/apiforge/route"
-	"github.com/kaibling/iggy/adapters/broker"
 	"github.com/kaibling/iggy/bootstrap"
 	bootstrap_broker "github.com/kaibling/iggy/bootstrap/broker"
 	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/pkg/utility"
+	"github.com/kaibling/iggy/service"
 )
 
 func fetchWorkflow(w http.ResponseWriter, r *http.Request) {
@@ -24,7 +24,7 @@ func fetchWorkflow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	us, err := bootstrap.NewWorkflowService(r.Context())
+	us, err := bootstrap.BuildRouteWorkflowService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
@@ -75,7 +75,7 @@ func createWorkflows(w http.ResponseWriter, r *http.Request) {
 		wf.BuildIn = false
 	}
 
-	us, err := bootstrap.NewWorkflowService(r.Context())
+	us, err := bootstrap.BuildRouteWorkflowService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
@@ -102,7 +102,7 @@ func deleteWorkflow(w http.ResponseWriter, r *http.Request) {
 
 	workflowID := route.ReadURLParam("id", r)
 
-	us, err := bootstrap.NewWorkflowService(r.Context())
+	us, err := bootstrap.BuildRouteWorkflowService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
@@ -128,7 +128,7 @@ func fetchRunsByWorkflow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	us, err := bootstrap.NewRunService(r.Context())
+	us, err := bootstrap.BuildRouteRunService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
@@ -175,14 +175,14 @@ func executeWorkflow(w http.ResponseWriter, r *http.Request) { //nolint: funlen
 		return
 	}
 
-	subConfig := broker.SubscriberConfig{
+	brokerConfig := service.Config{
 		Config:   cfg,
 		Username: username,
 		DBPool:   db,
 	}
 
 	// build adapter
-	pub, err := bootstrap_broker.NewPublisher(subConfig, logger)
+	pub, err := bootstrap_broker.NewPublisher(brokerConfig, logger)
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
@@ -230,7 +230,7 @@ func patchWorkflow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ws, err := bootstrap.NewWorkflowService(r.Context())
+	ws, err := bootstrap.BuildRouteWorkflowService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 
@@ -262,7 +262,7 @@ func fetchWorkflows(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	us, err := bootstrap.NewWorkflowService(r.Context())
+	us, err := bootstrap.BuildRouteWorkflowService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 

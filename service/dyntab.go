@@ -15,7 +15,7 @@ type dynTabRepo interface {
 	FetchDynamicTables(ids []string) ([]entity.DynamicTable, error)
 	CreateDynamicTables(newModels []entity.NewDynamicTable) ([]entity.DynamicTable, error)
 	IDQuery(query string) ([]string, error)
-	//AddDynSchema(newVars []entity.NewDynamicSchema) ([]entity.DynamicField, error)
+	// AddDynSchema(newVars []entity.NewDynamicSchema) ([]entity.DynamicField, error)
 }
 
 type DynTabService struct {
@@ -32,7 +32,7 @@ func (rls *DynTabService) FetchDynamicTables(ids []string) ([]entity.DynamicTabl
 	return rls.repo.FetchDynamicTables(ids)
 }
 
-func (rls *DynTabService) CreateDynamicTables(newEntities []entity.NewDynamicTable, dss *DynSchemaService) ([]entity.DynamicTable, error) {
+func (rls *DynTabService) CreateDynamicTables(newEntities []entity.NewDynamicTable, dss *DynSchemaService) ([]entity.DynamicTable, error) { //nolint:lll
 	for i := range newEntities {
 		newEntities[i].ID = utils.NewULID().String()
 	}

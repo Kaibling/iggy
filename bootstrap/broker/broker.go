@@ -8,37 +8,38 @@ import (
 	"github.com/kaibling/iggy/adapters/broker/loopback"
 	"github.com/kaibling/iggy/adapters/broker/nats"
 	"github.com/kaibling/iggy/apperror"
+	"github.com/kaibling/iggy/service"
 )
 
-func NewSubscriber(subConfig broker.SubscriberConfig, //nolint:ireturn,nolintlint
+func NewSubscriber(cfg service.Config, //nolint:ireturn,nolintlint
 	logger logging.Writer,
 ) (broker.Subscriber, error) {
 	l := logger.NewScope("subscriber")
 
-	switch subConfig.Config.Broker.BrokerName {
+	switch cfg.Config.Broker.BrokerName {
 	case "rabbitMQ":
 		panic("not implemented")
 	case "nats":
-		return nats.NewNATSClient(subConfig, l)
+		return nats.NewNATSClient(cfg, l)
 	case "loopback":
-		return loopback.NewLoopback(subConfig, l), nil
+		return loopback.NewLoopback(cfg, l), nil
 	default:
-		return nil, apperror.NewStringGeneric(fmt.Sprintf("subscriber adapter %s not found", subConfig.Config.Broker.BrokerName))
+		return nil, apperror.NewStringGeneric(fmt.Sprintf("subscriber adapter %s not found", cfg.Config.Broker.BrokerName))
 	}
 }
 
-func NewPublisher(subConfig broker.SubscriberConfig, logger logging.Writer, //nolint:ireturn,nolintlint
+func NewPublisher(cfg service.Config, logger logging.Writer, //nolint:ireturn,nolintlint
 ) (broker.Publisher, error) {
 	l := logger.NewScope("publisher")
 
-	switch subConfig.Config.Broker.BrokerName {
+	switch cfg.Config.Broker.BrokerName {
 	case "rabbitMQ":
 		panic("not implemented")
 	case "nats":
-		return nats.NewNATSClient(subConfig, l)
+		return nats.NewNATSClient(cfg, l)
 	case "loopback":
-		return loopback.NewLoopback(subConfig, l), nil
+		return loopback.NewLoopback(cfg, l), nil
 	default:
-		return nil, apperror.NewStringGeneric(fmt.Sprintf("publisher adapter %s not found", subConfig.Config.Broker.BrokerName))
+		return nil, apperror.NewStringGeneric(fmt.Sprintf("publisher adapter %s not found", cfg.Config.Broker.BrokerName))
 	}
 }

@@ -32,6 +32,6 @@ func (rls *DynSchemaService) DeleteFields(suffix, dynTabName string, fields []en
 	return rls.repo.RemoveFieldsFromSchema(suffix, dynTabName, fields)
 }
 
-func (rls *DynSchemaService) CreateSchemaTable(suffix string, dynTab entity.DynamicTable, vars []entity.DynamicField) error {
+func (rls *DynSchemaService) CreateSchemaTable(suffix string, dynTab entity.DynamicTable, vars []entity.DynamicField) error { //nolint:lll
 	return rls.repo.CreateTable(suffix, dynTab, vars)
 }

@@ -55,7 +55,6 @@ func (r *DynFieldRepo) AddFields(newModels []entity.NewDynamicField) ([]entity.D
 	}
 
 	return r.FetchDynamicFields(newDynamicFieldIDs)
-
 }
 
 func (r *DynFieldRepo) FetchDynamicFields(dynFieldIDs []string) ([]entity.DynamicField, error) {

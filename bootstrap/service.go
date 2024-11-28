@@ -3,146 +3,99 @@ package bootstrap
 import (
 	"context"
 
-	"github.com/kaibling/apiforge/ctxkeys"
+	"github.com/kaibling/apiforge/apierror"
+	"github.com/kaibling/iggy/entity"
 	repo "github.com/kaibling/iggy/persistence/repository"
+	"github.com/kaibling/iggy/pkg/config"
 	"github.com/kaibling/iggy/service"
 )
 
-func NewUserService(ctx context.Context) (*service.UserService, error) {
-	cfg, dbPool, _, username, err := ContextDefaultData(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	userRepo := repo.NewUserRepo(ctx, username, dbPool)
-
-	return service.NewUserService(ctx, userRepo, cfg), nil
+func NewWorkflowEngineService(ctx context.Context, cfg config.Configuration, dynDataService *service.DynDataService) (*service.WorkflowEngineService, error) { //nolint:lll
+	return service.NewWorkflowEngineService(ctx, cfg, dynDataService), nil
 }
 
-func NewTokenService(ctx context.Context) (*service.TokenService, error) {
-	cfg, dbPool, _, username, err := ContextDefaultData(ctx)
-	if err != nil {
-		return nil, err
-	}
+func NewDynTabService(ctx context.Context, serviceConfig service.Config) (*service.DynTabService, error) {
+	dynTabRepo := repo.NewDynTabRepo(ctx, serviceConfig.Username, serviceConfig.DBPool)
 
-	tokenRepo := repo.NewTokenRepo(ctx, username, dbPool)
-
-	return service.NewTokenService(ctx, tokenRepo, cfg), nil
+	return service.NewDynTabService(ctx, dynTabRepo, serviceConfig.Config), nil
 }
 
-func NewUserServiceAnonym(ctx context.Context, username string) (*service.UserService, error) {
-	cfg, dbPool, _, err := contextBasisData(ctx)
+func NewDynFieldService(ctx context.Context, serviceConfig service.Config) (*service.DynFieldService, error) {
+	dynFieldRepo := repo.NewDynFieldRepo(ctx, serviceConfig.Username, serviceConfig.DBPool)
+
+	dss, err := NewDynSchemaService(ctx, serviceConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	userRepo := repo.NewUserRepo(ctx, username, dbPool)
-
-	return service.NewUserService(ctx, userRepo, cfg), nil
+	return service.NewDynFieldService(ctx, dynFieldRepo, dss, serviceConfig.Config), nil
 }
 
-func NewTokenServiceAnonym(ctx context.Context, username string) (*service.TokenService, error) {
-	cfg, dbPool, _, err := contextBasisData(ctx)
+func NewDynDataService(ctx context.Context, serviceConfig service.Config) (*service.DynDataService, error) {
+	dynTabRepo := repo.NewDynDataRepo(ctx, serviceConfig.Username, serviceConfig.DBPool)
+
+	dss, err := NewDynSchemaService(ctx, serviceConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	tokenRepo := repo.NewTokenRepo(ctx, username, dbPool)
+	dfs, err := NewDynFieldService(ctx, serviceConfig)
+	if err != nil {
+		return nil, err
+	}
 
-	return service.NewTokenService(ctx, tokenRepo, cfg), nil
+	return service.NewDynDataService(ctx, dynTabRepo, dss, dfs, serviceConfig.Config), nil
 }
 
-func NewWorkflowService(ctx context.Context) (*service.WorkflowService, error) {
-	_, dbPool, log, username, err := ContextDefaultData(ctx)
-	if err != nil {
-		return nil, err
-	}
+func NewDynSchemaService(ctx context.Context, serviceConfig service.Config) (*service.DynSchemaService, error) {
+	dynSchemaRepo := repo.NewDynSchemaRepo(ctx, serviceConfig.Username, serviceConfig.DBPool)
 
-	workflowRepo := repo.NewWorkflowRepo(ctx, username, dbPool)
-
-	return service.NewWorkflowService(ctx, workflowRepo, log), nil
+	return service.NewDynSchemaService(ctx, dynSchemaRepo, serviceConfig.Config), nil
 }
 
-func NewRunService(ctx context.Context) (*service.RunService, error) {
-	cfg, dbPool, _, username, err := ContextDefaultData(ctx)
-	if err != nil {
-		return nil, err
-	}
+func NewRunLogService(ctx context.Context, serviceConfig service.Config) (*service.RunLogService, error) {
+	runLogRepo := repo.NewRunLogRepo(ctx, serviceConfig.Username, serviceConfig.DBPool)
 
-	requestID, ok := ctxkeys.GetValue(ctx, ctxkeys.RequestIDKey).(string)
-	if !ok {
-		return nil, err
-	}
-
-	userID, ok := ctxkeys.GetValue(ctx, ctxkeys.UserIDKey).(string)
-	if !ok {
-		return nil, err
-	}
-
-	runRepo := repo.NewRunRepo(ctx, username, requestID, dbPool)
-
-	return service.NewRunService(ctx, runRepo, userID, cfg), nil
+	return service.NewRunLogService(ctx, runLogRepo, serviceConfig.Config), nil
 }
 
-func NewDynTabService(ctx context.Context) (*service.DynTabService, error) {
-	cfg, dbPool, _, username, err := ContextDefaultData(ctx)
-	if err != nil {
-		return nil, err
-	}
+func NewRunService(ctx context.Context, serviceConfig service.Config, task entity.Task) (*service.RunService, error) { //nolint:lll
+	runRepo := repo.NewRunRepo(ctx, serviceConfig.Username, task.RequestID, serviceConfig.DBPool)
 
-	dynTabRepo := repo.NewDynTabRepo(ctx, username, dbPool)
-
-	return service.NewDynTabService(ctx, dynTabRepo, cfg), nil
+	return service.NewRunService(ctx, runRepo, task.UserID, serviceConfig.Config), nil
 }
 
-func NewRunLogService(ctx context.Context) (*service.RunLogService, error) {
-	cfg, dbPool, _, username, err := ContextDefaultData(ctx)
-	if err != nil {
-		return nil, err
-	}
+func NewWorkflowService(ctx context.Context, serviceConfig service.Config, scope string) (*service.WorkflowService, error) { //nolint:lll
+	workflowRepo := repo.NewWorkflowRepo(ctx, serviceConfig.Username, serviceConfig.DBPool)
 
-	runLogRepo := repo.NewRunLogRepo(ctx, username, dbPool)
-
-	return service.NewRunLogService(ctx, runLogRepo, cfg), nil
+	return service.NewWorkflowService(ctx, workflowRepo, serviceConfig.Log.NewScope(scope), serviceConfig.Config), nil
 }
 
-func NewDynSchemaService(ctx context.Context) (*service.DynSchemaService, error) {
-	cfg, dbPool, _, username, err := ContextDefaultData(ctx)
-	if err != nil {
-		return nil, err
+func WorkerExecution(ctx context.Context, serviceConfig service.Config, task entity.Task) error {
+	errs := apierror.NewMultiError()
+
+	wfs, err := NewWorkflowService(ctx, serviceConfig, "worker_execution")
+	errs.Add(err)
+
+	rs, err := NewRunService(ctx, serviceConfig, task)
+	errs.Add(err)
+
+	rls, err := NewRunLogService(ctx, serviceConfig)
+	errs.Add(err)
+
+	dds, err := NewDynDataService(ctx, serviceConfig)
+	errs.Add(err)
+
+	wfes, err := NewWorkflowEngineService(ctx, serviceConfig.Config, dds)
+	errs.Add(err)
+
+	if errs.HasError() {
+		return errs.GetErrors()[0]
 	}
 
-	dynSchemaRepo := repo.NewDynSchemaRepo(ctx, username, dbPool)
+	if err := wfs.Execute(task.WorkflowID, wfes, rs, rls); err != nil {
+		return err
+	}
 
-	return service.NewDynSchemaService(ctx, dynSchemaRepo, cfg), nil
+	return nil
 }
-
-func NewDynFieldService(ctx context.Context) (*service.DynFieldService, error) {
-	cfg, dbPool, _, username, err := ContextDefaultData(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	dss, err := NewDynSchemaService(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	dynFieldRepo := repo.NewDynFieldRepo(ctx, username, dbPool)
-
-	return service.NewDynFieldService(ctx, dynFieldRepo, dss, cfg), nil
-}
-
-// func NewWorkflowEngineService(ctx context.Context) (*service.WorkflowEngineService, error) {
-// 	cfg, ok := ctxkeys.GetValue(ctx, ctxkeys.AppConfigKey).(config.Configuration)
-// 	if !ok {
-// 		return nil, apperror.ErrNewMissingContext("config")
-// 	}
-
-// 	dynService, err := NewDynTabService(ctx)
-// 	if err != nil {
-// 		return nil, apperror.ErrMissing
-// 	}
-
-// 	return service.NewWorkflowEngineService(ctx, cfg, dynService), nil
-// }

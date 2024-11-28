@@ -4,20 +4,20 @@ import (
 	"context"
 
 	"github.com/kaibling/apiforge/logging"
-	"github.com/kaibling/iggy/adapters/broker"
 	"github.com/kaibling/iggy/bootstrap"
 	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/pkg/utility"
+	"github.com/kaibling/iggy/service"
 )
 
 var LoopbackChannel = make(chan []byte) //nolint: gochecknoglobals
 
-func NewLoopback(subConfig broker.SubscriberConfig, l logging.Writer) *Loopback {
-	return &Loopback{subConfig, l.NewScope("Subscriber")}
+func NewLoopback(cfg service.Config, l logging.Writer) *Loopback {
+	return &Loopback{cfg, l.NewScope("Subscriber")}
 }
 
 type Loopback struct {
-	cfg broker.SubscriberConfig
+	cfg service.Config
 	l   logging.Writer
 }
 

@@ -8,6 +8,14 @@ SELECT * FROM workflows
 WHERE deleted_at IS NULL
 ORDER BY id;
 
+-- name: FetchToBackup :many
+SELECT id FROM 
+workflows 
+WHERE
+deleted_at IS NULL AND build_in = false
+ORDER BY id;
+
+
 -- name: SaveWorkflow :one
 INSERT INTO workflows (
   id,  name, code, object_type,fail_on_error,build_in, created_at, modified_at, created_by, modified_by, deleted_at 

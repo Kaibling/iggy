@@ -67,6 +67,17 @@ func (r *WorkflowRepo) CreateWorkflows(newModels []*entity.NewWorkflow) ([]entit
 	return r.FetchWorkflows(newWorkflowsIDs, maxDepth)
 }
 
+func (r *WorkflowRepo) FetchToBackup() ([]entity.Workflow, error) {
+	maxDepth := 1
+
+	backupIDs, err := r.q.FetchToBackup(r.ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.FetchWorkflows(backupIDs, maxDepth)
+}
+
 func (r *WorkflowRepo) UpdateWorkflow(workflowID string, updateEntity entity.UpdateWorkflow) (*entity.Workflow, error) {
 	maxDepth := 1
 

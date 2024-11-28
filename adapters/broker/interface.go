@@ -2,10 +2,6 @@ package broker
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/kaibling/apiforge/logging"
-	"github.com/kaibling/iggy/pkg/config"
 )
 
 type Publisher interface {
@@ -16,9 +12,9 @@ type Subscriber interface {
 	Subscribe(ctx context.Context, channelName string) error
 }
 
-type SubscriberConfig struct {
-	Config   config.Configuration
-	Username string
-	DBPool   *pgxpool.Pool
-	Log      logging.Writer
-}
+// type SubscriberConfig struct {
+// 	Config   config.Configuration
+// 	Username string
+// 	DBPool   *pgxpool.Pool
+// 	Log      logging.Writer
+// }

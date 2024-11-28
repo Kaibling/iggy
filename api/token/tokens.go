@@ -16,7 +16,7 @@ func getTokens(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ts, err := bootstrap.NewTokenService(r.Context())
+	ts, err := bootstrap.BuildRouteTokenService(r.Context())
 	if err != nil {
 		e.SetError(apierror.NewGeneric(err)).Finish(w, r, l)
 

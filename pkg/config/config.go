@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -25,6 +26,12 @@ type AppConfig struct {
 	TokenExpiration int
 	TokenKeyLength  int
 	PasswordCost    int
+	ImportRepoURL   string
+	ImportLocalPath string
+	ImportOnStartup bool
+	// ExportRepoURL   string
+	ExportLocalPath string
+	GitToken        string
 }
 
 type DBConfig struct {
@@ -64,6 +71,11 @@ func Load() (Configuration, error) {
 			BindingPort:     getEnv("BINDING_PORT", "7800"),
 			PasswordCost:    passwordCost,
 			TokenKeyLength:  tokenLength,
+			ImportRepoURL:   getEnv("IMPORT_REPO_URL", ""),
+			ImportLocalPath: getEnv("IMPORT_LOCAL_PATH", "/tmp/workflows"),
+			ImportOnStartup: toBool(getEnv("IMPORT_ON_STARTUP", "false")),
+			ExportLocalPath: getEnv("EXPORT_LOCAL_PATH", "/tmp/workflows"),
+			GitToken:        getEnv("GIT_TOKEN", ""),
 		},
 		DB: DBConfig{
 			DBUser:     getEnv("DB_USER", ""),
@@ -76,7 +88,7 @@ func Load() (Configuration, error) {
 		Broker: BrokerConfig{
 			Channel:          getEnv("BROKER_CHANNEL", "iggy"),
 			BrokerName:       getEnv("BROKER_NAME", "nats"),
-			ConnectionString: getEnv("BROKER_CONNECTION_STRING", "nats://127.0.0.1:4222"),
+			ConnectionString: getEnv("BROKER_CONNECTION_STRING", "nats://0.0.0.0:4222"),
 			Username:         getEnv("BROKER_USERNAME", ""),
 			Password:         getEnv("BROKER_PASSWORD", ""),
 		},
@@ -94,4 +106,8 @@ func getEnv(key string, defaultValue string) string {
 	}
 
 	return val
+}
+
+func toBool(s string) bool {
+	return strings.ToLower(s) == "true"
 }
