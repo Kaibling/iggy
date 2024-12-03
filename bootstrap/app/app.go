@@ -61,11 +61,17 @@ func Run(withWorker bool, withAPI bool, version, buildTime string) error { //nol
 		return err
 	}
 
-	if err := wfs.ExportToGit(cfg.App.ExportLocalPath, cfg.App.GitToken); err != nil {
+	if err := wfs.ImportFromFiles(cfg.App.ExportLocalPath); err != nil {
 		ctxCancel()
 
 		return err
 	}
+
+	// if err := wfs.ExportToGit(cfg.App.ExportLocalPath, cfg.App.GitToken); err != nil {
+	// 	ctxCancel()
+
+	// 	return err
+	// }
 
 	// if err := wfs.LoadFromGit(cfg.App.ImportLocalPath); err != nil {
 	// 	if err := git.Clone(cfg.App.ImportRepoURL, cfg.App.ImportLocalPath); err != nil {

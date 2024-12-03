@@ -194,3 +194,49 @@ func (q *Queries) UpdateWorkflow(ctx context.Context, arg UpdateWorkflowParams) 
 	)
 	return err
 }
+
+const upsertWorkflow = `-- name: UpsertWorkflow :exec
+INSERT INTO workflows (
+  id,  name, code, object_type,fail_on_error,build_in, created_at, modified_at, created_by, modified_by, deleted_at 
+  )
+VALUES (
+  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+)
+ON CONFLICT (name)
+DO UPDATE
+ SET 
+  code =  $3,
+  object_type =  $4,
+  fail_on_error =  $5
+`
+
+type UpsertWorkflowParams struct {
+	ID          string
+	Name        string
+	Code        pgtype.Text
+	ObjectType  string
+	FailOnError bool
+	BuildIn     bool
+	CreatedAt   pgtype.Timestamp
+	ModifiedAt  pgtype.Timestamp
+	CreatedBy   string
+	ModifiedBy  string
+	DeletedAt   pgtype.Timestamp
+}
+
+func (q *Queries) UpsertWorkflow(ctx context.Context, arg UpsertWorkflowParams) error {
+	_, err := q.db.Exec(ctx, upsertWorkflow,
+		arg.ID,
+		arg.Name,
+		arg.Code,
+		arg.ObjectType,
+		arg.FailOnError,
+		arg.BuildIn,
+		arg.CreatedAt,
+		arg.ModifiedAt,
+		arg.CreatedBy,
+		arg.ModifiedBy,
+		arg.DeletedAt,
+	)
+	return err
+}

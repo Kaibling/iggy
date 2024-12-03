@@ -3,7 +3,9 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/kaibling/apiforge/lib/utils"
 	"github.com/kaibling/apiforge/logging"
@@ -16,11 +18,11 @@ import (
 type workflowRepo interface {
 	CreateWorkflows(newModel []*entity.NewWorkflow) ([]entity.Workflow, error)
 	UpdateWorkflow(id string, updateEntity entity.UpdateWorkflow) (*entity.Workflow, error)
-	// FetchWorkflow(id string) (*entity.Workflow, error)
 	FetchToBackup() ([]entity.Workflow, error)
 	FetchWorkflows(ids []string, depth int) ([]entity.Workflow, error)
 	IDQuery(query string) ([]string, error)
 	DeleteWorkflow(id string) error
+	Upserts(workflows []entity.Workflow) error
 }
 
 type WorkflowService struct {
@@ -123,6 +125,16 @@ func (ws *WorkflowService) ExportToGit(localPath, gitToken string) error {
 	return nil
 }
 
+func (ws *WorkflowService) ImportFromFiles(localPath string) error {
+	workflows, err := parseFiles(localPath)
+	if err != nil {
+		return err
+	}
+
+	// update or create workflow
+	return ws.repo.Upserts(workflows)
+}
+
 func exportData(data []entity.Workflow, path string, logger logging.Writer) ([]string, error) {
 	fileList := []string{}
 
@@ -144,4 +156,34 @@ func exportData(data []entity.Workflow, path string, logger logging.Writer) ([]s
 	}
 
 	return fileList, nil
+}
+
+func parseFiles(localPath string) ([]entity.Workflow, error) {
+	workflows := []entity.Workflow{}
+
+	files, err := os.ReadDir(localPath)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, file := range files {
+		if file.IsDir() || !strings.HasSuffix(file.Name(), ".json") {
+			continue
+		}
+
+		absulteFilePath := localPath + "/" + file.Name()
+
+		dat, err := os.ReadFile(absulteFilePath)
+		if err != nil {
+			return nil, fmt.Errorf("failed reading %s: %s", file.Name(), err)
+		}
+		var tmpWorkflow entity.Workflow
+		if err := json.Unmarshal(dat, &tmpWorkflow); err != nil {
+			return nil, fmt.Errorf("failed unmarshaling file '%s': %s", file.Name(), err)
+		}
+
+		workflows = append(workflows, tmpWorkflow)
+	}
+
+	return workflows, nil
 }

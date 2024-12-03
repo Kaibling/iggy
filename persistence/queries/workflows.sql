@@ -24,6 +24,25 @@ INSERT INTO workflows (
 )
 RETURNING id;
 
+
+-- name: UpsertWorkflow :exec
+INSERT INTO workflows (
+  id,  name, code, object_type,fail_on_error,build_in, created_at, modified_at, created_by, modified_by, deleted_at 
+  )
+VALUES (
+  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+)
+ON CONFLICT (name)
+DO UPDATE
+ SET 
+  code =  $3,
+  object_type =  $4,
+  fail_on_error =  $5;
+
+
+
+
+
 -- name: DeleteWorkflow :exec
 UPDATE workflows
 SET deleted_at = $1

@@ -78,6 +78,32 @@ func (r *WorkflowRepo) FetchToBackup() ([]entity.Workflow, error) {
 	return r.FetchWorkflows(backupIDs, maxDepth)
 }
 
+func (r *WorkflowRepo) Upserts(workflows []entity.Workflow) error {
+	for _, wf := range workflows {
+		if err := r.q.UpsertWorkflow(r.ctx, sqlcrepo.UpsertWorkflowParams{
+			ID:   wf.ID,
+			Name: wf.Name,
+			Code: pgtype.Text{
+				String: wf.Code,
+				Valid:  true,
+			},
+			ObjectType:  string(wf.ObjectType),
+			BuildIn:     wf.BuildIn,
+			FailOnError: wf.FailOnError,
+			ModifiedAt: pgtype.Timestamp{
+				Time:  time.Now(),
+				Valid: true,
+			},
+			ModifiedBy: r.username,
+		}); err != nil {
+			return err
+		}
+
+	}
+
+	return nil
+}
+
 func (r *WorkflowRepo) UpdateWorkflow(workflowID string, updateEntity entity.UpdateWorkflow) (*entity.Workflow, error) {
 	maxDepth := 1
 
