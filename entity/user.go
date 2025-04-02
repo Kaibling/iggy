@@ -57,3 +57,9 @@ type Identifier struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
 }
+
+type OrderedIdentifier struct {
+	ID        string `json:"id"`
+	Name      string `json:"name"`
+	StepOrder int    `json:"step_order"`
+}

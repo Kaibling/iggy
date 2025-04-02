@@ -9,7 +9,6 @@ import (
 
 	apiservice "github.com/kaibling/apiforge/service"
 	"github.com/kaibling/iggy/adapters/broker"
-	"github.com/kaibling/iggy/bootstrap"
 	"github.com/kaibling/iggy/bootstrap/api"
 	bootstrap_broker "github.com/kaibling/iggy/bootstrap/broker"
 	"github.com/kaibling/iggy/persistence/psql"
@@ -52,34 +51,6 @@ func Run(withWorker bool, withAPI bool, version, buildTime string) error { //nol
 		DBPool:   conn,
 		Log:      logger,
 	}
-
-	// load workflows
-	wfs, err := bootstrap.NewWorkflowService(ctx, sConfig, "export")
-	if err != nil {
-		ctxCancel()
-
-		return err
-	}
-
-	if err := wfs.ImportFromFiles(cfg.App.ExportLocalPath); err != nil {
-		ctxCancel()
-
-		return err
-	}
-
-	// if err := wfs.ExportToGit(cfg.App.ExportLocalPath, cfg.App.GitToken); err != nil {
-	// 	ctxCancel()
-
-	// 	return err
-	// }
-
-	// if err := wfs.LoadFromGit(cfg.App.ImportLocalPath); err != nil {
-	// 	if err := git.Clone(cfg.App.ImportRepoURL, cfg.App.ImportLocalPath); err != nil {
-	// 		ctxCancel()
-
-	// 		return err
-	// 	}
-	// }
 
 	interrupt := make(chan os.Signal, 1)
 	signal.Notify(interrupt, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)

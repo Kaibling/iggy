@@ -9,6 +9,15 @@ export const showError = (msg: string) => {
     toast.warn('This is a warning message!');
   };
 
+  export const showInfo = (msg: string) => {
+    toast.info(msg);
+  };
+
+  export const showSuccess = (msg: string) => {
+    toast.success(msg);
+  };
+
+
 
 export const NotifyContainer = () => {
     return (

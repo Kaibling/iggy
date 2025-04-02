@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
+	"github.com/kaibling/apiforge/lib/utils"
 	"github.com/kaibling/apiforge/logging"
 	"github.com/kaibling/iggy/bootstrap"
 	"github.com/kaibling/iggy/entity"
@@ -15,6 +17,7 @@ import (
 )
 
 const waitingDuration = 100 * time.Second
+const logScope = "subscriber"
 
 func NewNATSClient(cfg service.Config, l logging.Writer) (*Client, error) {
 	nc, err := nats_go.Connect(cfg.Config.Broker.ConnectionString)
@@ -22,13 +25,14 @@ func NewNATSClient(cfg service.Config, l logging.Writer) (*Client, error) {
 		return nil, fmt.Errorf("error connecting to NATS server: %w", err)
 	}
 
-	return &Client{cfg: cfg, l: l.NewScope("Subscriber"), nc: nc}, nil
+	return &Client{cfg: cfg, l: l.NewScope(logScope), nc: nc, backupLogger: l.NewScope(logScope)}, nil
 }
 
 type Client struct {
-	cfg service.Config
-	l   logging.Writer
-	nc  *nats_go.Conn
+	cfg          service.Config
+	l            logging.Writer
+	backupLogger logging.Writer
+	nc           *nats_go.Conn
 }
 
 func (n *Client) Publish(_ context.Context, channelName string, message []byte) error {
@@ -53,6 +57,9 @@ func (n *Client) Subscribe(ctx context.Context, channelName string) error {
 
 	// Process messages
 	for {
+		cycleID := utils.NewULID().String()
+		n.l = n.backupLogger.NewScope(logScope)
+		n.l.AddStringField("cycle_id", cycleID)
 		msg, err := sub.NextMsg(waitingDuration)
 		if err != nil {
 			if errors.Is(err, nats_go.ErrTimeout) {
@@ -64,7 +71,7 @@ func (n *Client) Subscribe(ctx context.Context, channelName string) error {
 			continue
 		}
 
-		n.l.Debug("Received message")
+		n.l.Debug("received message")
 
 		t, err := utility.DecodeToStruct[entity.Task](msg.Data)
 		if err != nil {
@@ -72,12 +79,18 @@ func (n *Client) Subscribe(ctx context.Context, channelName string) error {
 
 			continue
 		}
+		n.l.Debug(fmt.Sprintf("received Workflow %s", t.WorkflowID))
 
 		n.l.AddAnyField("request_id", t.RequestID)
 		n.cfg.Log = n.l
 
 		if err := bootstrap.WorkerExecution(ctx, n.cfg, t); err != nil {
-			n.l.Error(err)
+			if strings.Contains(err.Error(), "not found") {
+				n.l.Warn(err.Error())
+			} else {
+				n.l.Error(err)
+			}
+
 		}
 	}
 }

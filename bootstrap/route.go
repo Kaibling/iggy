@@ -133,16 +133,11 @@ func BuildRouteDynFieldService(ctx context.Context) (*service.DynFieldService, e
 	return service.NewDynFieldService(ctx, dynFieldRepo, dss, cfg), nil
 }
 
-// func NewWorkflowEngineService(ctx context.Context) (*service.WorkflowEngineService, error) {
-// 	cfg, ok := ctxkeys.GetValue(ctx, ctxkeys.AppConfigKey).(config.Configuration)
-// 	if !ok {
-// 		return nil, apperror.ErrNewMissingContext("config")
-// 	}
+func BuildUIService(ctx context.Context) (*service.UIConfigService, error) {
+	cfg, _, _, _, err := ContextDefaultData(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-// 	dynService, err := NewDynTabService(ctx)
-// 	if err != nil {
-// 		return nil, apperror.ErrMissing
-// 	}
-
-// 	return service.NewWorkflowEngineService(ctx, cfg, dynService), nil
-// }
+	return service.NewUIConfigService(cfg), nil
+}

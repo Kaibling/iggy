@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -13,12 +12,14 @@ import (
 	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/pkg/config"
 	"github.com/kaibling/iggy/pkg/git"
+	"gopkg.in/yaml.v3"
 )
 
 type workflowRepo interface {
 	CreateWorkflows(newModel []*entity.NewWorkflow) ([]entity.Workflow, error)
 	UpdateWorkflow(id string, updateEntity entity.UpdateWorkflow) (*entity.Workflow, error)
 	FetchToBackup() ([]entity.Workflow, error)
+	FetchBackupAll() ([]entity.Workflow, error)
 	FetchWorkflows(ids []string, depth int) ([]entity.Workflow, error)
 	IDQuery(query string) ([]string, error)
 	DeleteWorkflow(id string) error
@@ -65,6 +66,10 @@ func (ws *WorkflowService) Execute(workflowID string, workflowExecutionService *
 	wf, err := ws.FetchWorkflows([]string{workflowID})
 	if err != nil {
 		return err
+	}
+
+	if len(wf) == 0 {
+		return fmt.Errorf("workflow not found: %s", workflowID)
 	}
 
 	// execute
@@ -125,34 +130,50 @@ func (ws *WorkflowService) ExportToGit(localPath, gitToken string) error {
 	return nil
 }
 
+func (ws *WorkflowService) ExportToDir(localPath string) error {
+	// export from DB
+	exports, err := ws.repo.FetchBackupAll()
+	if err != nil {
+		return err
+	}
+	// create files
+	_, err = exportData(exports, localPath, ws.logger)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (ws *WorkflowService) ImportFromFiles(localPath string) error {
 	workflows, err := parseFiles(localPath)
 	if err != nil {
 		return err
 	}
 
+	fmt.Println(workflows)
+
 	// update or create workflow
-	return ws.repo.Upserts(workflows)
+	//return ws.repo.Upserts(workflows)
+	return nil
 }
 
 func exportData(data []entity.Workflow, path string, logger logging.Writer) ([]string, error) {
 	fileList := []string{}
 
-	for _, d := range data {
-		b, err := json.MarshalIndent(d, "", " ")
-		if err != nil {
-			return nil, err
-		}
+	b, err := yaml.Marshal(data)
+	if err != nil {
+		return nil, err
+	}
 
-		filename := d.Name + ".json"
-		fileList = append(fileList, filename)
+	filename := "export.yaml"
+	//fileList = append(fileList, filename)
 
-		absolutFilename := path + "/" + d.Name + ".json"
-		logger.Info("exporting " + absolutFilename)
+	absolutFilename := path + "/" + filename
+	logger.Info("exporting " + absolutFilename)
 
-		if err := os.WriteFile(absolutFilename, b, 0o600); err != nil { //nolint: mnd
-			return nil, err
-		}
+	if err := os.WriteFile(absolutFilename, b, 0o600); err != nil { //nolint: mnd
+		return nil, err
 	}
 
 	return fileList, nil
@@ -165,9 +186,9 @@ func parseFiles(localPath string) ([]entity.Workflow, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Println(localPath)
 	for _, file := range files {
-		if file.IsDir() || !strings.HasSuffix(file.Name(), ".json") {
+		if file.IsDir() || !strings.HasSuffix(file.Name(), ".yaml") {
 			continue
 		}
 
@@ -177,12 +198,12 @@ func parseFiles(localPath string) ([]entity.Workflow, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed reading %s: %s", file.Name(), err)
 		}
-		var tmpWorkflow entity.Workflow
-		if err := json.Unmarshal(dat, &tmpWorkflow); err != nil {
+		var tmpWorkflow []entity.Workflow
+		if err := yaml.Unmarshal(dat, &tmpWorkflow); err != nil {
 			return nil, fmt.Errorf("failed unmarshaling file '%s': %s", file.Name(), err)
 		}
 
-		workflows = append(workflows, tmpWorkflow)
+		workflows = append(workflows, tmpWorkflow...)
 	}
 
 	return workflows, nil

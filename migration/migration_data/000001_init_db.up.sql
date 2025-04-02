@@ -65,6 +65,7 @@ CREATE TABLE
   "workflows_children" (
     workflow_id TEXT NOT NULL,
     children_id TEXT NOT NULL,
+    step_order INT NOT NULL,
     PRIMARY KEY (children_id, workflow_id),
     FOREIGN KEY (children_id) REFERENCES workflows (id) ON DELETE CASCADE,
     FOREIGN KEY (workflow_id) REFERENCES workflows (id) ON DELETE CASCADE

@@ -45,6 +45,9 @@ const Navbar = () => {
           <Link to="/workflows">Workflows</Link>
         </li>
         <li>
+          <Link to="/workflow-backup">WF Backup</Link>
+        </li>
+        <li>
           <Link to="/runs">Runs</Link>
         </li>
         <li>

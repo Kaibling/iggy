@@ -3,7 +3,7 @@ CREATE TABLE
     id TEXT NOT NULL,
     username TEXT NOT NULL UNIQUE,
     password TEXT,
-    active int NOT NULL,
+    active INT NOT NULL,
     created_at TIMESTAMP NOT NULL,
     created_by TEXT NOT NULL,
     modified_at TIMESTAMP NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE
   "tokens" (
     id TEXT NOT NULL,
     value TEXT NOT NULL,
-    active int NOT NULL,
+    active INT NOT NULL,
     expires TIMESTAMP,
     created_at TIMESTAMP NOT NULL,
     created_by TEXT NOT NULL,
@@ -65,6 +65,7 @@ CREATE TABLE
   "workflows_children" (
     workflow_id TEXT NOT NULL,
     children_id TEXT NOT NULL,
+    step_order INT NOT NULL,
     PRIMARY KEY (children_id, workflow_id),
     FOREIGN KEY (children_id) REFERENCES workflows (id) ON DELETE CASCADE,
     FOREIGN KEY (workflow_id) REFERENCES workflows (id) ON DELETE CASCADE

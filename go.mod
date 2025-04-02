@@ -17,6 +17,7 @@ require (
 	github.com/prometheus/client_golang v1.20.5
 	github.com/urfave/cli/v2 v2.27.5
 	golang.org/x/crypto v0.29.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (

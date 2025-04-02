@@ -61,6 +61,12 @@ export interface RunLog {
     timestamp: string;
 }
 
+export interface UIConfig {
+	ImportLocalPath:  string;
+	ExportLocalPath: string;
+}
+
+
 export interface DynamicTable {
     id: string;
     name: string;

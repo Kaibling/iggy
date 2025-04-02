@@ -8,14 +8,14 @@ import (
 )
 
 type Workflow struct {
-	ID          string       `json:"id"`
-	Name        string       `json:"name"`
-	Code        string       `json:"code"`
-	BuildIn     bool         `json:"build_in"`
-	FailOnError bool         `json:"fail_on_error"`
-	ObjectType  WorkflowType `json:"object_type"`
-	Children    []Workflow   `json:"children"`
-	Meta        MetaData     `json:"meta"`
+	ID          string       `json:"id" yaml:"id"`
+	Name        string       `json:"name" yaml:"name"`
+	Code        string       `json:"code" yaml:"code"`
+	BuildIn     bool         `json:"build_in" yaml:"build_in"`
+	FailOnError bool         `json:"fail_on_error" yaml:"fail_on_error"`
+	ObjectType  WorkflowType `json:"object_type" yaml:"object_type"`
+	Children    []Workflow   `json:"children" yaml:"children"`
+	Meta        MetaData     `json:"meta" yaml:"-"`
 }
 
 type NewWorkflow struct {
@@ -38,12 +38,12 @@ func (w NewWorkflow) Validate() *apperror.AppError {
 }
 
 type UpdateWorkflow struct {
-	Name        *string       `json:"name"`
-	Code        *string       `json:"code"`
-	BuildIn     *bool         `json:"build_in"`
-	FailOnError *bool         `json:"fail_on_error"`
-	ObjectType  *WorkflowType `json:"object_type"`
-	Children    []Identifier  `json:"children"`
+	Name        *string             `json:"name"`
+	Code        *string             `json:"code"`
+	BuildIn     *bool               `json:"build_in"`
+	FailOnError *bool               `json:"fail_on_error"`
+	ObjectType  *WorkflowType       `json:"object_type"`
+	Children    []OrderedIdentifier `json:"children"`
 }
 
 type WorkflowType string

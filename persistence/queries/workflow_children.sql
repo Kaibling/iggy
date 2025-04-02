@@ -1,8 +1,8 @@
 -- name: SaveWorkflowChildren :exec
 INSERT INTO workflows_children (
-  workflow_id, children_id
+  workflow_id, children_id, step_order
 ) VALUES (
-  $1, $2
+  $1, $2, $3
 );
 
 -- name: DeleteWorkflowChildren :exec

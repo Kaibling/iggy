@@ -15,6 +15,12 @@ WHERE
 deleted_at IS NULL AND build_in = false
 ORDER BY id;
 
+-- name: FetchBackupAll :many
+SELECT id FROM 
+workflows 
+WHERE
+deleted_at IS NULL
+ORDER BY id;
 
 -- name: SaveWorkflow :one
 INSERT INTO workflows (

@@ -8,7 +8,7 @@ import RunDetail from './components/run/runDetail';
 import DynamicTableList from './components/dynamic_table/list';
 import DynamicTableDetail from './components/dynamic_table/detail';
 import DynamicTableNew from './components/dynamic_table/new';
-
+import Backup from './components/backup';
 
 import './App.css'
 
@@ -31,6 +31,9 @@ function App() {
         <Route path="/dynamic-tables" element={<DynamicTableList />} />
         <Route path="/dynamic-tables/new" element={<DynamicTableNew />} />
         <Route path="/dynamic-tables/:id" element={<DynamicTableDetail />} />
+
+        <Route path="/workflow-backup" element={<Backup />} />
+
         <Route path="*" element={<Navigate to="/workflows" />} />
       </Routes>
       </div>
