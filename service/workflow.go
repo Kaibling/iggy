@@ -11,7 +11,6 @@ import (
 	"github.com/kaibling/apiforge/params"
 	"github.com/kaibling/iggy/entity"
 	"github.com/kaibling/iggy/pkg/config"
-	"github.com/kaibling/iggy/pkg/git"
 	"gopkg.in/yaml.v3"
 )
 
@@ -105,30 +104,30 @@ func (ws *WorkflowService) FetchByPagination(qp params.Pagination) ([]entity.Wor
 	return loadedWorkflows, pag, nil
 }
 
-func (ws *WorkflowService) ExportToGit(localPath, gitToken string) error {
-	// export from DB
-	exports, err := ws.repo.FetchToBackup()
-	if err != nil {
-		return err
-	}
+// func (ws *WorkflowService) ExportToGit(localPath, gitToken string) error {
+// 	// export from DB
+// 	exports, err := ws.repo.FetchToBackup()
+// 	if err != nil {
+// 		return err
+// 	}
 
-	// create files
-	filenames, err := exportData(exports, localPath, ws.logger)
-	if err != nil {
-		return err
-	}
+// 	// create files
+// 	filenames, err := exportData(exports, localPath, ws.logger)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	if err := git.CommitFiles(localPath, filenames, ws.logger); err != nil {
-		return err
-	}
+// 	if err := git.CommitFiles(localPath, filenames, ws.logger); err != nil {
+// 		return err
+// 	}
 
-	// push
-	if err := git.Push(localPath, gitToken); err != nil {
-		return err
-	}
+// 	// push
+// 	if err := git.Push(localPath, gitToken); err != nil {
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 func (ws *WorkflowService) ExportToDir(localPath string) error {
 	// export from DB
@@ -151,11 +150,19 @@ func (ws *WorkflowService) ImportFromFiles(localPath string) error {
 		return err
 	}
 
-	fmt.Println(workflows)
+	for i := range workflows {
+		if workflows[i].ID == "" {
+			workflows[i].ID = utils.NewULID().String()
+		}
+	}
 
 	// update or create workflow
-	//return ws.repo.Upserts(workflows)
-	return nil
+	if err := ws.repo.Upserts(workflows); err != nil {
+		return err
+	}
+
+	return ws.ExportToDir(localPath)
+
 }
 
 func exportData(data []entity.Workflow, path string, logger logging.Writer) ([]string, error) {
@@ -186,7 +193,7 @@ func parseFiles(localPath string) ([]entity.Workflow, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(localPath)
+
 	for _, file := range files {
 		if file.IsDir() || !strings.HasSuffix(file.Name(), ".yaml") {
 			continue

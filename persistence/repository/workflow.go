@@ -106,8 +106,17 @@ func (r *WorkflowRepo) Upserts(workflows []entity.Workflow) error {
 				Valid: true,
 			},
 			ModifiedBy: r.username,
+			CreatedAt: pgtype.Timestamp{
+				Time:  time.Now(),
+				Valid: true,
+			},
+			CreatedBy: r.username,
 		}); err != nil {
-			return err
+			if !strings.Contains(err.Error(), "duplicate key value") {
+				return err
+			}
+			fmt.Printf("%s : %s\n", wf.Name, err.Error())
+
 		}
 
 	}

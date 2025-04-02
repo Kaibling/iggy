@@ -224,18 +224,22 @@ func (q *Queries) UpdateWorkflow(ctx context.Context, arg UpdateWorkflowParams) 
 }
 
 const upsertWorkflow = `-- name: UpsertWorkflow :exec
-INSERT INTO workflows (
-  id,  name, code, object_type,fail_on_error,build_in, created_at, modified_at, created_by, modified_by, deleted_at 
-  )
-VALUES (
-  $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+WITH upsert AS (
+  UPDATE workflows
+  SET 
+    code = $3,
+    object_type = $4,
+    fail_on_error = $5,
+    modified_at = $8,
+    modified_by = $10
+  WHERE id = $1 OR (name = $2 AND deleted_at = $11)
+  RETURNING id, name, code, object_type, fail_on_error, build_in, created_at, modified_at, created_by, modified_by, deleted_at
 )
-ON CONFLICT (name)
-DO UPDATE
- SET 
-  code =  $3,
-  object_type =  $4,
-  fail_on_error =  $5
+INSERT INTO workflows (
+  id, name, code, object_type, fail_on_error, build_in, created_at, modified_at, created_by, modified_by, deleted_at
+)
+SELECT $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+WHERE NOT EXISTS (SELECT 1 FROM upsert)
 `
 
 type UpsertWorkflowParams struct {
